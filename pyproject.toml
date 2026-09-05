@@ -1,0 +1,12 @@
+[project]
+name = "tempo-organizador"
+version = "1.0.0"
+description = "Organizador personal Tempo con backend FastAPI y SQLite"
+dependencies = [
+    "fastapi>=0.110.0",
+    "uvicorn[standard]>=0.28.0",
+    "pydantic>=2.6.0"
+]
+
+[tool.vercel]
+entrypoint = "main:app"

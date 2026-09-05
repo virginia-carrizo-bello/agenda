@@ -1,11 +1,23 @@
 import sqlite3
 import os
+import tempfile
 import time
 from typing import Optional
 from .models import ListItem, AgendaItem, ItemUpdate, AppState
 from .seed_data import get_seed_data
 
-DB_PATH = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "tempo.db")
+# En Vercel el sistema de archivos es de solo lectura excepto /tmp
+if os.environ.get("VERCEL"):
+    DB_PATH = os.path.join(tempfile.gettempdir(), "tempo.db")
+    repo_db = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "tempo.db")
+    if not os.path.exists(DB_PATH) and os.path.exists(repo_db):
+        import shutil
+        try:
+            shutil.copyfile(repo_db, DB_PATH)
+        except Exception:
+            pass
+else:
+    DB_PATH = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "tempo.db")
 
 def get_connection():
     conn = sqlite3.connect(DB_PATH)
