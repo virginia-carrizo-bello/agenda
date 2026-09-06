@@ -1071,9 +1071,10 @@
         /* 100% Pantalla Completa nativa de borde a borde, sin marcos simulados */
         @media (max-width: 768px) {
             html, body {
+                position: fixed !important;
+                inset: 0 !important;
                 width: 100% !important;
                 height: 100% !important;
-                height: 100dvh !important;
                 min-height: 100% !important;
                 overflow: hidden !important;
                 background: var(--bg) !important;
@@ -1087,56 +1088,29 @@
             .pc-sidebar {
                 display: none !important;
             }
-            .stage {
-                width: 100% !important;
-                height: 100% !important;
-                height: 100dvh !important;
-                padding: 0 !important;
-                margin: 0 !important;
-                display: block !important;
-            }
-            .device {
+            .stage, .device, #phone {
+                position: absolute !important;
+                inset: 0 !important;
                 width: 100% !important;
                 max-width: 100% !important;
                 height: 100% !important;
-                height: 100dvh !important;
                 min-height: 100% !important;
                 padding: 0 !important;
                 margin: 0 !important;
                 border: 0 !important;
                 border-radius: 0 !important;
                 box-shadow: none !important;
-                background: transparent !important;
-                display: block !important;
-            }
-            #phone {
-                width: 100% !important;
-                max-width: 100% !important;
-                height: 100% !important;
-                height: 100dvh !important;
-                border-radius: 0 !important;
-                transform: none !important;
-                box-shadow: none !important;
                 background: var(--bg) !important;
-                position: relative !important;
-                display: block !important;
+                transform: none !important;
                 overflow: hidden !important;
             }
             .island, .statusbar, .homebar, .caption {
                 display: none !important;
             }
-            .app {
+            .app, .app-main {
                 position: absolute !important;
                 inset: 0 !important;
-                display: block !important;
                 width: 100% !important;
-                height: 100% !important;
-            }
-            .app-main {
-                position: absolute !important;
-                inset: 0 !important;
-                display: flex !important;
-                flex-direction: column !important;
                 height: 100% !important;
                 overflow: hidden !important;
                 background: var(--bg) !important;
@@ -1159,17 +1133,28 @@
                 height: 100% !important;
             }
             .pad {
-                padding: calc(var(--sat) + 56px) 16px calc(var(--sab) + 84px) !important;
+                padding-top: calc(var(--sat) + 56px) !important;
+                padding-bottom: calc(68px + env(safe-area-inset-bottom, 12px)) !important;
+                padding-left: 16px !important;
+                padding-right: 16px !important;
                 box-sizing: border-box !important;
             }
             .tabbar {
-                position: absolute !important;
+                position: fixed !important;
                 bottom: 0 !important;
                 left: 0 !important;
                 right: 0 !important;
+                width: 100% !important;
                 display: flex !important;
+                align-items: center !important;
+                justify-content: space-around !important;
                 z-index: 45 !important;
-                padding: 6px 12px calc(var(--sab) + 6px) !important;
+                padding: 4px 12px max(6px, env(safe-area-inset-bottom, 8px)) !important;
+                background: color-mix(in srgb, var(--bg) 85%, transparent) !important;
+                backdrop-filter: blur(24px) saturate(1.8) !important;
+                -webkit-backdrop-filter: blur(24px) saturate(1.8) !important;
+                border-top: 0.5px solid var(--sep) !important;
+                box-shadow: none !important;
             }
             :root {
                 --sat: env(safe-area-inset-top, 0px);
