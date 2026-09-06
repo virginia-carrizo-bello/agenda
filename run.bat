@@ -16,11 +16,11 @@ echo Verificando dependencias...
 echo.
 echo ========================================================
 echo  Servidor listo!
-echo  Abriendo: http://localhost:8008
-echo  Documentacion API: http://localhost:8008/docs
+echo  Abriendo: http://localhost:8050
+echo  Documentacion API: http://localhost:8050/docs
 echo  Presiona Ctrl+C para detener el servidor.
 echo ========================================================
 echo.
 
-.\.venv\Scripts\python.exe -m uvicorn backend.main:app --host 127.0.0.1 --port 8008 --reload
+.\.venv\Scripts\python.exe -m uvicorn main:app --host 127.0.0.1 --port 8050 --reload
 pause

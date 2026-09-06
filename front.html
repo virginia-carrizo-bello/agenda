@@ -7,6 +7,9 @@
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <title>Tempo — Organizador</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Outfit:wght@500;600;700;800&display=swap" rel="stylesheet">
     <style>
         * {
             margin: 0;
@@ -112,7 +115,7 @@
         }
 
         @media(prefers-color-scheme:dark) {
-            :root:not([data-theme="light"]) {
+            :root:not([data-theme="light"]):not([data-theme="dark"]) {
                 color-scheme: dark;
                 --bg: #16121D;
                 --card: #221D2B;
@@ -171,6 +174,29 @@
             }
         }
 
+        /* Transiciones suaves y globales para elementos de la interfaz */
+        body,
+        .pc-sidebar,
+        .nav,
+        .card,
+        .sheet,
+        .search-screen,
+        .bar,
+        .view-mode-bar,
+        .vmb-btn,
+        .pc-fbtn,
+        .pc-nav-item,
+        .vmb-icon-btn,
+        .nav-btn,
+        .seg,
+        .seg .thumb {
+            transition: background-color .28s cubic-bezier(.25, .8, .3, 1),
+                        border-color .28s cubic-bezier(.25, .8, .3, 1),
+                        color .28s cubic-bezier(.25, .8, .3, 1),
+                        box-shadow .28s cubic-bezier(.25, .8, .3, 1),
+                        opacity .28s cubic-bezier(.25, .8, .3, 1);
+        }
+
         html,
         body {
             height: 100%
@@ -180,7 +206,7 @@
             background: var(--bg);
             color: var(--label);
             overflow: hidden;
-            font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Helvetica Neue", "Segoe UI", Roboto, sans-serif;
+            font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", Roboto, sans-serif;
             display: flex;
             align-items: stretch;
             justify-content: stretch;
@@ -566,56 +592,103 @@
 
         .nav {
             position: absolute;
-            top: var(--sat);
+            top: 0;
             left: 0;
             right: 0;
-            height: 52px;
+            height: calc(var(--sat) + 52px);
+            padding-top: var(--sat);
+            padding-left: 6px;
+            padding-right: 6px;
             z-index: 40;
             display: flex;
             align-items: center;
-            padding: 0 6px;
-            transition: background .25s, box-shadow .25s
+            transition: background .25s, box-shadow .25s, backdrop-filter .25s
         }
 
         .nav.solid {
-            background: color-mix(in srgb, var(--bg) 78%, transparent);
-            backdrop-filter: blur(22px) saturate(1.8);
-            -webkit-backdrop-filter: blur(22px) saturate(1.8);
+            background: color-mix(in srgb, var(--bg) 82%, transparent);
+            backdrop-filter: blur(24px) saturate(1.8);
+            -webkit-backdrop-filter: blur(24px) saturate(1.8);
             box-shadow: 0 .5px 0 var(--sep)
         }
 
         .nav-l {
-            width: 100px;
+            min-width: 0;
             display: flex;
-            align-items: center
+            align-items: center;
+            transition: min-width .2s ease;
+        }
+
+        .nav-l:has(.nav-back.show) {
+            min-width: 60px;
         }
 
         .nav-c {
             flex: 1;
             text-align: center;
-            font-size: 17px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 5px;
+            font-size: 13.5px;
             font-weight: 600;
             opacity: 0;
-            transition: opacity .2s;
+            transform: translateY(3px);
+            transition: opacity .22s var(--ease), transform .22s var(--ease);
             white-space: nowrap;
             overflow: hidden;
-            text-overflow: ellipsis
+            text-overflow: ellipsis;
+            padding: 0 2px;
+            color: var(--label);
+            letter-spacing: -0.2px;
         }
 
         .nav.solid .nav-c {
-            opacity: 1
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .nav-c .nt-date {
+            font-weight: 700;
+            color: var(--label);
+            white-space: nowrap;
+        }
+
+        .nav-c .nt-sep {
+            opacity: .4;
+            font-weight: 400;
+            color: var(--label3);
+        }
+
+        .nav-c .nt-weather {
+            display: inline-flex;
+            align-items: center;
+            gap: 3px;
+            font-weight: 600;
+            color: var(--label2);
+            font-variant-numeric: tabular-nums;
+            flex-shrink: 0;
+            white-space: nowrap;
+        }
+
+        .nav-c .nt-icon {
+            font-size: 14px;
+            line-height: 1;
+            display: inline-block;
         }
 
         .nav-r {
-            width: 100px;
+            min-width: auto;
             display: flex;
             justify-content: flex-end;
-            gap: 2px
+            align-items: center;
+            gap: 1px;
+            flex-shrink: 0;
         }
 
         .nav-btn {
-            width: 44px;
-            height: 44px;
+            width: 38px;
+            height: 38px;
             display: grid;
             place-items: center;
             color: var(--accent);
@@ -949,6 +1022,48 @@
                 height: 56px !important;
                 font-size: 15px !important;
             }
+
+            /* Layout de doble columna en PC para vista Hoy */
+            @media (min-width: 1024px) {
+                body:not(.preview-mobile) .today-dual {
+                    display: grid !important;
+                    grid-template-columns: 1.18fr 0.82fr !important;
+                    gap: 28px !important;
+                    align-items: start !important;
+                }
+                body:not(.preview-mobile) .today-main-col,
+                body:not(.preview-mobile) .today-side-col {
+                    min-width: 0 !important;
+                }
+            }
+
+            /* Panel dividido en Calendario de escritorio */
+            @media (min-width: 980px) {
+                body:not(.preview-mobile) .cal-split {
+                    display: grid !important;
+                    grid-template-columns: 1.15fr 0.85fr !important;
+                    gap: 26px !important;
+                    align-items: start !important;
+                }
+                body:not(.preview-mobile) .cal-pane-left,
+                body:not(.preview-mobile) .cal-pane-right {
+                    min-width: 0 !important;
+                }
+                body:not(.preview-mobile) .cal-pane-right {
+                    position: sticky !important;
+                    top: 10px !important;
+                }
+            }
+
+            /* Cuadrícula para Listas en escritorio */
+            @media (min-width: 920px) {
+                body:not(.preview-mobile) .lists-desktop-grid {
+                    display: grid !important;
+                    grid-template-columns: 1fr 1fr !important;
+                    gap: 24px !important;
+                    align-items: start !important;
+                }
+            }
         }
 
         /* Vista en Móvil (Smartphones / pantallas pequeñas) */
@@ -968,9 +1083,13 @@
             }
             .nav {
                 position: absolute !important;
-                top: var(--sat) !important;
+                top: 0 !important;
                 left: 0 !important;
                 right: 0 !important;
+                height: calc(var(--sat) + 52px) !important;
+                padding-top: var(--sat) !important;
+                padding-left: 6px !important;
+                padding-right: 6px !important;
             }
             .views {
                 position: absolute !important;
@@ -1002,50 +1121,266 @@
             }
         }
 
-        /* Simulación de vista móvil opcional en PC */
+        /* ============ Barra de control de modo de visualización en PC ============ */
+        .view-mode-bar {
+            position: fixed;
+            top: 14px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            background: rgba(24, 20, 32, 0.88);
+            backdrop-filter: blur(20px) saturate(1.8);
+            -webkit-backdrop-filter: blur(20px) saturate(1.8);
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            border-radius: 999px;
+            padding: 5px 8px 5px 6px;
+            box-shadow: 0 14px 34px rgba(0, 0, 0, 0.45), 0 0 0 1px rgba(255, 255, 255, 0.05) inset;
+            color: #FAF5EF;
+            font-size: 12.5px;
+            font-weight: 500;
+            user-select: none;
+            transition: opacity .2s, transform .2s;
+        }
+
+        .view-mode-bar:hover {
+            box-shadow: 0 18px 40px rgba(0, 0, 0, 0.6), 0 0 0 1px rgba(255, 255, 255, 0.14) inset;
+        }
+
+        .vmb-group {
+            display: flex;
+            background: rgba(255, 255, 255, 0.08);
+            border-radius: 999px;
+            padding: 3px;
+            gap: 2px;
+        }
+
+        .vmb-btn {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 13px;
+            border-radius: 999px;
+            color: rgba(250, 245, 239, 0.72);
+            font-size: 12px;
+            font-weight: 600;
+            transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+            cursor: pointer;
+        }
+
+        .vmb-btn:hover {
+            color: #FAF5EF;
+        }
+
+        .vmb-btn.on {
+            background: #8B5FA8;
+            color: #FFFFFF;
+            box-shadow: 0 3px 10px rgba(139, 95, 168, 0.45);
+        }
+
+        .vmb-sizes {
+            display: none;
+            align-items: center;
+            gap: 4px;
+            padding: 0 4px;
+        }
+
+        body.preview-mobile .vmb-sizes {
+            display: flex;
+        }
+
+        .vmb-label {
+            font-size: 11px;
+            color: rgba(250, 245, 239, 0.5);
+            margin-right: 2px;
+        }
+
+        .vmb-pill {
+            padding: 4px 9px;
+            border-radius: 6px;
+            font-size: 11px;
+            font-weight: 600;
+            color: rgba(250, 245, 239, 0.65);
+            background: rgba(255, 255, 255, 0.06);
+            transition: all 0.15s;
+            cursor: pointer;
+        }
+
+        .vmb-pill:hover {
+            color: #FFF;
+            background: rgba(255, 255, 255, 0.14);
+        }
+
+        .vmb-pill.on {
+            color: #FFF;
+            background: rgba(139, 95, 168, 0.55);
+            box-shadow: 0 1px 4px rgba(0, 0, 0, 0.3);
+        }
+
+        .vmb-right {
+            display: flex;
+            align-items: center;
+            padding-left: 2px;
+        }
+
+        .vmb-icon-btn {
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            display: grid;
+            place-items: center;
+            color: rgba(250, 245, 239, 0.75);
+            background: rgba(255, 255, 255, 0.06);
+            transition: all 0.15s;
+            cursor: pointer;
+        }
+
+        .vmb-icon-btn:hover {
+            color: #FFF;
+            background: rgba(255, 255, 255, 0.15);
+        }
+
+        /* Ocultar barra flotante en pantallas móviles reales */
+        @media (max-width: 768px) {
+            .view-mode-bar {
+                display: none !important;
+            }
+        }
+
+        /* ============ Simulación de vista móvil optimizada en PC (Tamaño real, sin reducción) ============ */
         body.preview-mobile {
-            background: #0E0C13 !important;
+            background: #0B0813 !important;
+            background: radial-gradient(circle at 50% 30%, #1e172a 0%, #0c0a12 100%) !important;
             display: flex !important;
+            flex-direction: column !important;
             align-items: center !important;
             justify-content: center !important;
+            min-height: 100vh !important;
+            overflow: hidden !important;
         }
+
         body.preview-mobile .pc-sidebar {
             display: none !important;
         }
-        body.preview-mobile .app {
-            display: block !important;
+
+        body.preview-mobile .stage {
+            display: flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+            width: 100% !important;
+            height: 100% !important;
+            padding: 56px 16px 20px !important;
+            overflow-y: auto !important;
         }
+
+        body.preview-mobile .device {
+            position: relative !important;
+            width: var(--phone-w, 420px) !important;
+            max-width: calc(100vw - 24px) !important;
+            height: min(860px, calc(100vh - 84px)) !important;
+            min-height: 520px !important;
+            padding: 12px !important;
+            border-radius: 54px !important;
+            background: #1C1826 !important;
+            border: 2.5px solid rgba(255, 255, 255, 0.14) !important;
+            box-shadow:
+                0 32px 85px -15px rgba(0, 0, 0, 0.82),
+                0 0 0 1px rgba(255, 255, 255, 0.06) inset,
+                0 1px 3px rgba(255, 255, 255, 0.25) inset,
+                0 20px 40px rgba(0, 0, 0, 0.4) !important;
+            display: flex !important;
+            align-items: stretch !important;
+            justify-content: stretch !important;
+            flex-shrink: 0 !important;
+            transition: width 0.22s cubic-bezier(0.16, 1, 0.3, 1), height 0.22s cubic-bezier(0.16, 1, 0.3, 1) !important;
+        }
+
+        body.preview-mobile #phone {
+            position: relative !important;
+            width: 100% !important;
+            height: 100% !important;
+            border-radius: 44px !important;
+            transform: none !important;
+            overflow: hidden !important;
+            background: var(--bg) !important;
+            box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.5) !important;
+            display: flex !important;
+            --sat: 46px;
+            --sab: 20px;
+        }
+
+        body.preview-mobile .app {
+            position: absolute !important;
+            inset: 0 !important;
+            display: block !important;
+            width: 100% !important;
+            height: 100% !important;
+        }
+
         body.preview-mobile .app-main {
             position: absolute !important;
             inset: 0 !important;
+            display: flex !important;
+            flex-direction: column !important;
+            height: 100% !important;
+            overflow: hidden !important;
         }
+
         body.preview-mobile .tabbar {
             display: flex !important;
         }
-        body.preview-mobile .device {
-            padding: 11px !important;
-            border-radius: 64px !important;
-            background: #17141D !important;
-            border: 1px solid #2B2733 !important;
-            box-shadow: 0 60px 120px rgba(0, 0, 0, .55), 0 2px 0 rgba(255, 255, 255, .05) inset !important;
-            width: auto !important;
-            height: auto !important;
-        }
-        body.preview-mobile #phone {
-            width: 393px !important;
-            height: 852px !important;
-            border-radius: 53px !important;
-            transform: scale(var(--s, 1)) !important;
-            transform-origin: center !important;
-        }
-        body.preview-mobile .island,
-        body.preview-mobile .statusbar,
-        body.preview-mobile .homebar,
-        body.preview-mobile .caption {
-            display: flex !important;
-        }
-        body.preview-mobile .caption {
+
+        body.preview-mobile .island {
             display: block !important;
+            position: absolute !important;
+            top: 10px !important;
+            left: 50% !important;
+            transform: translateX(-50%) !important;
+            width: 118px !important;
+            height: 29px !important;
+            background: #000000 !important;
+            border-radius: 20px !important;
+            z-index: 60 !important;
+            pointer-events: none !important;
+            box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.08) !important;
+        }
+
+        body.preview-mobile .statusbar {
+            display: flex !important;
+            position: absolute !important;
+            top: 0 !important;
+            left: 0 !important;
+            right: 0 !important;
+            height: 46px !important;
+            padding: 10px 25px 0 !important;
+            justify-content: space-between !important;
+            align-items: center !important;
+            z-index: 55 !important;
+            font-size: 13.5px !important;
+            font-weight: 600 !important;
+            color: var(--label) !important;
+            pointer-events: none !important;
+        }
+
+        body.preview-mobile .homebar {
+            display: block !important;
+            position: absolute !important;
+            bottom: 7px !important;
+            left: 50% !important;
+            transform: translateX(-50%) !important;
+            width: 130px !important;
+            height: 4.5px !important;
+            background: var(--label) !important;
+            opacity: 0.38 !important;
+            border-radius: 3px !important;
+            z-index: 60 !important;
+            pointer-events: none !important;
+        }
+
+        body.preview-mobile .caption {
+            display: none !important;
         }
 
         /* ============ Tipografía / secciones ============ */
@@ -1069,6 +1404,282 @@
             font-size: 15px;
             color: var(--label2);
             padding: 1px 5px
+        }
+
+        /* ============ Cabecera Principal del Día y Clima ============ */
+        .today-header {
+            display: flex;
+            align-items: flex-end;
+            justify-content: space-between;
+            gap: 12px;
+            padding: 4px 2px 10px;
+            position: relative;
+        }
+
+        .today-header-left {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+            min-width: 0;
+            flex: 1 1 auto;
+        }
+
+        .today-date-eyebrow {
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--accent);
+            letter-spacing: .25px;
+            line-height: 1.2;
+            white-space: nowrap;
+        }
+
+        .large-day {
+            font-size: 34px;
+            font-weight: 800;
+            letter-spacing: -.8px;
+            color: var(--label);
+            text-transform: capitalize;
+            line-height: 1.08;
+            margin: 0;
+            padding: 0;
+            white-space: nowrap;
+        }
+
+        /* Widget de clima elegante en la cabecera (Arriba: Ubicación, Abajo: Clima) */
+        .weather-widget-wrap {
+            position: relative;
+            flex-shrink: 0;
+            z-index: 15;
+        }
+
+        .weather-card-btn {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+            justify-content: center;
+            gap: 2px;
+            padding: 6px 12px;
+            border-radius: 14px;
+            background: color-mix(in srgb, var(--card) 90%, var(--bg));
+            border: 1px solid var(--sep);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, .04);
+            cursor: pointer;
+            transition: all .2s var(--ease);
+            white-space: nowrap;
+            text-align: right;
+            user-select: none;
+        }
+
+        .weather-card-btn:hover,
+        .weather-widget-wrap.open .weather-card-btn {
+            background: var(--card);
+            border-color: color-mix(in srgb, var(--accent) 45%, var(--sep));
+            box-shadow: 0 4px 14px color-mix(in srgb, var(--accent) 16%, rgba(0, 0, 0, .08));
+            transform: translateY(-1px);
+        }
+
+        .wc-location {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            font-size: 11px;
+            font-weight: 600;
+            color: var(--accent);
+            line-height: 1;
+            max-width: 130px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .wc-location svg {
+            flex-shrink: 0;
+            opacity: .9;
+        }
+
+        .wc-condition {
+            display: inline-flex;
+            align-items: center;
+            gap: 4.5px;
+            font-size: 12.5px;
+            font-weight: 700;
+            color: var(--label);
+            line-height: 1.2;
+        }
+
+        .wc-icon {
+            font-size: 14px;
+            line-height: 1;
+            display: inline-flex;
+        }
+
+        .wc-temp {
+            font-weight: 700;
+            letter-spacing: -.2px;
+        }
+
+        .wc-desc {
+            font-size: 11px;
+            font-weight: 500;
+            color: var(--label2);
+            margin-left: 1px;
+        }
+
+        .wc-chevron {
+            display: inline-flex;
+            color: var(--label3);
+            margin-left: 2px;
+            transition: transform .2s var(--ease);
+        }
+
+        .weather-widget-wrap.open .wc-chevron {
+            transform: rotate(180deg);
+        }
+
+        /* Popover flotante de predicción por hora */
+        .weather-popover {
+            position: absolute;
+            top: calc(100% + 8px);
+            right: 0;
+            width: 295px;
+            max-width: calc(100vw - 32px);
+            box-sizing: border-box;
+            background: color-mix(in srgb, var(--card) 97%, var(--bg));
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid color-mix(in srgb, var(--accent) 25%, var(--sep));
+            border-radius: 18px;
+            padding: 13px 13px 11px;
+            box-shadow: 0 12px 36px rgba(0, 0, 0, .18), 0 4px 12px rgba(0, 0, 0, .08);
+            z-index: 120;
+            opacity: 0;
+            visibility: hidden;
+            transform: translateY(-6px) scale(.98);
+            transform-origin: top right;
+            transition: opacity .2s var(--ease), transform .2s var(--ease), visibility .2s;
+            pointer-events: none;
+        }
+
+        .weather-widget-wrap:hover .weather-popover,
+        .weather-widget-wrap.open .weather-popover {
+            opacity: 1;
+            visibility: visible;
+            transform: translateY(0) scale(1);
+            pointer-events: auto;
+        }
+
+        .wp-head {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 9px;
+            padding-bottom: 7px;
+            border-bottom: 1px solid var(--sep);
+        }
+
+        .wp-loc {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            font-size: 13.5px;
+            font-weight: 700;
+            color: var(--label);
+        }
+
+        .wp-loc svg {
+            color: var(--accent);
+            flex-shrink: 0;
+        }
+
+        .wp-now-desc {
+            font-size: 11.5px;
+            font-weight: 500;
+            color: var(--label2);
+        }
+
+        .wp-title-h {
+            font-size: 10.5px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: .5px;
+            color: var(--label3);
+            margin-bottom: 7px;
+        }
+
+        .wp-hourly-scroll {
+            display: flex;
+            gap: 7px;
+            overflow-x: auto;
+            padding-bottom: 6px;
+            scrollbar-width: thin;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        .wp-hour-item {
+            flex: 0 0 54px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 3px;
+            padding: 7px 4px;
+            border-radius: 11px;
+            background: var(--bg3);
+            border: 1px solid var(--sep);
+            transition: all .15s;
+        }
+
+        .wp-hour-item.is-now {
+            background: var(--tint);
+            border-color: color-mix(in srgb, var(--accent) 50%, var(--sep));
+        }
+
+        .wp-hour-time {
+            font-size: 11px;
+            font-weight: 600;
+            color: var(--label2);
+        }
+
+        .wp-hour-item.is-now .wp-hour-time {
+            color: var(--accent);
+            font-weight: 700;
+        }
+
+        .wp-hour-icon {
+            font-size: 16px;
+            line-height: 1;
+            margin: 2px 0;
+        }
+
+        .wp-hour-temp {
+            font-size: 12.5px;
+            font-weight: 700;
+            color: var(--label);
+        }
+
+        .wp-hour-pop {
+            font-size: 9.5px;
+            font-weight: 600;
+            color: #376389;
+        }
+
+        [data-theme="dark"] .wp-hour-pop {
+            color: #A9CFF0;
+        }
+
+        .wp-footer {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-top: 7px;
+            padding-top: 7px;
+            border-top: 1px solid var(--sep);
+            font-size: 11px;
+            color: var(--label2);
+        }
+
+        .wp-footer b {
+            color: var(--label);
+            font-weight: 600;
         }
 
         .sech {
@@ -1377,10 +1988,10 @@
         }
 
         .hd {
-            font-size: 14px;
+            font-size: 13.5px;
             color: var(--label2);
-            margin-top: 2px;
-            text-transform: capitalize
+            margin-top: 3px;
+            line-height: 1.35;
         }
 
         .hstats {
@@ -1436,7 +2047,11 @@
 
         .ring .rfg {
             stroke: var(--accent);
-            transition: stroke-dashoffset .7s var(--ease)
+            transition: stroke-dashoffset .7s var(--ease), stroke .3s var(--ease)
+        }
+
+        .ring.complete .rfg {
+            stroke: var(--green);
         }
 
         .ring-t {
@@ -1449,18 +2064,25 @@
         }
 
         .ring-t b {
-            font-size: 24px;
+            font-size: 22px;
             font-weight: 800;
             letter-spacing: -.5px;
             line-height: 1;
             color: var(--label)
         }
 
+        .ring-t .pct-num {
+            font-size: 20px;
+            letter-spacing: -.6px;
+        }
+
         .ring-t span {
             font-size: 9.5px;
             color: var(--label2);
-            font-weight: 500;
-            margin-top: 2px
+            font-weight: 600;
+            margin-top: 2px;
+            text-transform: uppercase;
+            letter-spacing: .4px;
         }
 
         .ring-t svg {
@@ -2276,10 +2898,127 @@
             text-align: center
         }
 
-        .shint svg {
-            width: 34px;
-            height: 34px;
-            color: var(--label3)
+        .s-filters {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            padding: 0 16px 12px;
+            overflow-x: auto;
+            scrollbar-width: none;
+        }
+
+        .s-filters::-webkit-scrollbar {
+            display: none;
+        }
+
+        .s-chip {
+            padding: 5px 12px;
+            border-radius: 999px;
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--label2);
+            background: var(--bg3);
+            border: 1px solid transparent;
+            white-space: nowrap;
+            transition: all .15s ease;
+            cursor: pointer;
+        }
+
+        .s-chip:hover {
+            color: var(--label);
+            background: var(--bg3d);
+        }
+
+        .s-chip.on {
+            color: var(--on-accent);
+            background: var(--accent);
+            box-shadow: 0 2px 8px rgba(139, 95, 168, 0.35);
+        }
+
+        mark.sh-mark {
+            background: color-mix(in srgb, var(--accent) 26%, transparent);
+            color: var(--accent);
+            font-weight: 700;
+            border-radius: 3px;
+            padding: 0 3px;
+        }
+
+        /* Acciones de cabecera de día en calendario */
+        .cal-day-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 10px;
+            margin: 22px 4px 10px;
+        }
+
+        .cal-add-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            padding: 5px 12px;
+            background: var(--tint);
+            color: var(--accent);
+            border-radius: 999px;
+            font-size: 12px;
+            font-weight: 600;
+            transition: background .15s, transform .15s;
+            cursor: pointer;
+        }
+
+        .cal-add-btn:hover {
+            background: color-mix(in srgb, var(--accent) 22%, transparent);
+            transform: translateY(-1px);
+        }
+
+        .cal-today-btn {
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--accent);
+            padding: 4px 10px;
+            border-radius: 8px;
+            background: var(--bg3);
+            transition: background .15s;
+        }
+
+        .cal-today-btn:hover {
+            background: var(--bg3d);
+        }
+
+        /* Botón interactivo en estados vacíos */
+        .empty-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            margin-top: 14px;
+            padding: 8px 16px;
+            background: var(--accent);
+            color: var(--on-accent);
+            border-radius: 999px;
+            font-size: 13px;
+            font-weight: 600;
+            transition: transform .15s ease, box-shadow .15s ease;
+            box-shadow: 0 4px 14px rgba(139, 95, 168, 0.35);
+            cursor: pointer;
+        }
+
+        .empty-btn:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 6px 18px rgba(139, 95, 168, 0.45);
+        }
+
+        .empty-btn:active {
+            transform: translateY(1px);
+        }
+
+        /* Micro-interacciones táctiles en móvil */
+        @media (hover: none) and (pointer: coarse) {
+            .row .fg:active,
+            .dchip:active,
+            .cal-c:active {
+                transform: scale(0.982);
+                transition: transform 0.08s ease;
+            }
         }
 
         /* ============ Toast ============ */
@@ -2369,6 +3108,31 @@
 </head>
 
 <body>
+    <!-- Barra superior flotante de control de vista en navegador PC -->
+    <header class="view-mode-bar" id="viewModeBar" aria-label="Selector de visualización">
+        <div class="vmb-group">
+            <button type="button" class="vmb-btn" id="vmbBtnMobile" data-mode="mobile" title="Ver con marco de teléfono móvil">
+                <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.2"><rect x="6" y="2" width="12" height="20" rx="3"/><path d="M12 18h.01"/></svg>
+                <span>Vista Móvil</span>
+            </button>
+            <button type="button" class="vmb-btn" id="vmbBtnPc" data-mode="pc" title="Ver como aplicación de escritorio expandida">
+                <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.2"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg>
+                <span>Vista PC</span>
+            </button>
+        </div>
+        <div class="vmb-sizes" id="vmbSizes">
+            <span class="vmb-label">Ancho:</span>
+            <button type="button" class="vmb-pill on" data-w="420" title="Ancho estándar (420px)">420px</button>
+            <button type="button" class="vmb-pill" data-w="450" title="Ancho grande (450px)">450px</button>
+            <button type="button" class="vmb-pill" data-w="390" title="Ancho compacto (390px)">390px</button>
+        </div>
+        <div class="vmb-right">
+            <button type="button" class="vmb-icon-btn" id="vmbBtnTheme" title="Alternar tema claro/oscuro">
+                <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 14.5A8.5 8.5 0 0 1 9.5 4a8.5 8.5 0 1 0 10.5 10.5z"/></svg>
+            </button>
+        </div>
+    </header>
+
     <div class="stage">
         <div class="device">
             <div id="phone">
@@ -2492,6 +3256,12 @@
                                         <circle cx="11" cy="11" r="7" />
                                         <path d="M20.3 20.3l-3.8-3.8" />
                                     </svg></button>
+                                <button type="button" class="nav-btn" id="btnThemeNav" aria-label="Cambiar tema claro / oscuro" title="Cambiar tema claro / oscuro">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                                        stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                        <path d="M20 14.5A8.5 8.5 0 0 1 9.5 4a8.5 8.5 0 1 0 10.5 10.5z" />
+                                    </svg>
+                                </button>
                                 <button type="button" class="nav-btn" id="btnAdd" aria-label="Añadir"><svg
                                         viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"
                                         stroke-linecap="round" aria-hidden="true">
@@ -2552,6 +3322,15 @@
                         </div>
                         <button type="button" class="scancel" id="btnSCancel">Cancelar</button>
                     </div>
+                    <div class="s-filters" id="sFilters" role="tablist" aria-label="Filtros de búsqueda">
+                        <button type="button" class="s-chip on" data-filter="all">Todo</button>
+                        <button type="button" class="s-chip" data-filter="event">Eventos</button>
+                        <button type="button" class="s-chip" data-filter="task">Tareas</button>
+                        <button type="button" class="s-chip" data-filter="reminder">Recordatorios</button>
+                        <button type="button" class="s-chip" data-filter="shopping">Compras</button>
+                        <button type="button" class="s-chip" data-filter="birthday">Cumpleaños</button>
+                        <button type="button" class="s-chip" data-filter="wish">Deseos</button>
+                    </div>
                     <div class="sres pad" id="sRes" style="padding-top:6px"></div>
                     <div class="shint" id="sHint">
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"
@@ -2601,6 +3380,8 @@
             flag: '<path d="M5.5 21V3.8M5.5 4.2c4.5-2.2 8.5 2.2 13 0v9.3c-4.5 2.2-8.5-2.2-13 0"/>',
             reset: '<path d="M3.5 4.5v5.5h5.5"/><path d="M4.6 14.5a8 8 0 1 0 1.5-7.6L3.5 10"/>',
             moon: '<path d="M20 14.5A8.5 8.5 0 0 1 9.5 4a8.5 8.5 0 1 0 10.5 10.5z"/>',
+            sun: '<circle cx="12" cy="12" r="4"/><path d="M12 2v2.2M12 19.8v2.2M4.93 4.93l1.55 1.55M17.52 17.52l1.55 1.55M2 12h2.2M19.8 12h2.2M4.93 19.07l1.55-1.55M17.52 6.48l1.55-1.55"/>',
+            autoTheme: '<circle cx="12" cy="12" r="9"/><path d="M12 3v18"/><path d="M12 3a9 9 0 0 1 0 18" fill="currentColor" fill-opacity="0.35"/>',
         };
         const ic = (n, s = 20, w = 1.9) => `<svg viewBox="0 0 24 24" width="${s}" height="${s}" fill="none" stroke="currentColor" stroke-width="${w}" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false" style="width:${s}px;height:${s}px">${P[n]}</svg>`;
 
@@ -2638,6 +3419,14 @@
         const todayY = () => ymd(new Date());
         const cap = s => s.charAt(0).toUpperCase() + s.slice(1);
         const fLong = new Intl.DateTimeFormat('es-ES', { weekday: 'long', day: 'numeric', month: 'long' });
+        const fDayName = new Intl.DateTimeFormat('es-ES', { weekday: 'long' });
+        const fDateOnly = new Intl.DateTimeFormat('es-ES', { day: 'numeric', month: 'long', year: 'numeric' });
+        function formatHeaderDate(d = new Date()) {
+            const day = d.getDate();
+            const month = cap(d.toLocaleDateString('es-ES', { month: 'long' }));
+            const year = d.getFullYear();
+            return `${day} de ${month} de ${year}`;
+        }
         const fShort = new Intl.DateTimeFormat('es-ES', { day: 'numeric', month: 'short' });
         const fWk = new Intl.DateTimeFormat('es-ES', { weekday: 'short' });
         const fmtTime = t => t ? `${+t.split(':')[0]}:${t.split(':')[1]}` : '';
@@ -2652,9 +3441,202 @@
             return { next: n, days: Math.round((n - t0) / 864e5), turns: b.year ? n.getFullYear() - b.year : null };
         }
 
+        /* ================= Clima, Ciudad y Pronóstico por Hora en Tiempo Real ================= */
+        const WEATHER_KEY = 'tempo.weather.cache_v2';
+
+        function getCityFromTimezone(tz) {
+            if (!tz) return 'Tu ubicación';
+            const parts = tz.split('/');
+            const raw = parts[parts.length - 1] || tz;
+            return raw.replace(/_/g, ' ');
+        }
+
+        let weatherState = {
+            city: getCityFromTimezone(Intl.DateTimeFormat().resolvedOptions().timeZone),
+            temp: '22°C',
+            feelsLike: '22°C',
+            desc: 'Agradable',
+            icon: '☀️',
+            humidity: '55%',
+            wind: '10 km/h',
+            hourly: [],
+            loaded: false
+        };
+
+        try {
+            const cached = JSON.parse(localStorage.getItem(WEATHER_KEY) || '{}');
+            if (cached && cached.temp) {
+                weatherState = { ...weatherState, ...cached, loaded: true };
+            }
+        } catch (_) { }
+
+        function weatherCodeToInfo(code, isDay) {
+            if (code === 0) return { icon: isDay ? '☀️' : '🌙', desc: 'Despejado' };
+            if (code === 1) return { icon: isDay ? '🌤️' : '🌤️', desc: 'Despejado' };
+            if (code === 2) return { icon: isDay ? '⛅' : '☁️', desc: 'Parcialmente nublado' };
+            if (code === 3) return { icon: '☁️', desc: 'Nublado' };
+            if (code >= 45 && code <= 48) return { icon: '🌫️', desc: 'Niebla' };
+            if (code >= 51 && code <= 55) return { icon: '🌦️', desc: 'Llovizna' };
+            if (code >= 61 && code <= 65) return { icon: '🌧️', desc: 'Lluvia' };
+            if (code >= 71 && code <= 77) return { icon: '🌨️', desc: 'Nieve' };
+            if (code >= 80 && code <= 82) return { icon: '🌧️', desc: 'Chubascos' };
+            if (code >= 95 && code <= 99) return { icon: '⛈️', desc: 'Tormenta' };
+            return { icon: isDay ? '☀️' : '🌙', desc: 'Agradable' };
+        }
+
+        function renderWeatherPopoverContent() {
+            const hourlyHTML = (weatherState.hourly && weatherState.hourly.length)
+                ? weatherState.hourly.map((h, i) => `
+                    <div class="wp-hour-item${i === 0 ? ' is-now' : ''}">
+                      <span class="wp-hour-time">${h.timeStr}</span>
+                      <span class="wp-hour-icon">${h.icon}</span>
+                      <span class="wp-hour-temp">${h.temp}</span>
+                      ${h.pop > 0 ? `<span class="wp-hour-pop">💧${h.pop}%</span>` : ''}
+                    </div>`).join('')
+                : `<div style="padding:10px;text-align:center;font-size:12px;color:var(--label3)">Cargando pronóstico...</div>`;
+
+            return `
+              <div class="wp-head">
+                <div class="wp-loc">
+                  <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M12 21s-6-5.33-6-10a6 6 0 1 1 12 0c0 4.67-6 10-6 10z"/><circle cx="12" cy="11" r="2.5"/></svg>
+                  <b>${esc(weatherState.city)}</b>
+                </div>
+                <span class="wp-now-desc">${weatherState.desc} · Sensación ${weatherState.feelsLike}</span>
+              </div>
+              <div class="wp-title-h">Pronóstico próximas horas</div>
+              <div class="wp-hourly-scroll">
+                ${hourlyHTML}
+              </div>
+              <div class="wp-footer">
+                <span>💧 Humedad: <b>${weatherState.humidity || '55%'}</b></span>
+                <span>💨 Viento: <b>${weatherState.wind || '10 km/h'}</b></span>
+              </div>`;
+        }
+
+        function updateWeatherUI() {
+            const pill = document.getElementById('weatherPill');
+            if (pill) {
+                pill.innerHTML = `
+                  <div class="wc-location">
+                    <svg viewBox="0 0 24 24" width="10" height="10" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M12 21s-6-5.33-6-10a6 6 0 1 1 12 0c0 4.67-6 10-6 10z"/><circle cx="12" cy="11" r="2.5"/></svg>
+                    <span>${esc(weatherState.city)}</span>
+                  </div>
+                  <div class="wc-condition">
+                    <span class="wc-icon">${weatherState.icon}</span>
+                    <span class="wc-temp">${weatherState.temp}</span>
+                    <span class="wc-desc">${weatherState.desc}</span>
+                    <span class="wc-chevron"><svg viewBox="0 0 24 24" width="9" height="9" fill="none" stroke="currentColor" stroke-width="2.6"><path d="M6 9l6 6 6-6"/></svg></span>
+                  </div>`;
+                pill.setAttribute('title', `Clima en ${weatherState.city}: ${weatherState.desc}, ${weatherState.temp}. Toca para ver pronóstico.`);
+            }
+            const popover = document.getElementById('weatherPopover');
+            if (popover) {
+                popover.innerHTML = renderWeatherPopoverContent();
+            }
+            if (typeof UI !== 'undefined' && UI.tab === 'today' && !UI.stack && typeof navTitle !== 'undefined' && navTitle) {
+                navTitle.innerHTML = formatNavTitleToday();
+            }
+        }
+
+        async function fetchLiveWeather() {
+            try {
+                let lat = -34.6037, lon = -58.3816; // Coordenadas iniciales de referencia
+                let detectedCity = null;
+
+                if (navigator.geolocation) {
+                    try {
+                        const pos = await new Promise((res, rej) => {
+                            navigator.geolocation.getCurrentPosition(res, rej, { timeout: 3200 });
+                        });
+                        lat = pos.coords.latitude;
+                        lon = pos.coords.longitude;
+                        
+                        try {
+                            const rev = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat.toFixed(4)}&lon=${lon.toFixed(4)}&zoom=10&addressdetails=1`, { headers: { 'Accept-Language': 'es' } });
+                            if (rev.ok) {
+                                const revData = await rev.json();
+                                detectedCity = revData.address?.city || revData.address?.town || revData.address?.municipality || revData.address?.village || revData.address?.county || revData.address?.state;
+                            }
+                        } catch (_) { }
+                    } catch (_) { }
+                }
+
+                const tz = Intl.DateTimeFormat().resolvedOptions().timeZone || 'auto';
+                if (!detectedCity) {
+                    detectedCity = getCityFromTimezone(tz);
+                }
+
+                const url = `https://api.open-meteo.com/v1/forecast?latitude=${lat.toFixed(4)}&longitude=${lon.toFixed(4)}&current=temperature_2m,relative_humidity_2m,apparent_temperature,is_day,weather_code,wind_speed_10m&hourly=temperature_2m,weather_code,precipitation_probability,is_day&timezone=${encodeURIComponent(tz)}&forecast_days=2`;
+                const res = await fetch(url);
+                if (!res.ok) return;
+                const data = await res.json();
+                
+                if (data && data.current) {
+                    const t = Math.round(data.current.temperature_2m);
+                    const appT = Math.round(data.current.apparent_temperature ?? t);
+                    const isDay = data.current.is_day === 1;
+                    const info = weatherCodeToInfo(data.current.weather_code, isDay);
+                    const hum = data.current.relative_humidity_2m ? `${data.current.relative_humidity_2m}%` : '55%';
+                    const wind = data.current.wind_speed_10m ? `${Math.round(data.current.wind_speed_10m)} km/h` : '10 km/h';
+
+                    const hourlyList = [];
+                    if (data.hourly && data.hourly.time && data.hourly.temperature_2m) {
+                        const nowISO = new Date();
+                        const currentHourStr = pad(nowISO.getHours()) + ':00';
+                        const currentDayYMD = ymd(nowISO);
+                        
+                        let startIdx = data.hourly.time.findIndex(timeStr => {
+                            return timeStr.startsWith(currentDayYMD) && timeStr.endsWith(currentHourStr);
+                        });
+                        if (startIdx === -1) startIdx = 0;
+
+                        const count = Math.min(16, data.hourly.time.length - startIdx);
+                        for (let k = 0; k < count; k++) {
+                            const idx = startIdx + k;
+                            const rawTime = data.hourly.time[idx];
+                            const hourPart = rawTime.split('T')[1]?.slice(0, 5) || rawTime;
+                            const hTemp = Math.round(data.hourly.temperature_2m[idx]);
+                            const hCode = data.hourly.weather_code ? data.hourly.weather_code[idx] : 0;
+                            const hIsDay = data.hourly.is_day ? (data.hourly.is_day[idx] === 1) : true;
+                            const hInfo = weatherCodeToInfo(hCode, hIsDay);
+                            const pop = data.hourly.precipitation_probability ? data.hourly.precipitation_probability[idx] : 0;
+
+                            hourlyList.push({
+                                timeStr: k === 0 ? 'Ahora' : hourPart,
+                                temp: `${hTemp}°`,
+                                icon: hInfo.icon,
+                                desc: hInfo.desc,
+                                pop: pop || 0
+                            });
+                        }
+                    }
+
+                    weatherState = {
+                        city: detectedCity,
+                        temp: `${t}°C`,
+                        feelsLike: `${appT}°C`,
+                        desc: info.desc,
+                        icon: info.icon,
+                        humidity: hum,
+                        wind: wind,
+                        hourly: hourlyList,
+                        time: Date.now(),
+                        loaded: true
+                    };
+
+                    try { localStorage.setItem(WEATHER_KEY, JSON.stringify(weatherState)); } catch (_) { }
+                    updateWeatherUI();
+                }
+            } catch (e) {
+                console.warn('Clima en vivo no disponible:', e);
+            }
+        }
+        fetchLiveWeather();
+        setInterval(fetchLiveWeather, 15 * 60 * 1000); // Actualizar cada 15 min
+
         /* ================= Store (con sincronización a API REST Backend) ================= */
         const KEY = 'tempo.v1';
-        const API_BASE = (window.location.protocol === 'http:' || window.location.protocol === 'https:') ? '' : 'http://127.0.0.1:8008';
+        const API_BASE = (window.location.protocol === 'http:' || window.location.protocol === 'https:') ? '' : 'http://127.0.0.1:8050';
         const api = {
             async getState() {
                 const res = await fetch(`${API_BASE}/api/state`);
@@ -2789,25 +3771,136 @@
         const greeting = () => { const h = new Date().getHours(); return h < 12 ? 'Buenos días' : h < 20 ? 'Buenas tardes' : 'Buenas noches' };
         const esc = s => String(s ?? '').replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
 
-        /* ================= Tema (auto / claro / oscuro) ================= */
+        /* ================= Estado Dinámico de Carga de Tareas del Día ================= */
+        function getDayWorkloadStatus(evsCount = 0, pendTotal = 0, doneCount = 0, bdsCount = 0) {
+            const remainingTasks = Math.max(0, pendTotal - doneCount);
+            const totalRemaining = remainingTasks + evsCount;
+
+            if (totalRemaining === 0) {
+                return 'Hoy descansás';
+            }
+
+            if (totalRemaining <= 2) {
+                return 'Hoy tenés un día tranquilo';
+            }
+
+            if (totalRemaining <= 5) {
+                return 'Hoy tenés varias tareas por delante';
+            }
+
+            // totalRemaining >= 6
+            return 'Hoy tenés un día cargado';
+        }
+
+        /* ================= Sistema de Temas (Día / Noche & Manual) ================= */
         const THEME_KEY = 'tempo.theme';
         const getThemePref = () => { try { return localStorage.getItem(THEME_KEY) || 'auto' } catch (e) { return 'auto' } };
-        function isDarkNow() {
-            return document.documentElement.dataset.theme === 'dark' ||
-                (!document.documentElement.dataset.theme && matchMedia('(prefers-color-scheme:dark)').matches);
+
+        // Detección de día o noche según la hora local (Día: 07:00 a 19:30, Noche: 19:30 a 07:00)
+        function isDayTimeNow() {
+            const now = new Date();
+            const mins = now.getHours() * 60 + now.getMinutes();
+            return mins >= (7 * 60) && mins < (19 * 60 + 30);
         }
+
+        function getEffectiveTheme(pref = getThemePref()) {
+            if (pref === 'light') return 'light';
+            if (pref === 'dark') return 'dark';
+            // Modo 'auto': se ajusta dinámicamente según sea de día o de noche
+            return isDayTimeNow() ? 'light' : 'dark';
+        }
+
+        function isDarkNow() {
+            return getEffectiveTheme() === 'dark';
+        }
+
         function updateThemeMeta() {
             let m = document.querySelector('meta[name="theme-color"]');
             if (!m) { m = document.createElement('meta'); m.name = 'theme-color'; document.head.appendChild(m); }
             m.setAttribute('content', isDarkNow() ? '#16121D' : '#FAF5EF');
         }
-        function applyThemePref(v) {
-            try { localStorage.setItem(THEME_KEY, v) } catch (e) { }
-            if (v === 'auto') delete document.documentElement.dataset.theme;
-            else document.documentElement.dataset.theme = v;
-            updateThemeMeta();
+
+        function updateThemeButtonsUI() {
+            const pref = getThemePref();
+            const effective = getEffectiveTheme(pref);
+            const isDay = isDayTimeNow();
+
+            const descText = pref === 'auto'
+                ? `Tema: Automático (${isDay ? 'Modo Día ☀️ activo · 07:00-19:30' : 'Modo Noche 🌙 activo · 19:30-07:00'})`
+                : `Tema: ${pref === 'light' ? 'Claro ☀️ (Manual)' : 'Oscuro 🌙 (Manual)'}`;
+
+            // 1. Botón de la barra superior de PC (ViewModeBar)
+            const vmbBtn = document.getElementById('vmbBtnTheme');
+            if (vmbBtn) {
+                vmbBtn.innerHTML = ic(pref === 'auto' ? 'autoTheme' : (pref === 'light' ? 'sun' : 'moon'), 16, 2);
+                vmbBtn.setAttribute('title', `${descText} — Toca para alternar`);
+                vmbBtn.setAttribute('aria-label', descText);
+            }
+
+            // 2. Botón del sidebar de PC
+            const pcBtn = document.getElementById('pcBtnTheme');
+            if (pcBtn) {
+                pcBtn.innerHTML = `${ic(pref === 'auto' ? 'autoTheme' : (pref === 'light' ? 'sun' : 'moon'), 15, 2)}<span>${pref === 'auto' ? 'Auto' : (pref === 'light' ? 'Claro' : 'Oscuro')}</span>`;
+                pcBtn.setAttribute('title', descText);
+            }
+
+            // 3. Botón de la barra de navegación móvil (nav)
+            const navBtn = document.getElementById('btnThemeNav');
+            if (navBtn) {
+                navBtn.innerHTML = ic(pref === 'auto' ? 'autoTheme' : (pref === 'light' ? 'sun' : 'moon'), 19, 1.9);
+                navBtn.setAttribute('title', descText);
+                navBtn.setAttribute('aria-label', descText);
+            }
+
+            // 4. Control segmentado de apariencia en la pestaña 'Listas'
+            const segTheme = document.querySelector('.seg[data-theme-seg]');
+            if (segTheme) {
+                const idx = pref === 'light' ? 1 : (pref === 'dark' ? 2 : 0);
+                segTheme.dataset.i = String(idx);
+                segTheme.querySelectorAll('button').forEach(btn => {
+                    const isSel = btn.dataset.v === pref;
+                    btn.classList.toggle('on', isSel);
+                    btn.setAttribute('aria-pressed', isSel ? 'true' : 'false');
+                });
+                const subLbl = document.getElementById('themeStatusLabel');
+                if (subLbl) {
+                    subLbl.textContent = pref === 'auto'
+                        ? `Horario automático (${isDay ? '☀️ Día activo · 07:00 a 19:30' : '🌙 Noche activa · 19:30 a 07:00'})`
+                        : `Ajuste manual (${pref === 'light' ? '☀️ Siempre claro' : '🌙 Siempre oscuro'})`;
+                }
+            }
         }
-        try { matchMedia('(prefers-color-scheme:dark)').addEventListener('change', () => { if (getThemePref() === 'auto') updateThemeMeta() }) } catch (e) { }
+
+        function applyThemePref(v, saveStorage = true) {
+            if (saveStorage) {
+                try { localStorage.setItem(THEME_KEY, v) } catch (e) { }
+            }
+            const effective = getEffectiveTheme(v);
+            document.documentElement.dataset.theme = effective;
+            document.documentElement.dataset.themePref = v;
+            updateThemeMeta();
+            updateThemeButtonsUI();
+        }
+
+        // Revisión automática cada 30 segundos si está en modo automático
+        setInterval(() => {
+            if (getThemePref() === 'auto') {
+                const currentEff = document.documentElement.dataset.theme;
+                const newEff = getEffectiveTheme('auto');
+                if (currentEff !== newEff) {
+                    applyThemePref('auto', false);
+                    toast(`Cambio horario: ${newEff === 'light' ? 'Modo Día ☀️ activado' : 'Modo Noche 🌙 activado'}`, { icon: newEff === 'light' ? 'sun' : 'moon' });
+                } else {
+                    updateThemeButtonsUI();
+                }
+            }
+        }, 30000);
+
+        window.addEventListener('focus', () => {
+            if (getThemePref() === 'auto') {
+                applyThemePref('auto', false);
+            }
+        });
 
         /* ================= Estado UI ================= */
         const UI = { tab: 'today', cursor: new Date(), selDay: todayY(), stack: null };
@@ -2836,7 +3929,10 @@
     <div class="fg">${lead}<button type="button" class="tx" data-act="edit" data-id="${it.id}" aria-label="Editar: ${esc(it.title)}"><span class="t1">${esc(it.title)}</span>${o.cap ? `<span class="t2">${o.cap}</span>` : ''}</button>${flag}${meta ? `<span class="meta${o.hot ? ' hot' : ''}">${meta}</span>` : ''}${star}${chev}</div>
   </div>`;
         }
-        const emptyHTML = (icon, title, cap) => `<div class="empty"><div class="eic" aria-hidden="true">${ic(icon, 25)}</div><b>${title}</b><p>${cap}</p></div>`;
+        const emptyHTML = (icon, title, cap, actLabel = null, actKind = null) => {
+            const btn = actLabel ? `<button type="button" class="empty-btn" data-act="open-composer" data-kind="${actKind || 'task'}"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M12 5v14M5 12h14"/></svg><span>${actLabel}</span></button>` : '';
+            return `<div class="empty"><div class="eic" aria-hidden="true">${ic(icon, 25)}</div><b>${title}</b><p>${cap}</p>${btn}</div>`;
+        };
 
         function itemRow(it, o = {}) {
             if (it.kind === 'event') {
@@ -2881,10 +3977,19 @@
       <span class="ddots" aria-hidden="true">${dots}</span></button>`;
             }
 
-            const CIRC = 2 * Math.PI * 40, pct = pend.length ? doneN / pend.length : 0;
-            const ringT = pend.length
-                ? `<b>${pend.length - doneN}</b><span>${pend.length - doneN === 1 ? 'pendiente' : 'pendientes'}</span>`
-                : `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5l4.2 4.2L19 7.5"/></svg><span>todo listo</span>`;
+            const CIRC = 2 * Math.PI * 40;
+            const pct = pend.length ? doneN / pend.length : 0;
+            const pctVal = Math.round(pct * 100);
+            const isComplete = pend.length > 0 && doneN === pend.length;
+
+            let ringT;
+            if (pend.length === 0) {
+                ringT = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5l4.2 4.2L19 7.5"/></svg><span>al día</span>`;
+            } else if (isComplete) {
+                ringT = `<b class="pct-num" style="color:var(--green)">100%</b><span>hecho</span>`;
+            } else {
+                ringT = `<b class="pct-num">${pctVal}%</b><span>hecho</span>`;
+            }
 
             let ag;
             if (agenda.length) {
@@ -2894,27 +3999,62 @@
                     return `<div class="tl-row">${tt}${itemRow(it, { timeline: true }).replace('<div class="fg">', '<div class="fg" style="flex:1;min-width:0">')}</div>`;
                 }).join('')}</div>
     <p class="capfield" style="text-align:center;margin-top:12px">Toca el círculo para completar · desliza hacia la izquierda para eliminar</p>`;
-            } else ag = emptyHTML('sparkle', 'Día despejado', 'No hay nada previsto para hoy. Toca + para añadir algo.');
+            } else ag = emptyHTML('sparkle', 'Día despejado', 'No hay nada previsto para hoy.', 'Añadir a hoy', 'event');
+
+            const prioList = S.items.filter(i => !i.done && (i.prio === 2 || (i.kind === 'task' && i.date && i.date <= ymd(addDays(new Date(), 2))))).slice(0, 5);
+
+            const workloadText = getDayWorkloadStatus(evs.length, pend.length, doneN, bds.length);
 
             C.today.innerHTML = `
-    <h1 class="large">Hoy</h1><div class="sub2">${cap(fLong.format(new Date()))}</div>
-    <div class="card hero" style="margin-top:14px">
-      <div class="hero-l">
-        <div class="hi">${greeting()}</div>
-        <div class="hd">Así luce tu día</div>
-        <div class="hstats">
-          <div class="hs"><b style="color:${kcol('event')}">${evs.length}</b><span>${evs.length === 1 ? 'evento' : 'eventos'}</span></div>
-          <div class="hs"><b style="color:${kcol('task')}">${pend.length - doneN}</b><span>pendientes</span></div>
-          <div class="hs"><b style="color:${kcol('birthday')}">${bds.length}</b><span>${bds.length === 1 ? 'cumpleaños' : 'cumpleaños'}</span></div>
+    <div class="today-header">
+      <div class="today-header-left">
+        <div class="today-date-eyebrow">${formatHeaderDate(new Date())}</div>
+        <h1 class="large-day">${cap(fDayName.format(new Date()))}</h1>
+      </div>
+      <div class="weather-widget-wrap" id="weatherWrap">
+        <button type="button" class="weather-card-btn" id="weatherPill" aria-haspopup="dialog" aria-expanded="false" title="Clima en ${esc(weatherState.city)}: ${weatherState.desc}, ${weatherState.temp}. Toca para ver pronóstico por hora.">
+          <div class="wc-location">
+            <svg viewBox="0 0 24 24" width="10" height="10" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M12 21s-6-5.33-6-10a6 6 0 1 1 12 0c0 4.67-6 10-6 10z"/><circle cx="12" cy="11" r="2.5"/></svg>
+            <span>${esc(weatherState.city)}</span>
+          </div>
+          <div class="wc-condition">
+            <span class="wc-icon">${weatherState.icon}</span>
+            <span class="wc-temp">${weatherState.temp}</span>
+            <span class="wc-desc">${weatherState.desc}</span>
+            <span class="wc-chevron"><svg viewBox="0 0 24 24" width="9" height="9" fill="none" stroke="currentColor" stroke-width="2.6"><path d="M6 9l6 6 6-6"/></svg></span>
+          </div>
+        </button>
+        <div class="weather-popover" id="weatherPopover" role="dialog" aria-label="Pronóstico por hora en ${esc(weatherState.city)}">
+          ${renderWeatherPopoverContent()}
         </div>
       </div>
-      <div class="hero-r">
-        <svg class="ring" viewBox="0 0 96 96" aria-hidden="true"><circle class="rbg" cx="48" cy="48" r="40"/><circle class="rfg" cx="48" cy="48" r="40" stroke-dasharray="${CIRC.toFixed(1)}" stroke-dashoffset="${(CIRC * (1 - pct)).toFixed(1)}"/></svg>
-        <div class="ring-t" role="img" aria-label="${pend.length - doneN} de ${pend.length} pendientes completados">${ringT}</div>
-      </div>
     </div>
-    <div class="sech">Próximos días</div><div class="days">${chips}</div>
-    <div class="sech">Agenda del día</div>${ag}`;
+    <div class="today-dual" style="margin-top:14px">
+      <div class="today-main-col">
+        <div class="card hero">
+          <div class="hero-l">
+            <div class="hi">${greeting()}</div>
+            <div class="hd">${esc(workloadText)}</div>
+            <div class="hstats">
+              <div class="hs"><b style="color:${kcol('event')}">${evs.length}</b><span>${evs.length === 1 ? 'evento' : 'eventos'}</span></div>
+              <div class="hs"><b style="color:${kcol('task')}">${pend.length - doneN}</b><span>pendientes</span></div>
+              <div class="hs"><b style="color:${kcol('birthday')}">${bds.length}</b><span>${bds.length === 1 ? 'cumpleaños' : 'cumpleaños'}</span></div>
+            </div>
+          </div>
+          <div class="hero-r">
+            <svg class="ring${isComplete ? ' complete' : ''}" viewBox="0 0 96 96" aria-hidden="true"><circle class="rbg" cx="48" cy="48" r="40"/><circle class="rfg" cx="48" cy="48" r="40" stroke-dasharray="${CIRC.toFixed(1)}" stroke-dashoffset="${(CIRC * (1 - pct)).toFixed(1)}"/></svg>
+            <div class="ring-t" role="img" aria-label="${pend.length ? `${pctVal}% completado (${doneN} de ${pend.length} tareas)` : 'Al día, sin tareas pendientes'}">${ringT}</div>
+          </div>
+        </div>
+        <div class="sech">Agenda del día</div>${ag}
+      </div>
+      <div class="today-side-col">
+        <div class="sech">Próximos 7 días</div>
+        <div class="days">${chips}</div>
+        <div class="sech" style="margin-top:22px">Pendientes destacados</div>
+        ${prioList.length ? `<div class="card">${prioList.map(i => itemRow(i, { when: i.date ? fmtRel(i.date) : '' })).join('')}</div>` : emptyHTML('check', 'Al día', 'No tienes tareas urgentes pendientes.', 'Nueva tarea', 'task')}
+      </div>
+    </div>`;
         }
 
         /* ================= Vista CALENDARIO ================= */
@@ -2936,20 +4076,34 @@
             const ds = UI.selDay, list = [...itemsOn(ds)].sort(sortAgenda);
             const head = ds === todayY() ? 'Hoy' : (ds === ymd(addDays(new Date(), 1)) ? 'Mañana' : cap(fLong.format(fromYmd(ds))));
             const agenda = list.length ? `<div class="card">${list.map(i => itemRow(i)).join('')}</div>`
-                : emptyHTML('sparkle', 'Día libre', 'Nada previsto. Toca + para añadir algo a este día.');
+                : emptyHTML('sparkle', 'Día libre', 'Nada previsto para esta fecha.', 'Añadir a este día', 'event');
             C.calendar.innerHTML = `
-    <div style="display:flex;align-items:flex-end;justify-content:space-between;padding-right:4px">
-      <div><div class="large-sm">${y}</div><h1 class="large" style="text-transform:capitalize">${monthName}</h1></div>
-      <div class="cal-nav">
-        <button type="button" data-act="calnav" data-d="-1" aria-label="Mes anterior">${ic('chevL', 20, 2.2)}</button>
-        <button type="button" data-act="calnav" data-d="1" aria-label="Mes siguiente">${ic('chevR', 20, 2.2)}</button>
+    <div class="cal-split">
+      <div class="cal-pane-left">
+        <div style="display:flex;align-items:flex-end;justify-content:space-between;padding-right:4px">
+          <div><div class="large-sm">${y}</div><h1 class="large" style="text-transform:capitalize">${monthName}</h1></div>
+          <div class="cal-nav">
+            <button type="button" data-act="calnav" data-d="-1" aria-label="Mes anterior">${ic('chevL', 20, 2.2)}</button>
+            <button type="button" data-act="calnav" data-d="0" title="Ir a hoy" class="cal-today-btn">Hoy</button>
+            <button type="button" data-act="calnav" data-d="1" aria-label="Mes siguiente">${ic('chevR', 20, 2.2)}</button>
+          </div>
+        </div>
+        <div class="calw">
+          <div class="calh" aria-hidden="true">${['L', 'M', 'X', 'J', 'V', 'S', 'D'].map(d => `<span>${d}</span>`).join('')}</div>
+          <div class="calg">${cells}</div>
+        </div>
       </div>
-    </div>
-    <div class="calw">
-      <div class="calh" aria-hidden="true">${['L', 'M', 'X', 'J', 'V', 'S', 'D'].map(d => `<span>${d}</span>`).join('')}</div>
-      <div class="calg">${cells}</div>
-    </div>
-    <div class="sech">${head}</div>${agenda}`;
+      <div class="cal-pane-right">
+        <div class="cal-day-header">
+          <div class="sech" style="margin:0">${head}</div>
+          <button type="button" class="cal-add-btn" data-act="add-to-day" data-day="${ds}" title="Añadir a esta fecha">
+            <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M12 5v14M5 12h14"/></svg>
+            <span>Añadir</span>
+          </button>
+        </div>
+        <div style="margin-top:6px">${agenda}</div>
+      </div>
+    </div>`;
         }
 
         /* ================= Vista LISTAS ================= */
@@ -2970,30 +4124,47 @@
                 return collRow('cart', p, l.name, n ? `${n} por comprar` : 'Al día', 'open', 'shopping', l.id);
             }).join('');
             const pref = getThemePref();
-            const idx = ['auto', 'light', 'dark'].indexOf(pref);
+            const effective = getEffectiveTheme(pref);
+            const isDay = isDayTimeNow();
+            const idx = pref === 'light' ? 1 : (pref === 'dark' ? 2 : 0);
+            const statusNote = pref === 'auto'
+                ? `Horario automático (${isDay ? '☀️ Día activo · 07:00 a 19:30' : '🌙 Noche activa · 19:30 a 07:00'})`
+                : `Ajuste manual (${pref === 'light' ? '☀️ Siempre claro' : '🌙 Siempre oscuro'})`;
+
             C.lists.innerHTML = `
-    <h1 class="large">Listas</h1>
-    <div class="sech">Organización</div>
-    <div class="card coll">
-      ${collRow('bell', kc('reminder'), 'Recordatorios', pend('reminder') ? `${pend('reminder')} pendientes` : 'Al día', 'open', 'reminder')}
-      ${collRow('check', kc('task'), 'Pendientes', pend('task') ? `${pend('task')} abiertos` : 'Al día', 'open', 'task')}
-      ${collRow('gift', kc('birthday'), 'Cumpleaños', S.items.filter(i => i.kind === 'birthday').length + ' guardados', 'open', 'birthday')}
-      ${collRow('star', kc('wish'), 'Deseos', S.items.filter(i => i.kind === 'wish' && !i.done).length + ' por conseguir', 'open', 'wish')}
+    <h1 class="large">Listas y Colecciones</h1>
+    <div class="lists-desktop-grid" style="margin-top:14px">
+      <div class="lists-col">
+        <div class="sech">Organización</div>
+        <div class="card coll">
+          ${collRow('bell', kc('reminder'), 'Recordatorios', pend('reminder') ? `${pend('reminder')} pendientes` : 'Al día', 'open', 'reminder')}
+          ${collRow('check', kc('task'), 'Pendientes', pend('task') ? `${pend('task')} abiertos` : 'Al día', 'open', 'task')}
+          ${collRow('gift', kc('birthday'), 'Cumpleaños', S.items.filter(i => i.kind === 'birthday').length + ' guardados', 'open', 'birthday')}
+          ${collRow('star', kc('wish'), 'Deseos', S.items.filter(i => i.kind === 'wish' && !i.done).length + ' por conseguir', 'open', 'wish')}
+        </div>
+      </div>
+      <div class="lists-col">
+        <div class="sech">Listas de compra</div>
+        <div class="card coll">${shopRows}
+          <div class="row coll"><button type="button" class="fg" data-act="newlist">
+            <span class="sq link" aria-hidden="true">${ic('plus', 18, 2.2)}</span>
+            <span class="tx"><span class="t1 link">Nueva lista</span></span></button></div>
+        </div>
+      </div>
     </div>
-    <div class="sech">Listas de compra</div>
-    <div class="card coll">${shopRows}
-      <div class="row coll"><button type="button" class="fg" data-act="newlist">
-        <span class="sq link" aria-hidden="true">${ic('plus', 18, 2.2)}</span>
-        <span class="tx"><span class="t1 link">Nueva lista</span></span></button></div>
-    </div>
-    <div class="card" style="margin-top:26px;padding:9px 12px;display:flex;align-items:center;gap:12px">
-      <span class="sq" style="--c:${kcol('wish')};--cs:${ksoft('wish')}" aria-hidden="true">${ic('moon', 17)}</span>
-      <span style="flex:1;font-size:16px;font-weight:500;color:var(--label)">Apariencia</span>
-      <div class="seg" data-i="${idx}" style="margin:0;flex:none;width:180px" role="group" aria-label="Apariencia">
+    <div class="card" style="margin-top:24px;padding:12px 14px;display:flex;flex-direction:column;gap:10px">
+      <div style="display:flex;align-items:center;gap:12px;width:100%">
+        <span class="sq" style="--c:${kcol('wish')};--cs:${ksoft('wish')}" aria-hidden="true">${ic(pref === 'auto' ? 'autoTheme' : (effective === 'light' ? 'sun' : 'moon'), 18)}</span>
+        <div style="flex:1;display:flex;flex-direction:column">
+          <span style="font-size:15.5px;font-weight:600;color:var(--label)">Apariencia y Modo</span>
+          <span id="themeStatusLabel" style="font-size:12px;color:var(--label3)">${statusNote}</span>
+        </div>
+      </div>
+      <div class="seg" data-theme-seg="true" data-i="${idx}" style="margin:2px 0 0;width:100%" role="group" aria-label="Selector de tema">
         <div class="thumb" aria-hidden="true"></div>
-        <button type="button" data-act="theme" data-v="auto" aria-pressed="${pref === 'auto' ? 'true' : 'false'}">Auto</button>
-        <button type="button" data-act="theme" data-v="light" aria-pressed="${pref === 'light' ? 'true' : 'false'}">Claro</button>
-        <button type="button" data-act="theme" data-v="dark" aria-pressed="${pref === 'dark' ? 'true' : 'false'}">Oscuro</button>
+        <button type="button" data-act="theme" data-v="auto" class="${pref === 'auto' ? 'on' : ''}" aria-pressed="${pref === 'auto' ? 'true' : 'false'}">🌗 Auto</button>
+        <button type="button" data-act="theme" data-v="light" class="${pref === 'light' ? 'on' : ''}" aria-pressed="${pref === 'light' ? 'true' : 'false'}">☀️ Claro</button>
+        <button type="button" data-act="theme" data-v="dark" class="${pref === 'dark' ? 'on' : ''}" aria-pressed="${pref === 'dark' ? 'true' : 'false'}">🌙 Oscuro</button>
       </div>
     </div>
     <div class="card" style="margin-top:10px">
@@ -3061,10 +4232,27 @@
         function renderView(tab) {
             if (tab === 'today') renderToday(); else if (tab === 'calendar') renderCalendar(); else if (tab === 'lists') renderLists(); else renderDetail();
         }
+        function formatNavTitleToday(d = new Date()) {
+            const rawDay = fWk.format(d).replace('.', '');
+            const dayName = cap(rawDay);
+            const dayNum = d.getDate();
+            const rawMonth = d.toLocaleDateString('es-ES', { month: 'short' }).replace('.', '');
+            const month = cap(rawMonth);
+            const icon = weatherState.icon || '☀️';
+            const tempShort = (weatherState.temp || '22°C').replace(/C$/i, '');
+            return `<span class="nt-date">${dayName}, ${dayNum} de ${month}</span><span class="nt-sep">·</span><span class="nt-weather"><span class="nt-icon">${icon}</span> <span>${tempShort}</span></span>`;
+        }
         function syncNav() {
             $('#btnBack').classList.toggle('show', !!UI.stack);
-            navTitle.textContent = UI.stack ? detailTitle(UI.stack) : '';
-            nav.classList.toggle('solid', !!UI.stack || V[UI.tab].scrollTop > 34);
+            if (UI.stack) {
+                navTitle.textContent = detailTitle(UI.stack);
+            } else if (UI.tab === 'today') {
+                navTitle.innerHTML = formatNavTitleToday();
+            } else {
+                navTitle.textContent = '';
+            }
+            const curScroll = (V[UI.tab] && V[UI.tab].scrollTop) || 0;
+            nav.classList.toggle('solid', !!UI.stack || curScroll > 12);
         }
         function detailTitle(st) {
             if (st.kind === 'shopping') return S.lists.find(l => l.id === st.id)?.name || 'Lista';
@@ -3394,29 +4582,60 @@
             document.addEventListener('pointercancel', () => { d = null; sheet.style.transform = ''; });
         })();
 
-        /* ================= Búsqueda ================= */
-        const SS = $('#searchScreen'), sInput = $('#sInput'), sRes = $('#sRes'), sHint = $('#sHint');
+        /* ================= Búsqueda con Filtros y Resaltado ================= */
+        const SS = $('#searchScreen'), sInput = $('#sInput'), sRes = $('#sRes'), sHint = $('#sHint'), sFilters = $('#sFilters');
         const norm = s => (s || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
+        let searchFilter = 'all';
+
+        function highlightMatch(text, query) {
+            if (!query || !text) return esc(text);
+            const raw = String(text);
+            const nRaw = norm(raw);
+            const nQ = norm(query);
+            const idx = nRaw.indexOf(nQ);
+            if (idx === -1) return esc(raw);
+            const before = esc(raw.slice(0, idx));
+            const match = esc(raw.slice(idx, idx + query.length));
+            const after = esc(raw.slice(idx + query.length));
+            return `${before}<mark class="sh-mark">${match}</mark>${after}`;
+        }
+
         function openSearch() { SS.classList.add('open'); renderSearch(); setTimeout(() => sInput.focus(), 250); }
         function closeSearch() { SS.classList.remove('open'); sInput.value = ''; sInput.blur(); }
+
         function renderSearch() {
-            const q = norm(sInput.value.trim());
+            const rawQ = sInput.value.trim();
+            const q = norm(rawQ);
             sHint.style.display = q ? 'none' : 'flex';
             if (!q) { sRes.innerHTML = ''; return; }
-            const hits = S.items.filter(i => norm(i.title).includes(q) || norm(i.notes).includes(q));
-            if (!hits.length) { sRes.innerHTML = emptyHTML('search', 'Sin resultados', `Nada coincide con «${esc(sInput.value.trim())}».`); return; }
+            let hits = S.items.filter(i => norm(i.title).includes(q) || norm(i.notes).includes(q));
+            if (searchFilter !== 'all') {
+                hits = hits.filter(i => i.kind === searchFilter);
+            }
+            if (!hits.length) {
+                sRes.innerHTML = emptyHTML('search', 'Sin resultados', `Nada coincide con «${esc(rawQ)}»${searchFilter !== 'all' ? ' en esta categoría' : ''}.`, 'Crear entrada', searchFilter !== 'all' ? searchFilter : 'task');
+                return;
+            }
             const byKind = {}; hits.forEach(i => (byKind[i.kind] = byKind[i.kind] || []).push(i));
             sRes.innerHTML = Object.entries(byKind).map(([k, arr]) => {
                 const rows = arr.map(i => {
                     let when = '';
                     if (i.kind === 'birthday') { const nb = nextBday(i); when = nb.days === 0 ? '¡Hoy!' : `En ${nb.days} días`; }
                     else if (i.date) when = cap(fmtRel(i.date)) + (i.time ? ' · ' + fmtTime(i.time) : '');
-                    return itemRow(i, { when });
+                    const row = itemRow(i, { when });
+                    return row.replace(`<span class="t1">${esc(i.title)}</span>`, `<span class="t1">${highlightMatch(i.title, rawQ)}</span>`);
                 }).join('');
                 return `<div class="sech">${KIND[k].label} · ${arr.length}</div><div class="card">${rows}</div>`;
             }).join('');
         }
         sInput.addEventListener('input', renderSearch);
+        sFilters?.addEventListener('click', e => {
+            const chip = e.target.closest('.s-chip');
+            if (!chip) return;
+            searchFilter = chip.dataset.filter || 'all';
+            sFilters.querySelectorAll('.s-chip').forEach(c => c.classList.toggle('on', c === chip));
+            renderSearch();
+        });
 
         /* ================= Swipe en filas ================= */
         let sw = null, swiped = false;
@@ -3459,6 +4678,19 @@
         /* ================= Clicks globales ================= */
         document.addEventListener('click', e => {
             if (swiped) { swiped = false; return; }
+
+            // Manejo de la píldora de clima y popover de pronóstico por hora
+            const pillBtn = e.target.closest('#weatherPill');
+            const wrap = document.getElementById('weatherWrap');
+            if (pillBtn && wrap) {
+                const isOpen = wrap.classList.toggle('open');
+                pillBtn.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
+                return;
+            } else if (wrap && !e.target.closest('#weatherWrap')) {
+                wrap.classList.remove('open');
+                wrap.querySelector('#weatherPill')?.setAttribute('aria-expanded', 'false');
+            }
+
             const act = e.target.closest('[data-act]');
             if (act) {
                 const a = act.dataset.act, id = act.dataset.id;
@@ -3466,7 +4698,25 @@
                 if (a === 'edit') { const it = byId(id); if (it) openComposer(it.kind, it); return; }
                 if (a === 'goto') { UI.selDay = act.dataset.day; UI.cursor = fromYmd(act.dataset.day); setTab('calendar'); return; }
                 if (a === 'selday') { UI.selDay = act.dataset.day; renderCalendar(); return; }
-                if (a === 'calnav') { UI.cursor.setMonth(UI.cursor.getMonth() + Number(act.dataset.d)); renderCalendar(); return; }
+                if (a === 'calnav') {
+                    const d = Number(act.dataset.d);
+                    if (d === 0) {
+                        UI.cursor = new Date();
+                        UI.selDay = todayY();
+                    } else {
+                        UI.cursor.setMonth(UI.cursor.getMonth() + d);
+                    }
+                    renderCalendar();
+                    return;
+                }
+                if (a === 'add-to-day') {
+                    openComposer('event', null, { date: act.dataset.day });
+                    return;
+                }
+                if (a === 'open-composer') {
+                    openComposer(act.dataset.kind || 'task');
+                    return;
+                }
                 if (a === 'open') { openDetail(act.dataset.kind, id); return; }
                 if (a === 'newlist') { openNewList(); return; }
                 if (a === 'cleanlist') { cleanDone(id); return; }
@@ -3486,6 +4736,22 @@
                 return;
             }
             if (e.target.closest('#btnBack')) { popDetail(); return; }
+            const weatherBtn = e.target.closest('#weatherPill');
+            if (weatherBtn) {
+                const wrap = document.getElementById('weatherWrap');
+                if (wrap) {
+                    const isOpen = wrap.classList.toggle('open');
+                    weatherBtn.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
+                }
+                return;
+            }
+            if (!e.target.closest('#weatherWrap')) {
+                const wrap = document.getElementById('weatherWrap');
+                if (wrap && wrap.classList.contains('open')) {
+                    wrap.classList.remove('open');
+                    document.getElementById('weatherPill')?.setAttribute('aria-expanded', 'false');
+                }
+            }
             const tab = e.target.closest('[data-tab]');
             if (tab) { setTab(tab.dataset.tab); return; }
             const row = e.target.closest('.row');
@@ -3494,24 +4760,76 @@
         $('#scrim').addEventListener('click', closeSheet);
         $('#shCancel').addEventListener('click', closeSheet);
         $('#shDone').addEventListener('click', () => { composer.kind === '__newlist' ? saveNewList() : saveComposer(); });
+        function toggleAppTheme() {
+            const cur = getThemePref();
+            let next;
+            if (cur === 'auto') next = 'light';
+            else if (cur === 'light') next = 'dark';
+            else next = 'auto';
+
+            applyThemePref(next);
+            const isDay = isDayTimeNow();
+            if (next === 'auto') {
+                toast(`Tema automático: ${isDay ? 'Modo Día (07:00 - 19:30)' : 'Modo Noche (19:30 - 07:00)'}`, { icon: isDay ? 'sun' : 'moon' });
+            } else if (next === 'light') {
+                toast('Tema Claro activado manualmente', { icon: 'sun' });
+            } else {
+                toast('Tema Oscuro activado manualmente', { icon: 'moon' });
+            }
+        }
         $('#btnAdd').addEventListener('click', contextualAdd);
         $('#btnSearch').addEventListener('click', openSearch);
         $('#btnSCancel').addEventListener('click', closeSearch);
+        $('#btnThemeNav')?.addEventListener('click', toggleAppTheme);
+
+        /* ================= Control de Modo de Visualización (Móvil / PC) ================= */
+        const VIEW_PREF_KEY = 'tempo_view_preference';
+        const PHONE_W_KEY = 'tempo_phone_width';
+
+        function setPhoneWidth(widthPx) {
+            document.documentElement.style.setProperty('--phone-w', widthPx + 'px');
+            localStorage.setItem(PHONE_W_KEY, widthPx);
+            document.querySelectorAll('.vmb-pill').forEach(btn => {
+                btn.classList.toggle('on', btn.dataset.w === String(widthPx));
+            });
+        }
+
+        function setViewMode(mode) {
+            const isMobile = mode === 'mobile';
+            document.body.classList.toggle('preview-mobile', isMobile);
+            localStorage.setItem(VIEW_PREF_KEY, mode);
+            
+            // Actualizar botones de la barra superior
+            $('#vmbBtnMobile')?.classList.toggle('on', isMobile);
+            $('#vmbBtnPc')?.classList.toggle('on', !isMobile);
+            
+            fit();
+        }
+
+        $('#vmbBtnMobile')?.addEventListener('click', () => {
+            setViewMode('mobile');
+            toast('Vista móvil activada (tamaño real)');
+        });
+        $('#vmbBtnPc')?.addEventListener('click', () => {
+            setViewMode('pc');
+            toast('Vista de escritorio activada');
+        });
+        document.querySelectorAll('.vmb-pill').forEach(btn => {
+            btn.addEventListener('click', () => {
+                setPhoneWidth(Number(btn.dataset.w));
+                toast(`Ancho de teléfono: ${btn.dataset.w}px`);
+            });
+        });
+        $('#vmbBtnTheme')?.addEventListener('click', toggleAppTheme);
 
         /* Controles de barra lateral de escritorio */
         $('#pcBtnAdd')?.addEventListener('click', contextualAdd);
         $('#pcBtnSearch')?.addEventListener('click', openSearch);
-        $('#pcBtnTheme')?.addEventListener('click', () => {
-            const cur = getThemePref();
-            const next = cur === 'dark' ? 'light' : 'dark';
-            applyThemePref(next);
-            toast(`Tema ${next === 'dark' ? 'oscuro' : 'claro'} activado`);
-        });
+        $('#pcBtnTheme')?.addEventListener('click', toggleAppTheme);
         $('#pcBtnPreviewMobile')?.addEventListener('click', () => {
-            document.body.classList.toggle('preview-mobile');
-            const isMob = document.body.classList.contains('preview-mobile');
-            fit();
-            toast(isMob ? 'Vista previa móvil (iPhone)' : 'Vista de escritorio restaurada');
+            const nextMode = document.body.classList.contains('preview-mobile') ? 'pc' : 'mobile';
+            setViewMode(nextMode);
+            toast(nextMode === 'mobile' ? 'Vista móvil activada' : 'Vista de escritorio restaurada');
         });
 
         document.addEventListener('keydown', e => {
@@ -3532,24 +4850,26 @@
             }
         });
         $('#views').addEventListener('scroll', () => {
-            nav.classList.toggle('solid', !!UI.stack || V[UI.tab].scrollTop > 34);
+            const curScroll = V[UI.tab] ? V[UI.tab].scrollTop : 0;
+            nav.classList.toggle('solid', !!UI.stack || curScroll > 12);
         }, true);
 
         /* ================= Reloj y escala ================= */
         function tick() { $('#sbClock').textContent = new Intl.DateTimeFormat('es-ES', { hour: 'numeric', minute: '2-digit' }).format(new Date()) }
         tick(); setInterval(tick, 20000);
         function fit() {
-            if (!document.body.classList.contains('preview-mobile')) {
-                $('#phone').style.removeProperty('--s');
-                return;
-            }
-            const s = Math.min(1, (innerHeight - 92) / 878, (innerWidth - 56) / 419);
-            $('#phone').style.setProperty('--s', s.toFixed(4));
+            // Se mantiene a escala real 1:1 para que nunca se vea más pequeño de lo que debería
+            $('#phone').style.removeProperty('--s');
         }
-        addEventListener('resize', fit); fit();
+        addEventListener('resize', fit);
 
         /* ================= Init ================= */
         applyThemePref(getThemePref());
+        const savedView = localStorage.getItem(VIEW_PREF_KEY) || 'mobile';
+        const savedW = localStorage.getItem(PHONE_W_KEY) || '420';
+        setPhoneWidth(Number(savedW));
+        setViewMode(savedView);
+
         load().finally(() => {
             setTab('today');
         });
