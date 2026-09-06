@@ -1071,11 +1071,8 @@
         /* 100% Pantalla Completa nativa de borde a borde, sin marcos simulados */
         @media (max-width: 768px) {
             html, body {
-                position: fixed !important;
-                inset: 0 !important;
                 width: 100% !important;
                 height: 100% !important;
-                min-height: 100% !important;
                 overflow: hidden !important;
                 background: var(--bg) !important;
                 padding: 0 !important;
@@ -1088,15 +1085,17 @@
             .pc-sidebar {
                 display: none !important;
             }
-            .stage, .device, #phone {
+            .stage, .device, #phone, .app, .app-main {
                 position: absolute !important;
-                inset: 0 !important;
+                top: 0 !important;
+                left: 0 !important;
+                right: 0 !important;
+                bottom: 0 !important;
                 width: 100% !important;
                 max-width: 100% !important;
                 height: 100% !important;
-                min-height: 100% !important;
-                padding: 0 !important;
                 margin: 0 !important;
+                padding: 0 !important;
                 border: 0 !important;
                 border-radius: 0 !important;
                 box-shadow: none !important;
@@ -1106,14 +1105,6 @@
             }
             .island, .statusbar, .homebar, .caption {
                 display: none !important;
-            }
-            .app, .app-main {
-                position: absolute !important;
-                inset: 0 !important;
-                width: 100% !important;
-                height: 100% !important;
-                overflow: hidden !important;
-                background: var(--bg) !important;
             }
             .nav {
                 position: absolute !important;
@@ -1134,7 +1125,7 @@
             }
             .pad {
                 padding-top: calc(var(--sat) + 54px) !important;
-                padding-bottom: calc(64px + env(safe-area-inset-bottom, 10px)) !important;
+                padding-bottom: 66px !important;
                 padding-left: 16px !important;
                 padding-right: 16px !important;
                 box-sizing: border-box !important;
@@ -1149,18 +1140,18 @@
                 align-items: center !important;
                 justify-content: space-around !important;
                 z-index: 45 !important;
-                padding-top: 6px !important;
-                padding-bottom: max(6px, env(safe-area-inset-bottom, 8px)) !important;
-                padding-left: 12px !important;
-                padding-right: 12px !important;
-                background: color-mix(in srgb, var(--card) 90%, var(--bg)) !important;
+                height: 52px !important;
+                padding: 0 12px !important;
+                margin: 0 !important;
+                background: color-mix(in srgb, var(--card) 92%, var(--bg)) !important;
                 backdrop-filter: blur(28px) saturate(2) !important;
                 -webkit-backdrop-filter: blur(28px) saturate(2) !important;
                 border-top: 1px solid var(--sep) !important;
-                box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.05) !important;
+                box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.04) !important;
             }
             .tabbar button {
                 flex: 1 !important;
+                height: 100% !important;
                 display: flex !important;
                 flex-direction: column !important;
                 align-items: center !important;
@@ -1169,9 +1160,9 @@
                 color: var(--label2) !important;
                 font-size: 11px !important;
                 font-weight: 600 !important;
-                padding: 2px 0 !important;
-                min-height: 40px !important;
-                border-radius: 10px !important;
+                padding: 0 !important;
+                margin: 0 !important;
+                border-radius: 8px !important;
             }
             .tabbar button svg {
                 width: 22px !important;
@@ -1182,7 +1173,7 @@
             }
             :root {
                 --sat: env(safe-area-inset-top, 0px);
-                --sab: env(safe-area-inset-bottom, 0px);
+                --sab: 0px;
             }
         }
 
