@@ -204,12 +204,6 @@
             --sab: env(safe-area-inset-bottom, 0px);
         }
 
-        @supports (-webkit-touch-callout: none) {
-            :root {
-                --app-height: -webkit-fill-available;
-            }
-        }
-
         html,
         body {
             width: 100%;
@@ -274,12 +268,6 @@
         .statusbar,
         .homebar {
             display: none;
-        }
-
-        /* Variables de área segura */
-        :root {
-            --sat: 0px;
-            --sab: 0px;
         }
 
         /* ============ SIDEBAR DE ESCRITORIO (PC) ============ */
@@ -1091,18 +1079,21 @@
             }
         }
 
-        /* ============ Vista en Móvil REAL (Smartphones / Tablets pequeñas) ============ */
+        /* ============ Vista en Móvil REAL (Smartphones / Tablets pequeñas y Modo App/PWA) ============ */
         /* 100% Pantalla Completa nativa de borde a borde, sin marcos simulados */
         @media (max-width: 768px) {
             html, body {
+                position: fixed !important;
+                inset: 0 !important;
                 width: 100% !important;
                 height: 100% !important;
-                height: var(--app-height, 100dvh) !important;
+                height: 100dvh !important;
                 overflow: hidden !important;
                 background: var(--bg) !important;
                 padding: 0 !important;
                 margin: 0 !important;
                 border: 0 !important;
+                touch-action: pan-x pan-y;
             }
             .view-mode-bar {
                 display: none !important;
@@ -1111,11 +1102,11 @@
                 display: none !important;
             }
             .stage, .device, #phone {
-                position: relative !important;
+                position: absolute !important;
+                inset: 0 !important;
                 width: 100% !important;
                 max-width: 100% !important;
                 height: 100% !important;
-                height: var(--app-height, 100dvh) !important;
                 margin: 0 !important;
                 padding: 0 !important;
                 border: 0 !important;
@@ -1131,10 +1122,10 @@
                 display: none !important;
             }
             .app {
+                position: absolute !important;
+                inset: 0 !important;
                 width: 100% !important;
                 height: 100% !important;
-                height: var(--app-height, 100dvh) !important;
-                position: relative !important;
                 display: flex !important;
                 flex-direction: column !important;
                 overflow: hidden !important;
@@ -1144,8 +1135,10 @@
                 flex: 1 !important;
                 display: flex !important;
                 flex-direction: column !important;
-                position: relative !important;
+                position: absolute !important;
+                inset: 0 !important;
                 overflow: hidden !important;
+                width: 100% !important;
                 height: 100% !important;
                 background: var(--bg) !important;
             }
@@ -1168,7 +1161,7 @@
             }
             .pad {
                 padding-top: calc(env(safe-area-inset-top, 0px) + 54px) !important;
-                padding-bottom: 60px !important;
+                padding-bottom: calc(72px + env(safe-area-inset-bottom, 0px)) !important;
                 padding-left: 16px !important;
                 padding-right: 16px !important;
                 box-sizing: border-box !important;
@@ -1179,14 +1172,14 @@
                 left: 0 !important;
                 right: 0 !important;
                 width: 100% !important;
-                z-index: 45 !important;
+                z-index: 100 !important;
                 display: flex !important;
-                align-items: center !important;
+                align-items: flex-start !important;
                 justify-content: space-around !important;
-                height: 52px !important;
-                min-height: 52px !important;
-                max-height: 52px !important;
-                padding: 0 8px !important;
+                height: calc(52px + env(safe-area-inset-bottom, 0px)) !important;
+                min-height: calc(52px + env(safe-area-inset-bottom, 0px)) !important;
+                max-height: calc(52px + env(safe-area-inset-bottom, 0px)) !important;
+                padding: 0 8px env(safe-area-inset-bottom, 0px) !important;
                 margin: 0 !important;
                 box-sizing: border-box !important;
                 background: color-mix(in srgb, var(--card) 94%, var(--bg)) !important;
@@ -1217,6 +1210,22 @@
             }
             .tabbar button.on {
                 color: var(--accent) !important;
+            }
+        }
+
+        /* Reglas explícitas para Modo PWA / Pantalla de Inicio en iOS */
+        @media all and (display-mode: standalone), (display-mode: fullscreen) {
+            html, body, .stage, .device, #phone, .app {
+                position: fixed !important;
+                inset: 0 !important;
+                width: 100% !important;
+                height: 100% !important;
+                height: 100dvh !important;
+            }
+            .tabbar {
+                bottom: 0 !important;
+                height: calc(52px + env(safe-area-inset-bottom, 0px)) !important;
+                padding-bottom: env(safe-area-inset-bottom, 0px) !important;
             }
         }
 
@@ -4970,12 +4979,17 @@
             // Se mantiene a escala real 1:1 para que nunca se vea más pequeño de lo que debería
             $('#phone').style.removeProperty('--s');
         }
-        /* ================= Calibración de Altura de Pantalla Móvil ================= */
+        /* ================= Calibración de Altura de Pantalla Móvil y Detección PWA ================= */
         function setAppHeight() {
-            document.documentElement.style.setProperty('--app-height', `${window.innerHeight}px`);
+            const h = window.innerHeight;
+            document.documentElement.style.setProperty('--app-height', `${h}px`);
+            const isStandalone = window.navigator.standalone === true || window.matchMedia('(display-mode: standalone)').matches;
+            document.documentElement.classList.toggle('is-standalone', isStandalone);
+            document.body.classList.toggle('is-standalone', isStandalone);
         }
         window.addEventListener('resize', setAppHeight);
         window.addEventListener('orientationchange', setAppHeight);
+        window.addEventListener('DOMContentLoaded', setAppHeight);
         setAppHeight();
 
         /* ================= Init ================= */
