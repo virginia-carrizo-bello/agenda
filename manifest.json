@@ -1,0 +1,16 @@
+{
+  "name": "Tempo — Organizador",
+  "short_name": "Tempo",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#FAF5EF",
+  "theme_color": "#FAF5EF",
+  "description": "Organizador personal inteligente de eventos, tareas y hábitos",
+  "icons": [
+    {
+      "src": "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'%3E%3Crect width='512' height='512' rx='128' fill='%238B5FA8'/%3E%3Cpath d='M256 120v40M256 352v40M120 256h40M352 256h40M160 160l28 28M324 324l28 28M352 160l-28 28M188 324l-28 28' stroke='%23ffffff' stroke-width='32' stroke-linecap='round'/%3E%3Ccircle cx='256' cy='256' r='64' fill='none' stroke='%23ffffff' stroke-width='32'/%3E%3C/svg%3E",
+      "sizes": "512x512",
+      "type": "image/svg+xml"
+    }
+  ]
+}
