@@ -4207,18 +4207,33 @@
             const pend = pendToday(), doneN = pend.filter(i => i.done).length;
             const evs = itemsOn(T).filter(i => i.kind === 'event');
             const bds = itemsOn(T).filter(i => i.kind === 'birthday');
-            const agenda = [...itemsOn(T)].sort(sortAgenda);
 
-            let chips = '';
-            for (let i = 0; i < 7; i++) {
-                const d = addDays(new Date(), i), ds = ymd(d);
+            // --- Calendario mensual embebido ---
+            const cur = UI.cursor, y = cur.getFullYear(), m = cur.getMonth();
+            const monthName = cur.toLocaleDateString('es-ES', { month: 'long' });
+            const off = (new Date(y, m, 1).getDay() + 6) % 7, dim = new Date(y, m + 1, 0).getDate();
+            let cells = '';
+            for (let i = 0; i < off; i++) cells += '<span class="cal-c empty"></span>';
+            for (let d = 1; d <= dim; d++) {
+                const ds = ymd(new Date(y, m, d)), n = itemsOn(ds).length;
+                const cls = ['cal-c']; if (ds === todayY()) cls.push('is-today'); if (ds === UI.selDay) cls.push('is-sel');
                 const dots = dayKinds(ds).slice(0, 3).map(k => `<i style="background:${kcol(k)}"></i>`).join('');
-                chips += `<button type="button" class="dchip${i === 0 ? ' today' : ''}" data-act="goto" data-day="${ds}" aria-label="Ver ${cap(fLong.format(d))}">
-      <span class="dw">${i === 0 ? 'Hoy' : fWk.format(d).replace('.', '')}</span>
-      <span class="dn">${d.getDate()}</span>
-      <span class="ddots" aria-hidden="true">${dots}</span></button>`;
+                cells += `<button type="button" class="${cls.join(' ')}" data-act="selday" data-day="${ds}"
+      aria-label="${d} de ${monthName} de ${y}${n ? `, ${n} elemento${n > 1 ? 's' : ''}` : ''}"
+      ${ds === UI.selDay ? 'aria-pressed="true"' : ''}${ds === todayY() ? ' aria-current="date"' : ''}>
+      <span class="cal-n">${d}</span><span class="cal-dots" aria-hidden="true">${dots}</span></button>`;
             }
 
+            // --- Día seleccionado ---
+            const ds = UI.selDay, list = [...itemsOn(ds)].sort(sortAgenda);
+            const head = ds === todayY() ? 'Hoy' : (ds === ymd(addDays(new Date(), 1)) ? 'Mañana' : cap(fLong.format(fromYmd(ds))));
+            const agenda = list.length ? `<div class="card">${list.map(i => itemRow(i)).join('')}</div>`
+                : emptyHTML('sparkle', 'Día libre', 'Nada previsto para esta fecha.', 'Añadir', 'event');
+
+            // --- Pendientes destacados ---
+            const prioList = S.items.filter(i => !i.done && (i.prio === 2 || (i.kind === 'task' && i.date && i.date <= ymd(addDays(new Date(), 2))))).slice(0, 5);
+
+            // --- Hero ring ---
             const CIRC = 2 * Math.PI * 40;
             const pct = pend.length ? doneN / pend.length : 0;
             const pctVal = Math.round(pct * 100);
@@ -4232,18 +4247,6 @@
             } else {
                 ringT = `<b class="pct-num">${pctVal}%</b><span>hecho</span>`;
             }
-
-            let ag;
-            if (agenda.length) {
-                ag = `<div class="card tl">${agenda.map(it => {
-                    const tt = it.time ? `<span class="tl-time">${fmtTime(it.time)}</span>`
-                        : `<span class="tl-time"><small>${it.kind === 'birthday' ? 'todo el día' : 'sin hora'}</small></span>`;
-                    return `<div class="tl-row">${tt}${itemRow(it, { timeline: true }).replace('<div class="fg">', '<div class="fg" style="flex:1;min-width:0">')}</div>`;
-                }).join('')}</div>
-    <p class="capfield" style="text-align:center;margin-top:12px">Toca el círculo para completar · desliza hacia la izquierda para eliminar</p>`;
-            } else ag = emptyHTML('sparkle', 'Día despejado', 'No hay nada previsto para hoy.', 'Añadir a hoy', 'event');
-
-            const prioList = S.items.filter(i => !i.done && (i.prio === 2 || (i.kind === 'task' && i.date && i.date <= ymd(addDays(new Date(), 2))))).slice(0, 5);
 
             const workloadText = getDayWorkloadStatus(evs.length, pend.length, doneN, bds.length);
 
@@ -4280,7 +4283,7 @@
             <div class="hstats">
               <div class="hs"><b style="color:${kcol('event')}">${evs.length}</b><span>${evs.length === 1 ? 'evento' : 'eventos'}</span></div>
               <div class="hs"><b style="color:${kcol('task')}">${pend.length - doneN}</b><span>pendientes</span></div>
-              <div class="hs"><b style="color:${kcol('birthday')}">${bds.length}</b><span>${bds.length === 1 ? 'cumpleaños' : 'cumpleaños'}</span></div>
+              <div class="hs"><b style="color:${kcol('birthday')}">${bds.length}</b><span>cumpleaños</span></div>
             </div>
           </div>
           <div class="hero-r">
@@ -4288,16 +4291,40 @@
             <div class="ring-t" role="img" aria-label="${pend.length ? `${pctVal}% completado (${doneN} de ${pend.length} tareas)` : 'Al día, sin tareas pendientes'}">${ringT}</div>
           </div>
         </div>
-        <div class="sech">Agenda del día</div>${ag}
+
+        <!-- Calendario mensual embebido en Hoy -->
+        <div style="margin-top:16px">
+          <div style="display:flex;align-items:flex-end;justify-content:space-between;padding-right:4px;margin-bottom:2px">
+            <div><div class="large-sm">${y}</div><div class="large" style="text-transform:capitalize;font-size:var(--fs-xl);padding:0 4px 0">${monthName}</div></div>
+            <div class="cal-nav">
+              <button type="button" data-act="calnav" data-d="-1" aria-label="Mes anterior">${ic('chevL', 20, 2.2)}</button>
+              <button type="button" data-act="calnav" data-d="0" title="Ir a hoy" class="cal-today-btn">Hoy</button>
+              <button type="button" data-act="calnav" data-d="1" aria-label="Mes siguiente">${ic('chevR', 20, 2.2)}</button>
+            </div>
+          </div>
+          <div class="calw">
+            <div class="calh" aria-hidden="true">${['L', 'M', 'X', 'J', 'V', 'S', 'D'].map(d => `<span>${d}</span>`).join('')}</div>
+            <div class="calg">${cells}</div>
+          </div>
+        </div>
+
+        <!-- Items del día seleccionado -->
+        <div class="cal-day-header" style="margin-top:18px">
+          <div class="sech" style="margin:0">${head}</div>
+          <button type="button" class="cal-add-btn" data-act="add-to-day" data-day="${ds}" title="Añadir a esta fecha">
+            <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M12 5v14M5 12h14"/></svg>
+            <span>Añadir</span>
+          </button>
+        </div>
+        <div style="margin-top:6px">${agenda}</div>
       </div>
       <div class="today-side-col">
-        <div class="sech">Próximos 7 días</div>
-        <div class="days">${chips}</div>
-        <div class="sech" style="margin-top:22px">Pendientes destacados</div>
+        <div class="sech">Pendientes destacados</div>
         ${prioList.length ? `<div class="card">${prioList.map(i => itemRow(i, { when: i.date ? fmtRel(i.date) : '' })).join('')}</div>` : emptyHTML('check', 'Al día', 'No tienes tareas urgentes pendientes.', 'Nueva tarea', 'task')}
       </div>
     </div>`;
         }
+
 
         /* ================= Vista CALENDARIO ================= */
         function renderCalendar() {
@@ -4939,7 +4966,11 @@
                 if (a === 'toggle') { const r = act.closest('.row'); if (r) toggleDone(r); return; }
                 if (a === 'edit') { const it = byId(id); if (it) openComposer(it.kind, it); return; }
                 if (a === 'goto') { UI.selDay = act.dataset.day; UI.cursor = fromYmd(act.dataset.day); setTab('calendar'); return; }
-                if (a === 'selday') { UI.selDay = act.dataset.day; renderCalendar(); return; }
+                if (a === 'selday') {
+                    UI.selDay = act.dataset.day;
+                    if (UI.tab === 'today') renderToday(); else renderCalendar();
+                    return;
+                }
                 if (a === 'calnav') {
                     const d = Number(act.dataset.d);
                     if (d === 0) {
@@ -4948,7 +4979,7 @@
                     } else {
                         UI.cursor.setMonth(UI.cursor.getMonth() + d);
                     }
-                    renderCalendar();
+                    if (UI.tab === 'today') renderToday(); else renderCalendar();
                     return;
                 }
                 if (a === 'add-to-day') {
