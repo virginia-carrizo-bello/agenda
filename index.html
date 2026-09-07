@@ -5004,6 +5004,42 @@
             tabbar.style.transform = gap > 0 ? `translateY(${gap}px)` : '';
         }
 
+        /* ====================================================================
+           PANEL DE DIAGNÓSTICO TEMPORAL — quitar una vez identificada la causa.
+           Se ancla usando un top numérico calculado en JS (no CSS bottom:0),
+           para que sea fiable sin importar si "position:fixed" está bugueado.
+           ==================================================================== */
+        function debugTabbarGap() {
+            if (window.innerWidth > 768) return;
+            let d = document.getElementById('__debugbar');
+            if (!d) {
+                d = document.createElement('div');
+                d.id = '__debugbar';
+                d.style.cssText = 'position:fixed;left:0;right:0;z-index:999999;background:#e0004d;color:#fff;font:9px/1.4 monospace;padding:3px 6px;pointer-events:none;white-space:pre-wrap;';
+                document.body.appendChild(d);
+            }
+            const tb = document.getElementById('tabbar');
+            const r = tb ? tb.getBoundingClientRect() : null;
+            const vv = window.visualViewport;
+            const isStandalone = window.navigator.standalone === true || window.matchMedia('(display-mode: standalone)').matches;
+            const probe = document.createElement('div');
+            probe.style.cssText = 'position:fixed;bottom:0;height:0;padding-bottom:env(safe-area-inset-bottom,0px);visibility:hidden;';
+            document.body.appendChild(probe);
+            const sab = probe.getBoundingClientRect().height;
+            probe.remove();
+            d.style.top = Math.max(0, window.innerHeight - 54) + 'px';
+            d.textContent = 'ih:' + window.innerHeight +
+                ' ch:' + document.documentElement.clientHeight +
+                ' vvH:' + (vv ? Math.round(vv.height) : '-') +
+                ' vvOT:' + (vv ? Math.round(vv.offsetTop) : '-') +
+                ' sab:' + Math.round(sab) +
+                ' standalone:' + isStandalone + '\n' +
+                'tbTop:' + (r ? Math.round(r.top) : '-') +
+                ' tbBottom:' + (r ? Math.round(r.bottom) : '-') +
+                ' tbHeight:' + (r ? Math.round(r.height) : '-') +
+                ' GAP(ih-tbBottom):' + (r ? Math.round(window.innerHeight - r.bottom) : '-');
+        }
+
         function setAppHeight() {
             const h = window.innerHeight;
             document.documentElement.style.setProperty('--app-height', `${h}px`);
@@ -5011,6 +5047,7 @@
             document.documentElement.classList.toggle('is-standalone', isStandalone);
             document.body.classList.toggle('is-standalone', isStandalone);
             pinTabbarToRealViewport();
+            requestAnimationFrame(debugTabbarGap);
         }
         window.addEventListener('resize', setAppHeight);
         window.addEventListener('orientationchange', setAppHeight);
@@ -5020,6 +5057,7 @@
             window.visualViewport.addEventListener('scroll', pinTabbarToRealViewport);
         }
         setAppHeight();
+        setTimeout(debugTabbarGap, 400);
 
         /* ================= Init ================= */
         applyThemePref(getThemePref());
