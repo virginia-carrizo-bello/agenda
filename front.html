@@ -821,15 +821,19 @@
                 box-sizing: border-box;
                 align-items: flex-start;
                 justify-content: space-around;
-                background: color-mix(in srgb, var(--card) 94%, var(--bg));
-                /* backdrop-filter QUITADO: confirmado con marcadores de diagnóstico que
-                   la capa de composición que crea backdrop-filter es la que WebKit en
-                   iOS 26 recorta antes de la zona de safe-area inferior (un div plano
-                   sin filtro sí pintaba hasta el borde; uno hijo de este elemento con
-                   backdrop-filter, no). Sin backdrop-filter, fondo sólido normal. */
+                /* --card y --bg quedan a solo 5-14 unidades de RGB entre sí (blanco vs.
+                   crema), una diferencia real pero casi imperceptible — sobre todo en
+                   la franja de safe-area inferior, sin texto/ícono que ancle el ojo.
+                   Se confirmó con posicionamiento y "marcadores" de pintado que la barra
+                   YA llega pixel-perfecto al borde real (no hay bug de layout ni de
+                   pintado): lo que se percibía como "hueco" era solo bajo contraste.
+                   Mezclamos con negro en vez de con --bg para separarla claramente del
+                   fondo de página en ambos temas. */
+                background: color-mix(in srgb, var(--card) 92%, black);
+                backdrop-filter: blur(28px) saturate(2);
+                -webkit-backdrop-filter: blur(28px) saturate(2);
                 border-top: 1px solid var(--sep);
                 box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.04);
-                opacity: .999;
             }
 
             .tabbar button {
@@ -4980,120 +4984,17 @@
             $('#phone').style.removeProperty('--s');
         }
         /* ================= Calibración de Altura de Pantalla Móvil y Detección PWA ================= */
-
-        /* ====================================================================
-           FIX PARA EL HUECO FLOTANTE DE LA TABBAR EN iOS STANDALONE
-           En iOS, "position:fixed; bottom:0" se resuelve contra el viewport de
-           LAYOUT (document.documentElement.clientHeight), que en standalone
-           puede quedar más corto que el viewport VISUAL real (window.visualViewport),
-           como si WebKit siguiera reservando el alto de una toolbar de Safari
-           que en realidad no existe. Medimos la diferencia real entre ambos y
-           desplazamos la tabbar hacia abajo exactamente esa cantidad.
-           ==================================================================== */
-        function pinTabbarToRealViewport() {
-            const tabbar = document.getElementById('tabbar');
-            if (!tabbar) return;
-            if (window.innerWidth > 768) {
-                tabbar.style.transform = '';
-                return;
-            }
-            const vv = window.visualViewport;
-            const visualBottom = vv ? (vv.height + vv.offsetTop) : window.innerHeight;
-            const layoutH = document.documentElement.clientHeight;
-            const gap = Math.round(visualBottom - layoutH);
-            tabbar.style.transform = gap > 0 ? `translateY(${gap}px)` : '';
-        }
-
-        /* ====================================================================
-           PANEL DE DIAGNÓSTICO TEMPORAL — quitar una vez identificada la causa.
-           Se ancla usando un top numérico calculado en JS (no CSS bottom:0),
-           para que sea fiable sin importar si "position:fixed" está bugueado.
-
-           Además de las métricas, pinta dos franjas bien visibles exactamente
-           en la zona de safe-area inferior, para determinar si es un problema
-           de PINTADO (WebKit no dibuja ahí) o solo de CONTRASTE de color:
-             A (verde lima)  = franja independiente, fixed, directa en <body>
-             B (celeste)     = franja como hijo del propio #tabbar
-           Si ambas se ven en la foto: no hay bug de pintado, es solo contraste.
-           Si NO se ven (se sigue viendo crema): es un bug real de pintado.
-           ==================================================================== */
-        function debugTabbarGap() {
-            if (window.innerWidth > 768) return;
-            let d = document.getElementById('__debugbar');
-            if (!d) {
-                d = document.createElement('div');
-                d.id = '__debugbar';
-                d.style.cssText = 'position:fixed;left:0;right:0;z-index:999999;background:#e0004d;color:#fff;font:9px/1.4 monospace;padding:3px 6px;pointer-events:none;white-space:pre-wrap;';
-                document.body.appendChild(d);
-            }
-            const tb = document.getElementById('tabbar');
-            const r = tb ? tb.getBoundingClientRect() : null;
-            const vv = window.visualViewport;
-            const isStandalone = window.navigator.standalone === true || window.matchMedia('(display-mode: standalone)').matches;
-            const probe = document.createElement('div');
-            probe.style.cssText = 'position:fixed;bottom:0;height:0;padding-bottom:env(safe-area-inset-bottom,0px);visibility:hidden;';
-            document.body.appendChild(probe);
-            const sab = probe.getBoundingClientRect().height || 20;
-            probe.remove();
-            d.style.top = Math.max(0, window.innerHeight - 140) + 'px';
-            d.textContent = 'ih:' + window.innerHeight +
-                ' ch:' + document.documentElement.clientHeight +
-                ' vvH:' + (vv ? Math.round(vv.height) : '-') +
-                ' vvOT:' + (vv ? Math.round(vv.offsetTop) : '-') +
-                ' sab:' + Math.round(sab) +
-                ' standalone:' + isStandalone + '\n' +
-                'tbTop:' + (r ? Math.round(r.top) : '-') +
-                ' tbBottom:' + (r ? Math.round(r.bottom) : '-') +
-                ' tbHeight:' + (r ? Math.round(r.height) : '-') +
-                ' GAP(ih-tbBottom):' + (r ? Math.round(window.innerHeight - r.bottom) : '-') + '\n' +
-                'UA:' + navigator.userAgent;
-
-            /* IMPORTANTE: A y B van en MITADES distintas del ancho (no superpuestas),
-               para que ninguna pueda taparle la franja a la otra por z-index/stacking
-               context. Antes A (fija fuera de #tabbar) tapaba a B (hija de #tabbar,
-               atrapada en el stacking context propio del tabbar) al ocupar el mismo
-               rectángulo — eso invalidó la prueba anterior. */
-            let mA = document.getElementById('__markerA');
-            if (!mA) {
-                mA = document.createElement('div');
-                mA.id = '__markerA';
-                mA.textContent = 'A';
-                mA.style.cssText = 'position:fixed;left:0;width:50%;bottom:0;z-index:999997;background:#39FF14;color:#000;font:9px monospace;text-align:center;pointer-events:none;';
-                document.body.appendChild(mA);
-            }
-            mA.style.height = Math.round(sab) + 'px';
-
-            if (tb) {
-                let mB = document.getElementById('__markerB');
-                if (!mB) {
-                    mB = document.createElement('div');
-                    mB.id = '__markerB';
-                    mB.textContent = 'B';
-                    mB.style.cssText = 'position:absolute;right:0;width:50%;bottom:0;z-index:999996;background:#00E5FF;color:#000;font:9px monospace;text-align:center;pointer-events:none;';
-                    tb.appendChild(mB);
-                }
-                mB.style.height = Math.round(sab) + 'px';
-            }
-        }
-
         function setAppHeight() {
             const h = window.innerHeight;
             document.documentElement.style.setProperty('--app-height', `${h}px`);
             const isStandalone = window.navigator.standalone === true || window.matchMedia('(display-mode: standalone)').matches;
             document.documentElement.classList.toggle('is-standalone', isStandalone);
             document.body.classList.toggle('is-standalone', isStandalone);
-            pinTabbarToRealViewport();
-            requestAnimationFrame(debugTabbarGap);
         }
         window.addEventListener('resize', setAppHeight);
         window.addEventListener('orientationchange', setAppHeight);
         window.addEventListener('DOMContentLoaded', setAppHeight);
-        if (window.visualViewport) {
-            window.visualViewport.addEventListener('resize', pinTabbarToRealViewport);
-            window.visualViewport.addEventListener('scroll', pinTabbarToRealViewport);
-        }
         setAppHeight();
-        setTimeout(debugTabbarGap, 400);
 
         /* ================= Init ================= */
         applyThemePref(getThemePref());
