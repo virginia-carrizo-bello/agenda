@@ -3975,7 +3975,8 @@
             }
         }
         function save() { try { localStorage.setItem(KEY, JSON.stringify(S)) } catch (e) { } }
-        window._S = S; window._save = save;
+        window._getS = () => S;  // getter siempre devuelve el S actual
+        window._save = save;
         const byId = id => S.items.find(i => i.id === id);
 
         /* ================= Consultas ================= */
@@ -4527,7 +4528,7 @@
         }
         function popDetail() { $('#v-detail').classList.remove('open'); UI.stack = null; syncNav(); }
         function refreshAll() {
-            window._refreshAll = refreshAll;
+            window._refreshAll = refreshAll; // exponer siempre actualizado
             renderView(UI.tab);
             if (UI.stack) renderDetail();
             if (SS.classList.contains('open')) renderSearch();
@@ -5158,6 +5159,9 @@
 
         load().finally(() => {
             setTab('today');
+            window._refreshAll = refreshAll; // asegurar exposición post-load
+            // Si GCal ya tiene token (de sesión anterior), sincronizar ahora que S está listo
+            if (window.gcalSync) window.gcalSync();
         });
     </script>
 
@@ -5214,12 +5218,11 @@
         function gcalDisconnect() {
             if (gcalToken) google.accounts.oauth2.revoke(gcalToken.access_token, () => {});
             clearToken();
-            // Remove synced Google events from local store
-            const S = window._S;
+            const S = window._getS ? window._getS() : null;
             if (S) {
                 S.items = S.items.filter(i => !i.gcalId);
-                window._save();
-                window._refreshAll();
+                window._save && window._save();
+                window._refreshAll && window._refreshAll();
             }
             updateGCalUI();
         }
@@ -5257,8 +5260,8 @@
 
         // --- Sync: Google → App ---
         async function importFromGoogle() {
-            const S = window._S;
-            if (!S) return 0;
+            const S = window._getS ? window._getS() : null;
+            if (!S) { console.warn('GCal: estado no disponible'); return 0; }
             // 3 años hacia atrás + 1 año hacia adelante
             const now = new Date();
             const timeMin = new Date(now.getFullYear() - 3, now.getMonth(), now.getDate()).toISOString();
@@ -5281,6 +5284,7 @@
                 pageToken = data.nextPageToken;
             } while (pageToken);
 
+            console.log(`GCal: ${allEvents.length} eventos recibidos de Google`);
             // Limpiar eventos eliminados en Google
             const gcalIds = new Set(allEvents.map(e => e.id));
             S.items = S.items.filter(i => !i.gcalId || gcalIds.has(i.gcalId));
@@ -5313,13 +5317,14 @@
                     added++;
                 }
             }
+            console.log(`GCal: ${added} eventos nuevos importados`);
             window._save();
             return added;
         }
 
         // --- Sync: App → Google (push single event) ---
         window.gcalPushItem = async function(item) {
-            if (!gcalToken || item.kind !== 'event') return;
+            if (!gcalToken || item.kind !== 'event' || item.gcalId) return;
             const body = {
                 summary: item.title,
                 description: item.notes || '',
@@ -5335,7 +5340,7 @@
             } else {
                 // Create new
                 const created = await gcalFetch('/calendars/primary/events', { method: 'POST', body: JSON.stringify(body) });
-                if (created?.id) { item.gcalId = created.id; item.gcal = true; window._save(); }
+                if (created?.id) { item.gcalId = created.id; item.gcal = true; window._save && window._save(); }
             }
         };
 
