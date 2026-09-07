@@ -5048,12 +5048,17 @@
                 ' GAP(ih-tbBottom):' + (r ? Math.round(window.innerHeight - r.bottom) : '-') + '\n' +
                 'UA:' + navigator.userAgent;
 
+            /* IMPORTANTE: A y B van en MITADES distintas del ancho (no superpuestas),
+               para que ninguna pueda taparle la franja a la otra por z-index/stacking
+               context. Antes A (fija fuera de #tabbar) tapaba a B (hija de #tabbar,
+               atrapada en el stacking context propio del tabbar) al ocupar el mismo
+               rectángulo — eso invalidó la prueba anterior. */
             let mA = document.getElementById('__markerA');
             if (!mA) {
                 mA = document.createElement('div');
                 mA.id = '__markerA';
                 mA.textContent = 'A';
-                mA.style.cssText = 'position:fixed;left:0;right:0;bottom:0;z-index:999997;background:#39FF14;color:#000;font:9px monospace;text-align:center;pointer-events:none;';
+                mA.style.cssText = 'position:fixed;left:0;width:50%;bottom:0;z-index:999997;background:#39FF14;color:#000;font:9px monospace;text-align:center;pointer-events:none;';
                 document.body.appendChild(mA);
             }
             mA.style.height = Math.round(sab) + 'px';
@@ -5064,7 +5069,7 @@
                     mB = document.createElement('div');
                     mB.id = '__markerB';
                     mB.textContent = 'B';
-                    mB.style.cssText = 'position:absolute;left:0;right:0;bottom:0;z-index:999996;background:#00E5FF;color:#000;font:9px monospace;text-align:center;pointer-events:none;';
+                    mB.style.cssText = 'position:absolute;right:0;width:50%;bottom:0;z-index:999996;background:#00E5FF;color:#000;font:9px monospace;text-align:center;pointer-events:none;';
                     tb.appendChild(mB);
                 }
                 mB.style.height = Math.round(sab) + 'px';
