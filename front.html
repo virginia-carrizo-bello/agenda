@@ -4425,6 +4425,7 @@
         <span class="tx"><span class="t1 link">Restaurar datos de ejemplo</span></span></button></div>
     </div>
     <p class="capfield" style="text-align:center;margin-top:14px">Toca el círculo para completar · desliza → para eliminar · toca una fila para editarla</p>`;
+            if (window._updateGCalUI) window._updateGCalUI();
         }
 
         /* ================= Vista DETALLE ================= */
@@ -5362,6 +5363,8 @@
             if (act === 'gcal-disconnect') { gcalDisconnect(); }
         }, true);
 
+        window._updateGCalUI = updateGCalUI;
+
         // --- Init ---
         loadToken();
         window.addEventListener('load', () => {
@@ -5370,19 +5373,7 @@
             if (gcalToken) {
                 // Sincronizar inmediatamente con token guardado
                 gcalSync();
-            } else {
-                // Auto-reconectar silenciosamente (sin popup) si el usuario ya autorizó antes
-                setTimeout(() => {
-                    initTokenClient();
-                    if (tokenClient) {
-                        tokenClient.requestAccessToken({ prompt: '' });
-                    }
-                }, 1500);
             }
-            // Renovar token cada 45 min para mantenerse siempre conectado
-            setInterval(() => {
-                if (tokenClient) tokenClient.requestAccessToken({ prompt: '' });
-            }, 45 * 60 * 1000);
         });
     })();
     </script>
