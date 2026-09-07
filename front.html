@@ -822,13 +822,13 @@
                 align-items: flex-start;
                 justify-content: space-around;
                 background: color-mix(in srgb, var(--card) 94%, var(--bg));
-                backdrop-filter: blur(28px) saturate(2);
-                -webkit-backdrop-filter: blur(28px) saturate(2);
+                /* backdrop-filter QUITADO: confirmado con marcadores de diagnóstico que
+                   la capa de composición que crea backdrop-filter es la que WebKit en
+                   iOS 26 recorta antes de la zona de safe-area inferior (un div plano
+                   sin filtro sí pintaba hasta el borde; uno hijo de este elemento con
+                   backdrop-filter, no). Sin backdrop-filter, fondo sólido normal. */
                 border-top: 1px solid var(--sep);
                 box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.04);
-                /* opacity < 1 fuerza a WebKit a compositar esta capa (mitiga un bug de
-                   pintado de iOS 26 con fondos 100% opacos en fixed/inset). El transform
-                   que corrige el hueco real se aplica desde JS (pinTabbarToRealViewport). */
                 opacity: .999;
             }
 
