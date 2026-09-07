@@ -313,7 +313,7 @@
         }
 
         .pc-title {
-            font-size: 20px;
+            font-size: var(--fs-xl);
             font-weight: 800;
             letter-spacing: -.5px;
             color: var(--label);
@@ -321,7 +321,7 @@
         }
 
         .pc-subtitle {
-            font-size: 11px;
+            font-size: var(--fs-sm);
             font-weight: 600;
             color: var(--label3);
             text-transform: uppercase;
@@ -343,7 +343,7 @@
             border-radius: 12px;
             background: var(--accent);
             color: var(--on-accent);
-            font-size: 14px;
+            font-size: var(--fs-sm2);
             font-weight: 600;
             box-shadow: 0 4px 14px color-mix(in srgb, var(--accent) 30%, transparent);
             transition: transform .15s, opacity .15s;
@@ -362,7 +362,7 @@
         .pc-btn-add kbd,
         .pc-btn-search kbd {
             margin-left: auto;
-            font-size: 10px;
+            font-size: var(--fs-xs);
             font-weight: 600;
             opacity: .8;
             background: rgba(0, 0, 0, .14);
@@ -380,7 +380,7 @@
             border-radius: 10px;
             background: var(--bg3);
             color: var(--label2);
-            font-size: 13.5px;
+            font-size: var(--fs-sm);
             transition: background .15s, color .15s;
         }
 
@@ -408,7 +408,7 @@
             padding: 10px 12px;
             border-radius: 11px;
             color: var(--label2);
-            font-size: 14px;
+            font-size: var(--fs-sm2);
             font-weight: 500;
             transition: all .15s;
             text-align: left;
@@ -440,7 +440,7 @@
 
         .pc-badge {
             margin-left: auto;
-            font-size: 11.5px;
+            font-size: var(--fs-sm);
             font-weight: 700;
             padding: 2px 7px;
             border-radius: 10px;
@@ -466,7 +466,7 @@
             align-items: center;
             justify-content: space-between;
             padding: 4px 6px;
-            font-size: 11.5px;
+            font-size: var(--fs-sm);
             font-weight: 700;
             color: var(--label3);
             text-transform: uppercase;
@@ -479,7 +479,7 @@
             display: grid;
             place-items: center;
             border-radius: 6px;
-            font-size: 16px;
+            font-size: var(--fs-md);
             color: var(--accent);
             transition: background .15s;
         }
@@ -501,7 +501,7 @@
             padding: 8px 10px;
             border-radius: 9px;
             color: var(--label2);
-            font-size: 13.5px;
+            font-size: var(--fs-sm);
             font-weight: 500;
             transition: background .15s, color .15s;
             text-align: left;
@@ -521,7 +521,7 @@
 
         .pc-sub-count {
             margin-left: auto;
-            font-size: 11.5px;
+            font-size: var(--fs-sm);
             color: var(--label3);
             font-weight: 600;
         }
@@ -539,7 +539,7 @@
             display: flex;
             align-items: center;
             gap: 7px;
-            font-size: 11.5px;
+            font-size: var(--fs-sm);
             color: var(--label3);
             padding: 0 4px;
         }
@@ -567,7 +567,7 @@
             border-radius: 8px;
             background: var(--bg3);
             color: var(--label2);
-            font-size: 11.5px;
+            font-size: var(--fs-sm);
             font-weight: 600;
             transition: background .15s, color .15s;
         }
@@ -637,7 +637,7 @@
             align-items: center;
             justify-content: center;
             gap: 5px;
-            font-size: 13.5px;
+            font-size: var(--fs-sm);
             font-weight: 600;
             opacity: 0;
             transform: translateY(3px);
@@ -679,7 +679,7 @@
         }
 
         .nav-c .nt-icon {
-            font-size: 14px;
+            font-size: var(--fs-sm2);
             line-height: 1;
             display: inline-block;
         }
@@ -717,7 +717,7 @@
             align-items: center;
             gap: 1px;
             color: var(--accent);
-            font-size: 17px;
+            font-size: var(--fs-md);
             min-height: 44px;
             padding: 6px 8px 6px 2px;
             border-radius: 10px
@@ -846,7 +846,7 @@
                 justify-content: center;
                 gap: 2px;
                 color: var(--label2);
-                font-size: 11px;
+                font-size: var(--fs-sm);
                 font-weight: 600;
                 letter-spacing: .1px;
                 padding: 0;
@@ -902,7 +902,7 @@
             }
             body:not(.preview-mobile) .nav-c {
                 opacity: 1 !important;
-                font-size: 18px !important;
+                font-size: var(--fs-lg) !important;
                 font-weight: 700 !important;
                 text-align: left !important;
             }
@@ -1060,7 +1060,7 @@
             }
             body:not(.preview-mobile) .cal-c {
                 height: 56px !important;
-                font-size: 15px !important;
+                font-size: var(--fs-base) !important;
             }
 
             /* Layout de doble columna en PC para vista Hoy */
@@ -1123,8 +1123,6 @@
                 margin: 0 !important;
                 border: 0 !important;
                 touch-action: pan-x pan-y;
-                /* Reducir tamaño de letra ~6% en móvil (16px → ~15px) */
-                font-size: 94% !important;
             }
             .view-mode-bar {
                 display: none !important;
@@ -1246,7 +1244,7 @@
             padding: 5px 8px 5px 6px;
             box-shadow: 0 14px 34px rgba(0, 0, 0, 0.45), 0 0 0 1px rgba(255, 255, 255, 0.05) inset;
             color: #FAF5EF;
-            font-size: 12.5px;
+            font-size: var(--fs-sm2);
             font-weight: 500;
             user-select: none;
             transition: opacity .2s, transform .2s;
@@ -1271,7 +1269,7 @@
             padding: 6px 13px;
             border-radius: 999px;
             color: rgba(250, 245, 239, 0.72);
-            font-size: 12px;
+            font-size: var(--fs-sm2);
             font-weight: 600;
             transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
             cursor: pointer;
@@ -1299,7 +1297,7 @@
         }
 
         .vmb-label {
-            font-size: 11px;
+            font-size: var(--fs-sm);
             color: rgba(250, 245, 239, 0.5);
             margin-right: 2px;
         }
@@ -1307,7 +1305,7 @@
         .vmb-pill {
             padding: 4px 9px;
             border-radius: 6px;
-            font-size: 11px;
+            font-size: var(--fs-sm);
             font-weight: 600;
             color: rgba(250, 245, 239, 0.65);
             background: rgba(255, 255, 255, 0.06);
@@ -1471,7 +1469,7 @@
                 justify-content: space-between !important;
                 align-items: center !important;
                 z-index: 55 !important;
-                font-size: 13.5px !important;
+                font-size: var(--fs-sm) !important;
                 font-weight: 600 !important;
                 color: var(--label) !important;
                 pointer-events: none !important;
@@ -1499,7 +1497,7 @@
 
         /* ============ Tipografía / secciones ============ */
         .large {
-            font-size: 33px;
+            font-size: var(--fs-3xl);
             font-weight: 800;
             letter-spacing: -.6px;
             color: var(--label);
@@ -1507,7 +1505,7 @@
         }
 
         .large-sm {
-            font-size: 14px;
+            font-size: var(--fs-sm2);
             font-weight: 600;
             color: var(--label2);
             padding: 0 5px;
@@ -1515,7 +1513,7 @@
         }
 
         .sub2 {
-            font-size: 15px;
+            font-size: var(--fs-base);
             color: var(--label2);
             padding: 1px 5px
         }
@@ -1539,7 +1537,7 @@
         }
 
         .today-date-eyebrow {
-            font-size: 13px;
+            font-size: var(--fs-sm);
             font-weight: 600;
             color: var(--accent);
             letter-spacing: .25px;
@@ -1548,7 +1546,7 @@
         }
 
         .large-day {
-            font-size: 34px;
+            font-size: var(--fs-3xl);
             font-weight: 800;
             letter-spacing: -.8px;
             color: var(--label);
@@ -1596,7 +1594,7 @@
             display: inline-flex;
             align-items: center;
             gap: 4px;
-            font-size: 11px;
+            font-size: var(--fs-sm);
             font-weight: 600;
             color: var(--accent);
             line-height: 1;
@@ -1615,14 +1613,14 @@
             display: inline-flex;
             align-items: center;
             gap: 4.5px;
-            font-size: 12.5px;
+            font-size: var(--fs-sm2);
             font-weight: 700;
             color: var(--label);
             line-height: 1.2;
         }
 
         .wc-icon {
-            font-size: 14px;
+            font-size: var(--fs-sm2);
             line-height: 1;
             display: inline-flex;
         }
@@ -1633,7 +1631,7 @@
         }
 
         .wc-desc {
-            font-size: 11px;
+            font-size: var(--fs-sm);
             font-weight: 500;
             color: var(--label2);
             margin-left: 1px;
@@ -1695,7 +1693,7 @@
             display: flex;
             align-items: center;
             gap: 5px;
-            font-size: 13.5px;
+            font-size: var(--fs-sm);
             font-weight: 700;
             color: var(--label);
         }
@@ -1706,13 +1704,13 @@
         }
 
         .wp-now-desc {
-            font-size: 11.5px;
+            font-size: var(--fs-sm);
             font-weight: 500;
             color: var(--label2);
         }
 
         .wp-title-h {
-            font-size: 10.5px;
+            font-size: var(--fs-xs);
             font-weight: 700;
             text-transform: uppercase;
             letter-spacing: .5px;
@@ -1748,7 +1746,7 @@
         }
 
         .wp-hour-time {
-            font-size: 11px;
+            font-size: var(--fs-sm);
             font-weight: 600;
             color: var(--label2);
         }
@@ -1759,19 +1757,19 @@
         }
 
         .wp-hour-icon {
-            font-size: 16px;
+            font-size: var(--fs-md);
             line-height: 1;
             margin: 2px 0;
         }
 
         .wp-hour-temp {
-            font-size: 12.5px;
+            font-size: var(--fs-sm2);
             font-weight: 700;
             color: var(--label);
         }
 
         .wp-hour-pop {
-            font-size: 9.5px;
+            font-size: var(--fs-xs);
             font-weight: 600;
             color: #376389;
         }
@@ -1787,7 +1785,7 @@
             margin-top: 7px;
             padding-top: 7px;
             border-top: 1px solid var(--sep);
-            font-size: 11px;
+            font-size: var(--fs-sm);
             color: var(--label2);
         }
 
@@ -1797,7 +1795,7 @@
         }
 
         .sech {
-            font-size: 13px;
+            font-size: var(--fs-sm);
             font-weight: 600;
             color: var(--label2);
             margin: 26px 6px 8px;
@@ -1808,7 +1806,7 @@
         }
 
         .sech .act {
-            font-size: 13px;
+            font-size: var(--fs-sm);
             font-weight: 600;
             color: var(--accent);
             min-height: 32px;
@@ -1913,7 +1911,7 @@
 
         .t1 {
             display: block;
-            font-size: 16.5px;
+            font-size: var(--fs-md);
             font-weight: 500;
             color: var(--label);
             white-space: nowrap;
@@ -1924,7 +1922,7 @@
 
         .t2 {
             display: block;
-            font-size: 13px;
+            font-size: var(--fs-sm);
             color: var(--label2);
             margin-top: 1.5px;
             white-space: nowrap;
@@ -1933,7 +1931,7 @@
         }
 
         .meta {
-            font-size: 14.5px;
+            font-size: var(--fs-sm2);
             color: var(--label2);
             font-variant-numeric: tabular-nums;
             flex: none
@@ -2029,7 +2027,7 @@
             flex: none;
             display: grid;
             place-items: center;
-            font-size: 15px;
+            font-size: var(--fs-base);
             font-weight: 700;
             color: var(--c);
             background: var(--cs)
@@ -2095,14 +2093,14 @@
         }
 
         .hi {
-            font-size: 21px;
+            font-size: var(--fs-lg);
             font-weight: 700;
             letter-spacing: -.3px;
             color: var(--label)
         }
 
         .hd {
-            font-size: 13.5px;
+            font-size: var(--fs-sm);
             color: var(--label2);
             margin-top: 3px;
             line-height: 1.35;
@@ -2126,13 +2124,13 @@
         }
 
         .hs b {
-            font-size: 20px;
+            font-size: var(--fs-lg);
             font-weight: 700;
             letter-spacing: -.3px
         }
 
         .hs span {
-            font-size: 11.5px;
+            font-size: var(--fs-sm);
             color: var(--label2)
         }
 
@@ -2178,7 +2176,7 @@
         }
 
         .ring-t b {
-            font-size: 22px;
+            font-size: var(--fs-xl);
             font-weight: 800;
             letter-spacing: -.5px;
             line-height: 1;
@@ -2186,12 +2184,12 @@
         }
 
         .ring-t .pct-num {
-            font-size: 20px;
+            font-size: var(--fs-xl);
             letter-spacing: -.6px;
         }
 
         .ring-t span {
-            font-size: 9.5px;
+            font-size: var(--fs-xs);
             color: var(--label2);
             font-weight: 600;
             margin-top: 2px;
@@ -2242,14 +2240,14 @@
         }
 
         .dchip .dw {
-            font-size: 10.5px;
+            font-size: var(--fs-xs);
             font-weight: 600;
             color: var(--label2);
             text-transform: uppercase
         }
 
         .dchip .dn {
-            font-size: 18px;
+            font-size: var(--fs-lg);
             font-weight: 700;
             color: var(--label)
         }
@@ -2307,7 +2305,7 @@
             width: 56px;
             flex: none;
             text-align: right;
-            font-size: 12.5px;
+            font-size: var(--fs-sm2);
             color: var(--label2);
             font-variant-numeric: tabular-nums;
             line-height: 1.25
@@ -2315,7 +2313,7 @@
 
         .tl-time small {
             display: block;
-            font-size: 10px;
+            font-size: var(--fs-xs);
             color: var(--label3)
         }
 
@@ -2336,7 +2334,7 @@
 
         .calh span {
             text-align: center;
-            font-size: 11px;
+            font-size: var(--fs-sm);
             font-weight: 600;
             color: var(--label3);
             text-transform: uppercase
@@ -2373,7 +2371,7 @@
             border-radius: 50%;
             display: grid;
             place-items: center;
-            font-size: 16px;
+            font-size: var(--fs-md);
             font-weight: 500;
             color: var(--label);
             font-variant-numeric: tabular-nums;
@@ -2459,7 +2457,7 @@
         }
 
         .cnt {
-            font-size: 14.5px;
+            font-size: var(--fs-sm2);
             color: var(--label2);
             flex: none
         }
@@ -2470,7 +2468,7 @@
         }
 
         .dhead .dt {
-            font-size: 15px;
+            font-size: var(--fs-base);
             color: var(--label2)
         }
 
@@ -2509,7 +2507,7 @@
         }
 
         .ghost span {
-            font-size: 15px;
+            font-size: var(--fs-base);
             color: var(--red);
             font-weight: 500
         }
@@ -2519,7 +2517,7 @@
         }
 
         .capfield {
-            font-size: 12.5px;
+            font-size: var(--fs-sm2);
             color: var(--label2);
             margin: -6px 6px 14px;
             line-height: 1.4
@@ -2552,13 +2550,13 @@
         }
 
         .empty b {
-            font-size: 16px;
+            font-size: var(--fs-md);
             font-weight: 600;
             color: var(--label)
         }
 
         .empty p {
-            font-size: 13.5px;
+            font-size: var(--fs-sm);
             color: var(--label2);
             line-height: 1.4;
             max-width: 250px
@@ -2637,7 +2635,7 @@
             left: 0;
             right: 0;
             text-align: center;
-            font-size: 16.5px;
+            font-size: var(--fs-md);
             font-weight: 600;
             pointer-events: none;
             color: var(--label)
@@ -2645,7 +2643,7 @@
 
         .sh-cancel,
         .sh-done {
-            font-size: 16.5px;
+            font-size: var(--fs-md);
             color: var(--accent);
             padding: 8px 10px;
             min-height: 44px;
@@ -2693,7 +2691,7 @@
         }
 
         .frow label {
-            font-size: 16px;
+            font-size: var(--fs-md);
             color: var(--label);
             flex: 1
         }
@@ -2702,7 +2700,7 @@
         .frow input[type=time],
         .frow input[type=number],
         .frow input[type=text] {
-            font-size: 16px;
+            font-size: var(--fs-md);
             color: var(--accent);
             background: transparent;
             border: 0;
@@ -2722,7 +2720,7 @@
             border: 0;
             outline: none;
             background: transparent;
-            font-size: 22px;
+            font-size: var(--fs-xl);
             font-weight: 600;
             padding: 15px;
             letter-spacing: -.2px
@@ -2738,7 +2736,7 @@
             border: 0;
             outline: none;
             background: transparent;
-            font-size: 16px;
+            font-size: var(--fs-md);
             padding: 12px 15px;
             resize: none;
             min-height: 74px;
@@ -2789,7 +2787,7 @@
         }
 
         .tp span {
-            font-size: 11.5px;
+            font-size: var(--fs-sm);
             font-weight: 600;
             color: var(--label2);
             transition: color .2s
@@ -2842,7 +2840,7 @@
             flex: 1;
             position: relative;
             z-index: 1;
-            font-size: 13.5px;
+            font-size: var(--fs-sm);
             font-weight: 500;
             color: var(--label2);
             padding: 9px 2px;
@@ -2871,7 +2869,7 @@
             border-radius: 22px;
             background: var(--card);
             box-shadow: inset 0 0 0 .5px var(--sep);
-            font-size: 14px;
+            font-size: var(--fs-sm2);
             font-weight: 500;
             color: var(--label2);
             transition: .2s;
@@ -2977,7 +2975,7 @@
             border: 0;
             outline: none;
             background: transparent;
-            font-size: 16.5px;
+            font-size: var(--fs-md);
             color: var(--label);
             min-width: 0
         }
@@ -2987,7 +2985,7 @@
         }
 
         .scancel {
-            font-size: 16.5px;
+            font-size: var(--fs-md);
             color: var(--accent);
             flex: none;
             min-height: 44px;
@@ -3028,7 +3026,7 @@
         .s-chip {
             padding: 5px 12px;
             border-radius: 999px;
-            font-size: 12px;
+            font-size: var(--fs-sm2);
             font-weight: 600;
             color: var(--label2);
             background: var(--bg3);
@@ -3074,7 +3072,7 @@
             background: var(--tint);
             color: var(--accent);
             border-radius: 999px;
-            font-size: 12px;
+            font-size: var(--fs-sm2);
             font-weight: 600;
             transition: background .15s, transform .15s;
             cursor: pointer;
@@ -3086,7 +3084,7 @@
         }
 
         .cal-today-btn {
-            font-size: 12px;
+            font-size: var(--fs-sm2);
             font-weight: 600;
             color: var(--accent);
             padding: 4px 10px;
@@ -3109,7 +3107,7 @@
             background: var(--accent);
             color: var(--on-accent);
             border-radius: 999px;
-            font-size: 13px;
+            font-size: var(--fs-sm);
             font-weight: 600;
             transition: transform .15s ease, box-shadow .15s ease;
             box-shadow: 0 4px 14px rgba(139, 95, 168, 0.35);
@@ -3177,7 +3175,7 @@
         }
 
         .toast span {
-            font-size: 14.5px;
+            font-size: var(--fs-sm2);
             font-weight: 500;
             color: var(--label);
             white-space: nowrap;
@@ -3186,7 +3184,7 @@
         }
 
         .toast button {
-            font-size: 14.5px;
+            font-size: var(--fs-sm2);
             font-weight: 700;
             color: var(--accent);
             flex: none;
@@ -4272,7 +4270,7 @@
       <div style="display:flex;align-items:center;gap:12px;width:100%">
         <span class="sq" style="--c:${kcol('wish')};--cs:${ksoft('wish')}" aria-hidden="true">${ic(pref === 'auto' ? 'autoTheme' : (effective === 'light' ? 'sun' : 'moon'), 18)}</span>
         <div style="flex:1;display:flex;flex-direction:column">
-          <span style="font-size:15.5px;font-weight:600;color:var(--label)">Apariencia y Modo</span>
+          <span style="font-size: var(--fs-base);font-weight:600;color:var(--label)">Apariencia y Modo</span>
           <span id="themeStatusLabel" style="font-size:12px;color:var(--label3)">${statusNote}</span>
         </div>
       </div>
@@ -4543,7 +4541,7 @@
       <div class="frow"><label for="fd-date">Fecha</label><input type="date" id="fd-date" name="date" value="${dateVal}"></div>
       <div class="frow"><label for="fd-time">Hora</label><input type="time" id="fd-time" name="time" value="${it?.time || ''}"></div>
     </div>
-    <div class="frow" style="padding-top:2px"><span class="frow" style="flex:none;width:100%;padding:0;font-size:16px">Prioridad</span></div>
+    <div class="frow" style="padding-top:2px"><span class="frow" style="flex:none;width:100%;padding:0;font-size: var(--fs-md)">Prioridad</span></div>
     ${segHTML('prio', PRIO.map((l, v) => ({ v, label: l })), it?.prio ?? 0)}`;
             else if (kind === 'birthday') f += `
     <div class="fgroup">
@@ -4554,11 +4552,11 @@
     <div class="fgroup">
       <div class="frow"><label for="fd-price">Precio (€)</label><input type="number" id="fd-price" name="price" inputmode="decimal" min="0" step="0.01" placeholder="0" value="${it?.price ?? ''}"></div>
     </div>
-    <div class="frow" style="padding-top:2px"><span style="flex:none;width:100%;padding:0;font-size:16px">Prioridad</span></div>
+    <div class="frow" style="padding-top:2px"><span style="flex:none;width:100%;padding:0;font-size: var(--fs-md)">Prioridad</span></div>
     ${segHTML('prio', ['Algún día', 'Me interesa', 'Lo quiero'].map((l, v) => ({ v, label: l })), it?.prio ?? 0)}`;
             else if (kind === 'shopping') {
                 const sel = it?.listId || ctx.listId || S.lists[0]?.id;
-                f += `<div class="frow" style="padding-bottom:4px"><span style="flex:none;width:100%;padding:0;font-size:16px">Lista</span></div>
+                f += `<div class="frow" style="padding-bottom:4px"><span style="flex:none;width:100%;padding:0;font-size: var(--fs-md)">Lista</span></div>
       <div class="chips" role="group" aria-label="Lista de compra">${S.lists.map(l => { const p = palOf(l.color); return `<button type="button" class="chip ${l.id === sel ? 'on' : ''}" data-lid="${l.id}" aria-pressed="${l.id === sel ? 'true' : 'false'}" style="--c:${p.c};--cs:${p.cs}"><i aria-hidden="true"></i>${esc(l.name)}</button>` }).join('')}</div>
       <div class="fgroup" style="margin-top:12px">
         <div class="frow"><label for="fd-qty">Cantidad</label><input type="text" id="fd-qty" name="qty" inputmode="text" placeholder="1 kg, ×2…" value="${it?.qty || ''}"></div>
@@ -4655,7 +4653,7 @@
             shTitle.textContent = 'Nueva lista'; shDone.textContent = 'Crear';
             sheetBody.innerHTML = `
     <div class="fgroup"><input class="biginp" name="lname" aria-label="Nombre de la lista" placeholder="Nombre de la lista" autocomplete="off"></div>
-    <div class="frow" style="padding-top:2px"><span style="flex:none;width:100%;padding:0;font-size:16px">Color</span></div>
+    <div class="frow" style="padding-top:2px"><span style="flex:none;width:100%;padding:0;font-size: var(--fs-md)">Color</span></div>
     <div class="swatches" role="group" aria-label="Color de la lista">${Object.entries(PALETTE).map(([key, p], i) => `
       <button type="button" class="sw ${i === 0 ? 'on' : ''}" data-c="${key}" aria-pressed="${i === 0 ? 'true' : 'false'}" aria-label="Color ${p.name}" style="--c:${p.c};--cs:${p.cs}">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${P.check}</svg></button>`).join('')}</div>`;
