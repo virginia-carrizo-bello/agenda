@@ -826,12 +826,9 @@
                 -webkit-backdrop-filter: blur(28px) saturate(2);
                 border-top: 1px solid var(--sep);
                 box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.04);
-                /* NO aplicar transform aquí: crearía un stacking context que
-                   podría volver a romper el posicionamiento fixed en iOS */
-                /* Bug de iOS 26 Safari/WebKit: un position:fixed con fondo 100% opaco
-                   NO se pinta hasta el borde físico inferior (deja un hueco del tamaño
-                   de los controles del navegador), incluso en modo standalone/PWA.
-                   opacity < 1 fuerza a WebKit a compositar la capa correctamente. */
+                /* opacity < 1 fuerza a WebKit a compositar esta capa (mitiga un bug de
+                   pintado de iOS 26 con fondos 100% opacos en fixed/inset). El transform
+                   que corrige el hueco real se aplica desde JS (pinTabbarToRealViewport). */
                 opacity: .999;
             }
 
@@ -4983,16 +4980,45 @@
             $('#phone').style.removeProperty('--s');
         }
         /* ================= Calibración de Altura de Pantalla Móvil y Detección PWA ================= */
+
+        /* ====================================================================
+           FIX PARA EL HUECO FLOTANTE DE LA TABBAR EN iOS STANDALONE
+           En iOS, "position:fixed; bottom:0" se resuelve contra el viewport de
+           LAYOUT (document.documentElement.clientHeight), que en standalone
+           puede quedar más corto que el viewport VISUAL real (window.visualViewport),
+           como si WebKit siguiera reservando el alto de una toolbar de Safari
+           que en realidad no existe. Medimos la diferencia real entre ambos y
+           desplazamos la tabbar hacia abajo exactamente esa cantidad.
+           ==================================================================== */
+        function pinTabbarToRealViewport() {
+            const tabbar = document.getElementById('tabbar');
+            if (!tabbar) return;
+            if (window.innerWidth > 768) {
+                tabbar.style.transform = '';
+                return;
+            }
+            const vv = window.visualViewport;
+            const visualBottom = vv ? (vv.height + vv.offsetTop) : window.innerHeight;
+            const layoutH = document.documentElement.clientHeight;
+            const gap = Math.round(visualBottom - layoutH);
+            tabbar.style.transform = gap > 0 ? `translateY(${gap}px)` : '';
+        }
+
         function setAppHeight() {
             const h = window.innerHeight;
             document.documentElement.style.setProperty('--app-height', `${h}px`);
             const isStandalone = window.navigator.standalone === true || window.matchMedia('(display-mode: standalone)').matches;
             document.documentElement.classList.toggle('is-standalone', isStandalone);
             document.body.classList.toggle('is-standalone', isStandalone);
+            pinTabbarToRealViewport();
         }
         window.addEventListener('resize', setAppHeight);
         window.addEventListener('orientationchange', setAppHeight);
         window.addEventListener('DOMContentLoaded', setAppHeight);
+        if (window.visualViewport) {
+            window.visualViewport.addEventListener('resize', pinTabbarToRealViewport);
+            window.visualViewport.addEventListener('scroll', pinTabbarToRealViewport);
+        }
         setAppHeight();
 
         /* ================= Init ================= */
