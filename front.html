@@ -2446,6 +2446,38 @@
             background: transparent;
         }
 
+        .cal-c.is-weekend .cal-n {
+            color: var(--amber);
+            font-weight: 700;
+        }
+
+        .cal-c.is-weekend.is-today .cal-n {
+            box-shadow: inset 0 0 0 2px var(--amber);
+            color: var(--amber);
+        }
+
+        .cal-c.is-weekend.is-sel .cal-n {
+            background: var(--amber);
+            color: #FFFFFF;
+            box-shadow: none;
+        }
+
+        .cal-c.is-holiday .cal-n {
+            color: var(--green);
+            font-weight: 700;
+        }
+
+        .cal-c.is-holiday.is-today .cal-n {
+            box-shadow: inset 0 0 0 2px var(--green);
+            color: var(--green);
+        }
+
+        .cal-c.is-holiday.is-sel .cal-n {
+            background: var(--green);
+            color: #FFFFFF;
+            box-shadow: none;
+        }
+
         .cal-c:hover {
             background: var(--bg3);
         }
@@ -2537,6 +2569,19 @@
             padding: 0 3px;
             text-align: left;
             white-space: nowrap;
+        }
+
+        .cal-ev-chip.cal-holiday-chip {
+            background: color-mix(in srgb, var(--red) 14%, var(--card)) !important;
+            color: var(--red) !important;
+            font-weight: 700 !important;
+            border: 0.5px solid color-mix(in srgb, var(--red) 28%, transparent);
+        }
+
+        .cal-ev-chip.cal-holiday-chip.is-nolaborable {
+            background: color-mix(in srgb, var(--amber) 14%, var(--card)) !important;
+            color: var(--amber) !important;
+            border: 0.5px solid color-mix(in srgb, var(--amber) 28%, transparent);
         }
 
         /* ============ Cabecera Navegación Calendario (Google Calendar Style) ============ */
@@ -3777,6 +3822,58 @@
         const fromYmd = s => { const [a, b, c] = s.split('-').map(Number); return new Date(a, b - 1, c) };
         const addDays = (d, n) => { const x = new Date(d); x.setDate(x.getDate() + n); return x };
         const getWeekDays = d => { const date = new Date(d); const day = (date.getDay() + 6) % 7; const monday = new Date(date); monday.setDate(date.getDate() - day); const days = []; for (let i = 0; i < 7; i++) { const w = new Date(monday); w.setDate(monday.getDate() + i); days.push(w); } return days; };
+
+        /* ================= Feriados de Argentina ================= */
+        function getEasterDate(year) {
+            const a = year % 19, b = Math.floor(year / 100), c = year % 100;
+            const d = Math.floor(b / 4), e = b % 4, f = Math.floor((b + 8) / 25);
+            const g = Math.floor((b - f + 1) / 3), h = (19 * a + b - d - g + 15) % 30;
+            const i = Math.floor(c / 4), k = c % 4, l = (32 + 2 * e + 2 * i - h - k) % 7;
+            const m = Math.floor((a + 11 * h + 22 * l) / 451);
+            const month = Math.floor((h + l - 7 * m + 114) / 31);
+            const day = ((h + l - 7 * m + 114) % 31) + 1;
+            return new Date(year, month - 1, day);
+        }
+
+        const ARG_FIXED_HOLIDAYS = {
+            '01-01': { name: 'Año Nuevo', desc: 'Celebración del inicio del nuevo año en el calendario gregoriano universal.' },
+            '03-24': { name: 'Día de la Memoria por la Verdad y la Justicia', desc: 'Homenaje a las víctimas de la dictadura cívico-militar (1976-1983) iniciada tras el golpe de Estado del 24 de marzo de 1976 en Argentina.' },
+            '04-02': { name: 'Día del Veterano y de los Caídos en Malvinas', desc: 'Homenaje a los 649 soldados caídos y veteranos de la Guerra de Malvinas (1982), combatiendo en las islas y el Atlántico Sur.' },
+            '05-01': { name: 'Día del Trabajador', desc: 'Homenaje a los Mártires de Chicago (EE.UU., 1886), ejecutados tras liderar la huelga histórica por la jornada laboral de 8 horas.' },
+            '05-25': { name: 'Día de la Revolución de Mayo', desc: 'Creación del primer gobierno patrio en el Cabildo de Buenos Aires (1810), destituyendo al virrey Cisneros tras la Revolución de Mayo.' },
+            '06-17': { name: 'Paso a la Inmortalidad del Gral. Güemes', desc: 'Líder de la Guerra Gaucha que defendió la frontera norte de 6 invasiones realistas. Falleció el 17 de junio de 1821 en Cañada de la Horqueta (Salta) tras ser herido de bala.' },
+            '06-20': { name: 'Paso a la Inmortalidad del Gral. Belgrano', desc: 'Creador de la Bandera Nacional (Rosario, 1812) y victorioso comandante en las batallas de Tucumán y Salta. Falleció el 20 de junio de 1820 en Buenos Aires.' },
+            '07-09': { name: 'Día de la Declaración de la Independencia', desc: 'Proclamación formal de la independencia de las Provincias Unidas en la Casa Histórica de Tucumán (1816), rompiendo lazos con la Corona española.' },
+            '08-17': { name: 'Paso a la Inmortalidad del Gral. San Martín', desc: 'Padre de la Patria: organizó el Ejército de los Andes, cruzó la cordillera y libertó Argentina, Chile y Perú. Falleció en el exilio el 17 de agosto de 1850 en Boulogne-sur-Mer (Francia).' },
+            '10-12': { name: 'Día del Respeto a la Diversidad Cultural', desc: 'Reflexión tras la llegada de Cristóbal Colón a América (Guanahani, 1492) y promoción de los derechos de los pueblos originarios.' },
+            '11-20': { name: 'Día de la Soberanía Nacional', desc: 'Conmemoración de la Batalla de la Vuelta de Obligado (1845) en San Pedro (Bs. As.), donde tropas de Mansilla encadenaron el Río Paraná resistiendo a la flota anglo-francesa.' },
+            '12-08': { name: 'Día de la Inmaculada Concepción de María', desc: 'Festividad católica dedicada a la concepción de la Virgen María libre de pecado en Nazaret.' },
+            '12-25': { name: 'Navidad', desc: 'Celebración cristiana del nacimiento de Jesús de Nazaret en Belén (Judea).' }
+        };
+
+        function getArgHoliday(ds) {
+            if (!ds) return null;
+            const [yStr, mStr, dStr] = ds.split('-');
+            const year = Number(yStr);
+            const mmdd = `${mStr}-${dStr}`;
+
+            if (ARG_FIXED_HOLIDAYS[mmdd]) {
+                const info = ARG_FIXED_HOLIDAYS[mmdd];
+                return { name: info.name, desc: info.desc, type: 'feriado' };
+            }
+
+            const easter = getEasterDate(year);
+            const carnav1 = ymd(addDays(easter, -48));
+            const carnav2 = ymd(addDays(easter, -47));
+            const juevSanto = ymd(addDays(easter, -3));
+            const vierSanto = ymd(addDays(easter, -2));
+
+            if (ds === carnav1 || ds === carnav2) return { name: 'Carnaval', desc: 'Festividad popular previa a la Cuaresma originada en antiguas tradiciones mediterráneas e introducida en América.', type: 'feriado' };
+            if (ds === vierSanto) return { name: 'Viernes Santo', desc: 'Conmemoración del juicio en Jerusalén, crucifixión y muerte de Jesús en el Monte Calvario (Gólgota).', type: 'feriado' };
+            if (ds === juevSanto) return { name: 'Jueves Santo', desc: 'Día no laborable por la Última Cena de Jesús con sus discípulos y el lavatorio de pies en Jerusalén.', type: 'nolaborable' };
+
+            return null;
+        }
         const todayY = () => ymd(new Date());
         const cap = s => s.charAt(0).toUpperCase() + s.slice(1);
         const fLong = new Intl.DateTimeFormat('es-ES', { weekday: 'long', day: 'numeric', month: 'long' });
@@ -4299,29 +4396,43 @@
             const isDesk = window.innerWidth >= 769 && !document.body.classList.contains('preview-mobile');
             const maxChips = isDesk ? 3 : 2;
             const items = itemsOn(ds).sort(sortAgenda);
-            const n = items.length;
+            const dt = fromYmd(ds);
+            const dayOfWeek = dt.getDay(); // 0 = Dom, 6 = Sáb
+            const isWeekend = dayOfWeek === 0 || dayOfWeek === 6;
+            const hol = getArgHoliday(ds);
+
             const cls = ['cal-c'];
+            if (isWeekend) cls.push('is-weekend');
+            if (hol) cls.push('is-holiday');
             if (ds === todayY()) cls.push('is-today');
             if (ds === UI.selDay) cls.push('is-sel');
 
+            let chipsList = [];
+
+            items.forEach(i => {
+                const c = kcol(i.kind);
+                const cs = ksoft(i.kind);
+                chipsList.push(`<div class="cal-ev-chip" style="background:${cs};color:${c}" title="${esc(i.title)}${i.time ? ' ' + i.time : ''}">
+                    <span class="ev-title">${esc(i.title)}</span>
+                </div>`);
+            });
+
             let chipsHtml = '';
-            if (n > 0) {
-                const visible = items.slice(0, maxChips);
-                const extra = n - maxChips;
+            if (chipsList.length > 0) {
+                const visible = chipsList.slice(0, maxChips);
+                const extra = chipsList.length - maxChips;
                 chipsHtml = `<div class="cal-events-list">` +
-                    visible.map(i => {
-                        const c = kcol(i.kind);
-                        const cs = ksoft(i.kind);
-                        return `<div class="cal-ev-chip" style="background:${cs};color:${c}" title="${esc(i.title)}${i.time ? ' ' + i.time : ''}">
-                            <span class="ev-title">${esc(i.title)}</span>
-                        </div>`;
-                    }).join('') +
+                    visible.join('') +
                     (extra > 0 ? `<div class="cal-ev-more">+${extra} más</div>` : '') +
                     `</div>`;
             }
 
+            const nTotal = items.length;
+            const holTitle = hol ? `${hol.name} (${hol.type === 'nolaborable' ? 'Día no laborable' : 'Feriado Nacional'})` : '';
+
             return `<button type="button" class="${cls.join(' ')}" data-act="selday" data-day="${ds}"
-      aria-label="${d} de ${monthName} de ${y}${n ? `, ${n} elemento${n > 1 ? 's' : ''}` : ''}"
+      title="${holTitle}"
+      aria-label="${d} de ${monthName} de ${y}${hol ? `, ${hol.name}` : ''}${nTotal ? `, ${nTotal} elemento${nTotal > 1 ? 's' : ''}` : ''}"
       ${ds === UI.selDay ? 'aria-pressed="true"' : ''}${ds === todayY() ? ' aria-current="date"' : ''}>
       <div class="cal-top"><span class="cal-n">${d}</span></div>
       ${chipsHtml}
@@ -4382,8 +4493,22 @@
             // --- Día seleccionado ---
             const ds = UI.selDay, list = [...itemsOn(ds)].sort(sortAgenda);
             const head = ds === todayY() ? 'Hoy' : (ds === ymd(addDays(new Date(), 1)) ? 'Mañana' : cap(fLong.format(fromYmd(ds))));
-            const agenda = list.length ? `<div class="card">${list.map(i => itemRow(i)).join('')}</div>`
-                : emptyHTML('sparkle', 'Día libre', 'Nada previsto para esta fecha.', 'Añadir', 'event');
+            const hol = getArgHoliday(ds);
+            let holBanner = '';
+            if (hol) {
+                const isNolab = hol.type === 'nolaborable';
+                const col = 'var(--green)';
+                holBanner = `<div class="card" style="padding:12px 15px;margin-bottom:12px;display:flex;align-items:flex-start;gap:12px;background:color-mix(in srgb, ${col} 12%, var(--card));box-shadow:inset 0 0 0 1px color-mix(in srgb, ${col} 25%, transparent);border-radius:16px">
+                    <span style="font-size:22px;line-height:1.2">🇦🇷</span>
+                    <div style="flex:1">
+                        <div style="font-size:var(--fs-sm);font-weight:700;color:${col};letter-spacing:.3px;text-transform:uppercase">${isNolab ? 'Día no laborable' : 'Feriado Nacional en Argentina'}</div>
+                        <div style="font-size:var(--fs-md);font-weight:700;color:var(--label);margin-top:2px">${esc(hol.name)}</div>
+                        ${hol.desc ? `<div style="font-size:var(--fs-sm2);color:var(--label2);margin-top:4px;line-height:1.4">${esc(hol.desc)}</div>` : ''}
+                    </div>
+                </div>`;
+            }
+            const agenda = list.length ? `${holBanner}<div class="card">${list.map(i => itemRow(i)).join('')}</div>`
+                : `${holBanner}${emptyHTML('sparkle', 'Sin tareas ni eventos creados', 'Nada adicional previsto para esta fecha.', 'Añadir', 'event')}`;
 
             // --- Pendientes destacados ---
             const prioList = S.items.filter(i => !i.done && (i.prio === 2 || (i.kind === 'task' && i.date && i.date <= ymd(addDays(new Date(), 2))))).slice(0, 5);
@@ -4507,8 +4632,22 @@
 
             const ds = UI.selDay, list = [...itemsOn(ds)].sort(sortAgenda);
             const head = ds === todayY() ? 'Hoy' : (ds === ymd(addDays(new Date(), 1)) ? 'Mañana' : cap(fLong.format(fromYmd(ds))));
-            const agenda = list.length ? `<div class="card">${list.map(i => itemRow(i)).join('')}</div>`
-                : emptyHTML('sparkle', 'Día libre', 'Nada previsto para esta fecha.', 'Añadir a este día', 'event');
+            const hol = getArgHoliday(ds);
+            let holBanner = '';
+            if (hol) {
+                const isNolab = hol.type === 'nolaborable';
+                const col = 'var(--green)';
+                holBanner = `<div class="card" style="padding:12px 15px;margin-bottom:12px;display:flex;align-items:flex-start;gap:12px;background:color-mix(in srgb, ${col} 12%, var(--card));box-shadow:inset 0 0 0 1px color-mix(in srgb, ${col} 25%, transparent);border-radius:16px">
+                    <span style="font-size:22px;line-height:1.2">🇦🇷</span>
+                    <div style="flex:1">
+                        <div style="font-size:var(--fs-sm);font-weight:700;color:${col};letter-spacing:.3px;text-transform:uppercase">${isNolab ? 'Día no laborable' : 'Feriado Nacional en Argentina'}</div>
+                        <div style="font-size:var(--fs-md);font-weight:700;color:var(--label);margin-top:2px">${esc(hol.name)}</div>
+                        ${hol.desc ? `<div style="font-size:var(--fs-sm2);color:var(--label2);margin-top:4px;line-height:1.4">${esc(hol.desc)}</div>` : ''}
+                    </div>
+                </div>`;
+            }
+            const agenda = list.length ? `${holBanner}<div class="card">${list.map(i => itemRow(i)).join('')}</div>`
+                : `${holBanner}${emptyHTML('sparkle', 'Sin tareas ni eventos creados', 'Nada adicional previsto para esta fecha.', 'Añadir a este día', 'event')}`;
 
             C.calendar.innerHTML = `
     <div class="cal-split">
