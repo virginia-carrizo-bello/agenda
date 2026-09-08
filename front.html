@@ -5274,8 +5274,9 @@
             if (!editing) S.items.push(it);
             save(); closeSheet();
             api.saveItem(it).catch(e => console.warn('Sync save item fallo:', e));
-            if (it.kind === 'event' && !it.gcalId) window.gcalPushItem && window.gcalPushItem(it);
-            else if (it.kind === 'event' && it.gcalId) window.gcalPushItem && window.gcalPushItem(it);
+            if (window.gcalPushItem && (it.kind === 'event' || it.kind === 'birthday' || it.kind === 'routine')) {
+                window.gcalPushItem(it);
+            }
             toast(editing ? 'Cambios guardados' : `${KIND[kind].label} añadido`);
             refreshAll();
         }
@@ -5805,9 +5806,11 @@
                 const startTime = ev.start?.dateTime ? ev.start.dateTime.slice(11, 16) : '';
                 const endTime = ev.end?.dateTime ? ev.end.dateTime.slice(11, 16) : '';
                 if (existing) {
-                    existing.kind = 'event';
+                    if (existing.kind !== 'birthday' && existing.kind !== 'routine') {
+                        existing.kind = 'event';
+                    }
                     existing.title = ev.summary || '(sin título)';
-                    existing.date = startDate;
+                    existing.date = existing.kind === 'birthday' ? (existing.date || startDate) : startDate;
                     existing.time = startTime;
                     existing.end = endTime;
                     existing.notes = ev.description || '';
@@ -5832,35 +5835,92 @@
             return added;
         }
 
-        // --- Sync: App → Google (push single event) ---
+        // --- Sync: App → Google (push single item: event, birthday, routine) ---
         window.gcalPushItem = async function(item) {
-            if (!gcalToken || (item.kind !== 'event' && item.kind !== 'routine') || item.gcalId) return;
-            const body = {
-                summary: item.title,
-                description: item.notes || '',
-                start: item.time ? { dateTime: `${item.date}T${item.time}:00`, timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone }
-                                 : { date: item.date },
-                end: item.end ? { dateTime: `${item.date}T${item.end}:00`, timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone }
-                              : item.time ? { dateTime: `${item.date}T${item.time}:00`, timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone }
-                              : { date: item.date }
-            };
-            if (item.gcalId) {
-                // Update existing
-                await gcalFetch(`/calendars/primary/events/${item.gcalId}`, { method: 'PUT', body: JSON.stringify(body) });
-            } else {
-                // Create new
-                const created = await gcalFetch('/calendars/primary/events', { method: 'POST', body: JSON.stringify(body) });
-                if (created?.id) { item.gcalId = created.id; item.gcal = true; window._save && window._save(); }
+            if (!gcalToken) return;
+            if (item.kind !== 'event' && item.kind !== 'routine' && item.kind !== 'birthday') return;
+
+            let body = {};
+            const curYear = new Date().getFullYear();
+
+            if (item.kind === 'birthday') {
+                const [mStr, dStr] = (item.date || '01-01').split('-');
+                const bYear = item.year || curYear;
+                const eventDate = `${curYear}-${mStr.padStart(2, '0')}-${dStr.padStart(2, '0')}`;
+                body = {
+                    summary: item.title.toLowerCase().includes('cumple') ? item.title : `🎂 Cumpleaños de ${item.title}`,
+                    description: item.year ? `Año de nacimiento: ${item.year}` : (item.notes || 'Cumpleaños guardado en Tempo'),
+                    start: { date: eventDate },
+                    end: { date: eventDate },
+                    recurrence: ['RRULE:FREQ=YEARLY'],
+                    transparency: 'transparent'
+                };
+            } else if (item.kind === 'routine') {
+                const startDate = item.date || todayY();
+                const freqMap = {
+                    daily: 'RRULE:FREQ=DAILY',
+                    weekdays: 'RRULE:FREQ=WEEKLY;BYDAY=MO,TU,WE,TH,FR',
+                    weekends: 'RRULE:FREQ=WEEKLY;BYDAY=SA,SU',
+                    weekly: 'RRULE:FREQ=WEEKLY',
+                    monthly: 'RRULE:FREQ=MONTHLY'
+                };
+                const rrule = freqMap[item.repeat || 'daily'] || 'RRULE:FREQ=DAILY';
+                body = {
+                    summary: item.title,
+                    description: item.notes || '',
+                    start: item.time ? { dateTime: `${startDate}T${item.time}:00`, timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone }
+                                     : { date: startDate },
+                    end: item.end ? { dateTime: `${startDate}T${item.end}:00`, timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone }
+                                  : item.time ? { dateTime: `${startDate}T${item.time}:00`, timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone }
+                                  : { date: startDate },
+                    recurrence: [rrule]
+                };
+            } else { // event
+                body = {
+                    summary: item.title,
+                    description: item.notes || '',
+                    start: item.time ? { dateTime: `${item.date}T${item.time}:00`, timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone }
+                                     : { date: item.date },
+                    end: item.end ? { dateTime: `${item.date}T${item.end}:00`, timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone }
+                                  : item.time ? { dateTime: `${item.date}T${item.time}:00`, timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone }
+                                  : { date: item.date }
+                };
+            }
+
+            try {
+                if (item.gcalId) {
+                    await gcalFetch(`/calendars/primary/events/${item.gcalId}`, { method: 'PUT', body: JSON.stringify(body) });
+                } else {
+                    const created = await gcalFetch('/calendars/primary/events', { method: 'POST', body: JSON.stringify(body) });
+                    if (created?.id) {
+                        item.gcalId = created.id;
+                        item.gcal = true;
+                        window._save && window._save();
+                    }
+                }
+            } catch (e) {
+                console.warn('GCal push error:', e);
             }
         };
+
+        // --- Export unsynced local items to Google Calendar ---
+        async function pushUnsyncedToGoogle() {
+            const S = window._getS ? window._getS() : null;
+            if (!S || !S.items || !gcalToken) return;
+            const unsynced = S.items.filter(i => (i.kind === 'birthday' || i.kind === 'event' || i.kind === 'routine') && !i.gcalId);
+            for (const it of unsynced) {
+                await window.gcalPushItem(it);
+            }
+        }
 
         // --- Full sync ---
         window.gcalSync = async function() {
             if (!gcalToken) return;
+            await pushUnsyncedToGoogle();
             const n = await importFromGoogle();
             window._refreshAll();
-            if (n > 0) window._toast && window._toast(`${n} evento${n > 1 ? 's' : ''} importado${n > 1 ? 's' : ''} de Google Calendar`);
-            else window._toast && window._toast('Google Calendar sincronizado');
+            if (n > 0) window._toast && window._toast(`Google Calendar sincronizado (${n} eventos recibidos)`);
+            else window._toast && window._toast('Google Calendar sincronizado ✓');
         };
 
         // --- Hook into app actions ---
