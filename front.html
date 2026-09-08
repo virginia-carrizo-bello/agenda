@@ -2886,38 +2886,11 @@
             display: flex;
             align-items: center;
             justify-content: space-between;
-            padding: 8px 14px 10px;
+            padding: 10px 16px;
             position: relative;
             flex: none;
             touch-action: none;
             min-height: 52px;
-        }
-
-        .sh-title {
-            position: absolute;
-            left: 90px;
-            right: 60px;
-            text-align: center;
-            font-size: var(--fs-md);
-            font-weight: 600;
-            pointer-events: none;
-            color: var(--label);
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-        }
-
-        .sh-done {
-            font-size: var(--fs-md);
-            font-weight: 700;
-            color: var(--accent);
-            padding: 6px 12px;
-            min-height: 36px;
-            position: relative;
-            z-index: 1;
-            border-radius: 10px;
-            background: transparent;
-            margin-right: auto;
         }
 
         .sh-cancel {
@@ -2927,9 +2900,10 @@
             padding: 6px 12px;
             min-height: 36px;
             position: relative;
-            z-index: 1;
+            z-index: 2;
             border-radius: 8px;
             background: transparent;
+            margin-right: auto;
             transition: background .15s, color .15s;
         }
 
@@ -2942,6 +2916,22 @@
             opacity: .6;
         }
 
+        .sh-title {
+            position: absolute;
+            left: 50%;
+            transform: translateX(-50%);
+            text-align: center;
+            font-size: var(--fs-md);
+            font-weight: 600;
+            pointer-events: none;
+            color: var(--label);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            max-width: calc(100% - 170px);
+            z-index: 1;
+        }
+
         .sh-done {
             font-size: var(--fs-md);
             font-weight: 700;
@@ -2949,7 +2939,7 @@
             padding: 6px 14px;
             min-height: 36px;
             position: relative;
-            z-index: 1;
+            z-index: 2;
             border-radius: 8px;
             background: transparent;
             margin-left: auto;
@@ -3013,7 +3003,9 @@
         .frow input[type=date],
         .frow input[type=time],
         .frow input[type=number],
-        .frow input[type=text] {
+        .frow input[type=text],
+        .frow select,
+        .frow select.fselect {
             font-size: var(--fs-md);
             color: var(--accent);
             background: transparent;
@@ -3022,11 +3014,199 @@
             outline: none;
             -webkit-appearance: none;
             appearance: none;
-            font-variant-numeric: tabular-nums
+            font-variant-numeric: tabular-nums;
+            font-family: inherit;
+            cursor: pointer;
+        }
+
+        .frow select.fselect {
+            direction: rtl;
+            font-weight: 500;
+        }
+
+        .frow select option {
+            background: var(--bg);
+            color: var(--label);
+            direction: ltr;
         }
 
         .frow input[type=date] {
             min-width: 120px
+        }
+
+        /* Interruptor Todo el Día (Switch iOS Style) */
+        .switch-wrap {
+            display: inline-flex;
+            align-items: center;
+            cursor: pointer;
+            position: relative;
+            user-select: none;
+            -webkit-user-select: none;
+        }
+
+        .switch-wrap input[type="checkbox"] {
+            position: absolute;
+            opacity: 0;
+            width: 0;
+            height: 0;
+            pointer-events: none;
+        }
+
+        .switch-slider {
+            position: relative;
+            display: inline-block;
+            width: 46px;
+            height: 26px;
+            background-color: var(--fill2);
+            border-radius: 26px;
+            transition: background-color 0.25s ease, box-shadow 0.25s ease;
+            box-shadow: inset 0 0 0 1px var(--sep);
+        }
+
+        .switch-slider::after {
+            content: '';
+            position: absolute;
+            height: 20px;
+            width: 20px;
+            left: 3px;
+            bottom: 3px;
+            background-color: #FFFFFF;
+            border-radius: 50%;
+            transition: transform 0.25s var(--spring), box-shadow 0.2s ease;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+        }
+
+        .switch-wrap input[type="checkbox"]:checked + .switch-slider {
+            background-color: var(--accent);
+            box-shadow: inset 0 0 0 1px var(--accent);
+        }
+
+        .switch-wrap input[type="checkbox"]:checked + .switch-slider::after {
+            transform: translateX(20px);
+        }
+
+        .switch-wrap input[type="checkbox"]:focus-visible + .switch-slider {
+            outline: 2px solid var(--accent);
+            outline-offset: 2px;
+        }
+
+        .frow.is-disabled {
+            opacity: 0.38;
+            pointer-events: none;
+            transition: opacity 0.2s ease;
+        }
+
+        .frow.is-disabled input {
+            cursor: not-allowed;
+        }
+
+        /* Selector de Frecuencia de Rutinas */
+        .routine-freq-wrap {
+            margin-top: 6px;
+            margin-bottom: 16px;
+        }
+
+        .routine-mode-seg {
+            display: flex;
+            background: var(--bg3);
+            border-radius: 12px;
+            padding: 3px;
+            gap: 3px;
+            box-shadow: inset 0 0 0 1px var(--sep);
+        }
+
+        .r-mode-btn {
+            flex: 1;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 9px 12px;
+            border-radius: 9px;
+            font-size: var(--fs-md);
+            font-weight: 600;
+            color: var(--label2);
+            background: transparent;
+            border: 0;
+            cursor: pointer;
+            transition: all .2s ease;
+            user-select: none;
+            -webkit-user-select: none;
+        }
+
+        .r-mode-btn:hover {
+            color: var(--label);
+        }
+
+        .r-mode-btn.on {
+            background: var(--card);
+            color: var(--label);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, .14), 0 0 0 .5px var(--sep);
+            font-weight: 700;
+        }
+
+        .routine-days-container {
+            background: var(--card);
+            border-radius: 16px;
+            padding: 12px 14px 14px;
+            box-shadow: inset 0 0 0 .5px var(--sep);
+            margin-top: 10px;
+        }
+
+        .routine-days-label {
+            font-size: var(--fs-sm);
+            color: var(--label2);
+            font-weight: 500;
+            margin-bottom: 10px;
+        }
+
+        .routine-days-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 6px;
+        }
+
+        .r-day-chip {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 8px 2px;
+            min-height: 50px;
+            border-radius: 12px;
+            background: var(--bg);
+            border: 1px solid var(--sep);
+            color: var(--label);
+            cursor: pointer;
+            transition: background .18s ease, color .18s ease, border-color .18s ease, transform .12s ease;
+            user-select: none;
+            -webkit-user-select: none;
+        }
+
+        .r-day-chip:hover {
+            background: var(--bg3);
+            transform: translateY(-1px);
+        }
+
+        .r-day-chip.on {
+            background: var(--k-routine, #C2410C) !important;
+            color: #FFFFFF !important;
+            border-color: var(--k-routine, #C2410C) !important;
+            box-shadow: 0 4px 12px rgba(194, 65, 12, 0.38);
+            font-weight: 700;
+            transform: translateY(-1px);
+        }
+
+        .r-day-letter {
+            font-size: var(--fs-md);
+            font-weight: 700;
+            line-height: 1.1;
+        }
+
+        .r-day-sub {
+            font-size: 10px;
+            opacity: 0.85;
+            margin-top: 3px;
+            text-transform: capitalize;
         }
 
         .biginp {
@@ -4291,6 +4471,56 @@
             return Boolean(it.done);
         }
 
+        function isRoutineOnDay(it, ds, dayOfWeek) {
+            const start = it.date || '1970-01-01';
+            if (ds < start) return false;
+            const r = (it.repeat || 'daily').toLowerCase();
+            if (r === 'daily') return true;
+            if (r === 'weekdays') return dayOfWeek >= 1 && dayOfWeek <= 5;
+            if (r === 'weekends') return dayOfWeek === 0 || dayOfWeek === 6;
+            if (r === 'mon' || r === 'monday' || r === '1') return dayOfWeek === 1;
+            if (r === 'tue' || r === 'tuesday' || r === '2') return dayOfWeek === 2;
+            if (r === 'wed' || r === 'wednesday' || r === '3') return dayOfWeek === 3;
+            if (r === 'thu' || r === 'thursday' || r === '4') return dayOfWeek === 4;
+            if (r === 'fri' || r === 'friday' || r === '5') return dayOfWeek === 5;
+            if (r === 'sat' || r === 'saturday' || r === '6') return dayOfWeek === 6;
+            if (r === 'sun' || r === 'sunday' || r === '0') return dayOfWeek === 0;
+            if (r.includes(',')) {
+                const parts = r.split(',').map(s => s.trim());
+                const dayMap = { sun: 0, mon: 1, tue: 2, wed: 3, thu: 4, fri: 5, sat: 6, '0': 0, '1': 1, '2': 2, '3': 3, '4': 4, '5': 5, '6': 6 };
+                return parts.some(p => dayMap[p] === dayOfWeek);
+            }
+            if (r === 'weekly') {
+                const sObj = fromYmd(start);
+                return dayOfWeek === sObj.getDay();
+            }
+            if (r === 'monthly') {
+                const startDay = parseInt(start.split('-')[2]);
+                const curDay = parseInt(ds.split('-')[2]);
+                return startDay === curDay;
+            }
+            return it.date === ds;
+        }
+
+        function getRoutineLabel(repeat) {
+            const r = (repeat || 'daily').toLowerCase();
+            if (r === 'daily') return 'Todos los días';
+            if (r === 'weekdays') return 'Lun a Vie';
+            if (r === 'weekends') return 'Fines de semana';
+            if (r === 'mon' || r === 'monday' || r === '1') return 'Cada lunes';
+            if (r === 'tue' || r === 'tuesday' || r === '2') return 'Cada martes';
+            if (r === 'wed' || r === 'wednesday' || r === '3') return 'Cada miércoles';
+            if (r === 'thu' || r === 'thursday' || r === '4') return 'Cada jueves';
+            if (r === 'fri' || r === 'friday' || r === '5') return 'Cada viernes';
+            if (r === 'sat' || r === 'saturday' || r === '6') return 'Cada sábado';
+            if (r === 'sun' || r === 'sunday' || r === '0') return 'Cada domingo';
+            if (r.includes(',')) {
+                const names = { mon: 'Lun', tue: 'Mar', wed: 'Mié', thu: 'Jue', fri: 'Vie', sat: 'Sáb', sun: 'Dom' };
+                return r.split(',').map(s => names[s.trim()] || s).join(', ');
+            }
+            return 'Semanal';
+        }
+
         const itemsOn = ds => {
             const mmdd = ds.slice(5);
             const dObj = fromYmd(ds);
@@ -4300,21 +4530,7 @@
                 if (it.kind === 'birthday') return it.date === mmdd;
                 // Únicamente si es una rutina explícita con repetición configurada
                 if (it.kind === 'routine' && it.repeat) {
-                    const start = it.date || '1970-01-01';
-                    if (ds < start) return false;
-                    if (it.repeat === 'daily') return true;
-                    if (it.repeat === 'weekdays') return dayOfWeek >= 1 && dayOfWeek <= 5;
-                    if (it.repeat === 'weekends') return dayOfWeek === 0 || dayOfWeek === 6;
-                    if (it.repeat === 'weekly') {
-                        const sObj = fromYmd(start);
-                        return dayOfWeek === sObj.getDay();
-                    }
-                    if (it.repeat === 'monthly') {
-                        const startDay = parseInt(start.split('-')[2]);
-                        const curDay = parseInt(ds.split('-')[2]);
-                        return startDay === curDay;
-                    }
-                    return it.date === ds;
+                    return isRoutineOnDay(it, ds, dayOfWeek);
                 }
                 // Todo evento normal o ítem sin repetición SOLO aparece en su fecha fija
                 return it.date === ds;
@@ -4467,15 +4683,34 @@
         const V = { today: $('#v-today'), calendar: $('#v-calendar'), lists: $('#v-lists'), detail: $('#v-detail') };
         const C = { today: $('#c-today'), calendar: $('#c-calendar'), lists: $('#c-lists'), detail: $('#c-detail') };
 
+        function cleanBirthdayName(title) {
+            if (!title) return '';
+            let name = String(title).trim();
+            // Quitar emoji de torta si ya viene incluido
+            name = name.replace(/^🎂\s*/, '');
+            // Quitar prefijos comunes de cumpleaños
+            name = name.replace(/^cumpleaños\s*(de\s+la|del|de|:|-)?\s*/i, '');
+            name = name.replace(/^cumple\s*(de\s+la|del|de|:|-)?\s*/i, '');
+            // Quitar sufijos comunes
+            name = name.replace(/\s*[\(\[-]?\s*cumpleaños\s*[\)\]]?\s*$/i, '');
+            name = name.replace(/\s*[\(\[-]?\s*cumple\s*[\)\]]?\s*$/i, '');
+            name = name.replace(/^🎂\s*/, '').replace(/\s*🎂$/, '').trim();
+            return name || title;
+        }
+
         /* ================= Filas ================= */
         function rowHTML(it, o = {}) {
             const curDay = o.ds || UI.selDay || todayY();
             const isDone = isItemDoneOn(it, curDay);
+            const isBday = it.kind === 'birthday' || /cumpleaños|cumple/i.test(it.title);
+            const cleanName = isBday ? cleanBirthdayName(it.title) : it.title;
+            let titleDisplay = cleanName;
+
             let lead;
             if (hasCheck(it.kind)) {
                 lead = `<button type="button" class="chk" data-act="toggle" data-id="${it.id}" aria-pressed="${isDone ? 'true' : 'false'}" aria-label="${isDone ? 'Desmarcar' : 'Completar'}: ${esc(it.title)}"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.2 4.2L19 7.5"/></svg></button>`;
-            } else if (it.kind === 'birthday') {
-                lead = `<span class="bav" style="--c:${kcol('birthday')};--cs:${ksoft('birthday')}" aria-hidden="true">${(it.title[0] || '?').toUpperCase()}</span>`;
+            } else if (it.kind === 'birthday' || isBday) {
+                lead = `<span class="bav" style="--c:${kcol('birthday')};--cs:${ksoft('birthday')}" aria-hidden="true">🎂</span>`;
             } else {
                 lead = `<span class="lead-dot" style="background:${kcol(it.kind)}" aria-hidden="true"></span>`;
             }
@@ -4486,7 +4721,7 @@
             return `<div class="row${isDone ? ' done' : ''}" data-id="${it.id}" data-kind="${it.kind}" style="--kc:${kcol(it.kind)};--kcs:${ksoft(it.kind)}">
     <div class="under u-l" aria-hidden="true">${ic('trash', 21)}</div>
     <div class="under u-r" aria-hidden="true">${ic('check', 21, 2.4)}</div>
-    <div class="fg">${lead}<button type="button" class="tx" data-act="edit" data-id="${it.id}" aria-label="Editar: ${esc(it.title)}"><span class="t1">${esc(it.title)}</span>${o.cap ? `<span class="t2">${o.cap}</span>` : ''}</button>${flag}${meta ? `<span class="meta${o.hot ? ' hot' : ''}">${meta}</span>` : ''}${star}${chev}</div>
+    <div class="fg">${lead}<button type="button" class="tx" data-act="edit" data-id="${it.id}" aria-label="Editar: ${esc(it.title)}"><span class="t1">${esc(titleDisplay)}</span>${o.cap ? `<span class="t2">${o.cap}</span>` : ''}</button>${flag}${meta ? `<span class="meta${o.hot ? ' hot' : ''}">${meta}</span>` : ''}${star}${chev}</div>
   </div>`;
         }
         const emptyHTML = (icon, title, cap, actLabel = null, actKind = null) => {
@@ -4494,15 +4729,46 @@
             return `<div class="empty"><div class="eic" aria-hidden="true">${ic(icon, 25)}</div><b>${title}</b><p>${cap}</p>${btn}</div>`;
         };
 
+        function getAlarmLabel(minutes) {
+            if (minutes == null) return '';
+            if (minutes === 0) return '🔔 A la hora';
+            if (minutes < 60) return `🔔 ${minutes}m antes`;
+            if (minutes === 60) return '🔔 1h antes';
+            if (minutes < 1440) return `🔔 ${Math.round(minutes / 60)}h antes`;
+            return '🔔 1d antes';
+        }
+
         function itemRow(it, o = {}) {
             if (it.kind === 'event') {
                 const meta = o.timeline ? '' : (it.time ? fmtTime(it.time) + (it.end ? ' – ' + fmtTime(it.end) : '') : 'Todo el día');
-                return rowHTML(it, { meta, cap: o.when || (it.notes ? esc(it.notes) : ''), ds: o.ds });
+                let capText = o.when || '';
+                if (it.location) {
+                    capText = capText ? `${capText} · 📍 ${esc(it.location)}` : `📍 ${esc(it.location)}`;
+                } else if (!capText && it.notes) {
+                    capText = esc(it.notes);
+                }
+                return rowHTML(it, { meta, cap: capText, ds: o.ds });
             }
             if (it.kind === 'routine') {
-                const repLabel = it.repeat === 'weekdays' ? 'Lun a Vie' : it.repeat === 'weekly' ? 'Semanal' : it.repeat === 'weekends' ? 'Fines de sem.' : 'Todos los días';
+                const repLabel = getRoutineLabel(it.repeat);
                 const meta = (it.time ? fmtTime(it.time) + ' · ' : '') + repLabel;
                 return rowHTML(it, { meta, cap: o.when || (it.notes ? esc(it.notes) : ''), ds: o.ds });
+            }
+            if (it.kind === 'reminder') {
+                const alarmStr = getAlarmLabel(it.alarm);
+                let meta = o.timeline ? '' : (it.time ? fmtTime(it.time) : '');
+                if (alarmStr) {
+                    meta = meta ? `${meta} · ${alarmStr}` : alarmStr;
+                }
+                let cp = o.when || '';
+                if (it.location) {
+                    cp = cp ? `${cp} · 📍 ${esc(it.location)}` : `📍 ${esc(it.location)}`;
+                } else if (!cp && it.notes) {
+                    cp = esc(it.notes);
+                }
+                const isDone = isItemDoneOn(it, o.ds || UI.selDay || todayY());
+                const hot = !isDone && it.date && it.date < todayY();
+                return rowHTML(it, { meta, cap: cp, hot, ds: o.ds });
             }
             if (it.kind === 'birthday') {
                 const nb = nextBday(it);
@@ -4543,10 +4809,16 @@
             let chipsList = [];
 
             items.forEach(i => {
-                const c = kcol(i.kind);
-                const cs = ksoft(i.kind);
-                chipsList.push(`<div class="cal-ev-chip" style="background:${cs};color:${c}" title="${esc(i.title)}${i.time ? ' ' + i.time : ''}">
-                    <span class="ev-title">${esc(i.title)}</span>
+                const isBday = i.kind === 'birthday' || /cumpleaños|cumple/i.test(i.title);
+                const c = kcol(isBday ? 'birthday' : i.kind);
+                const cs = ksoft(isBday ? 'birthday' : i.kind);
+                let titleText = i.title;
+                if (isBday) {
+                    const name = cleanBirthdayName(titleText);
+                    titleText = `🎂 ${name}`;
+                }
+                chipsList.push(`<div class="cal-ev-chip" style="background:${cs};color:${c}" title="${esc(titleText)}${i.time ? ' ' + i.time : ''}">
+                    <span class="ev-title">${esc(titleText)}</span>
                 </div>`);
             });
 
@@ -5154,29 +5426,86 @@
                 ? (it ? `${it.year || 2000}-${it.date}` : '')
                 : (it ? it.date : (ctx.date || todayY()));
             let f = '';
-            if (kind === 'event') f += `
+            if (kind === 'event') {
+                const isAllDay = it ? (!it.time && !it.end) : false;
+                f += `
+    <div class="fgroup">
+      <div class="frow"><label for="fd-date">Fecha</label><input type="date" id="fd-date" name="date" value="${dateVal}"></div>
+      <div class="frow">
+        <label for="fd-allday" style="cursor:pointer">Todo el día</label>
+        <label class="switch-wrap" for="fd-allday">
+          <input type="checkbox" id="fd-allday" name="allday" ${isAllDay ? 'checked' : ''} aria-label="Todo el día">
+          <span class="switch-slider" aria-hidden="true"></span>
+        </label>
+      </div>
+      <div class="frow ${isAllDay ? 'is-disabled' : ''}" id="row-from"><label for="fd-time">Desde</label><input type="time" id="fd-time" name="time" value="${it?.time || ''}" ${isAllDay ? 'disabled' : ''}></div>
+      <div class="frow ${isAllDay ? 'is-disabled' : ''}" id="row-end"><label for="fd-end">Hasta</label><input type="time" id="fd-end" name="end" value="${it?.end || ''}" ${isAllDay ? 'disabled' : ''}></div>
+      <div class="frow"><label for="fd-loc">Ubicación</label><input type="text" id="fd-loc" name="location" placeholder="Lugar o dirección (opcional)" value="${esc(it?.location || '')}" autocomplete="off"></div>
+    </div>`;
+            }
+            else if (kind === 'reminder') {
+                const alarmVal = it?.alarm != null ? String(it.alarm) : '';
+                f += `
     <div class="fgroup">
       <div class="frow"><label for="fd-date">Fecha</label><input type="date" id="fd-date" name="date" value="${dateVal}"></div>
       <div class="frow"><label for="fd-time">Hora</label><input type="time" id="fd-time" name="time" value="${it?.time || ''}"></div>
-      <div class="frow"><label for="fd-end">Fin</label><input type="time" id="fd-end" name="end" value="${it?.end || ''}"></div>
+      <div class="frow">
+        <label for="fd-alarm">Aviso / Alarma</label>
+        <select id="fd-alarm" name="alarm" class="fselect" aria-label="Aviso o alarma">
+          <option value="" ${alarmVal === '' ? 'selected' : ''}>Sin aviso</option>
+          <option value="0" ${alarmVal === '0' ? 'selected' : ''}>A la hora exacta</option>
+          <option value="5" ${alarmVal === '5' ? 'selected' : ''}>5 minutos antes</option>
+          <option value="10" ${alarmVal === '10' ? 'selected' : ''}>10 minutos antes</option>
+          <option value="15" ${alarmVal === '15' ? 'selected' : ''}>15 minutos antes</option>
+          <option value="30" ${alarmVal === '30' ? 'selected' : ''}>30 minutos antes</option>
+          <option value="60" ${alarmVal === '60' ? 'selected' : ''}>1 hora antes</option>
+          <option value="120" ${alarmVal === '120' ? 'selected' : ''}>2 horas antes</option>
+          <option value="1440" ${alarmVal === '1440' ? 'selected' : ''}>1 día antes</option>
+        </select>
+      </div>
+      <div class="frow"><label for="fd-loc">Ubicación</label><input type="text" id="fd-loc" name="location" placeholder="Lugar o dirección (opcional)" value="${esc(it?.location || '')}" autocomplete="off"></div>
     </div>`;
-            else if (kind === 'reminder') f += `
-    <div class="fgroup">
-      <div class="frow"><label for="fd-date">Fecha</label><input type="date" id="fd-date" name="date" value="${dateVal}"></div>
-      <div class="frow"><label for="fd-time">Hora</label><input type="time" id="fd-time" name="time" value="${it?.time || ''}"></div>
-    </div>`;
-            else if (kind === 'routine') f += `
+            }
+            else if (kind === 'routine') {
+                const rep = it?.repeat || 'daily';
+                const isDaily = rep === 'daily';
+                const curDay = !isDaily ? rep : 'mon';
+                f += `
     <div class="fgroup">
       <div class="frow"><label for="fd-date">Comienza el</label><input type="date" id="fd-date" name="date" value="${dateVal}"></div>
       <div class="frow"><label for="fd-time">Hora</label><input type="time" id="fd-time" name="time" value="${it?.time || ''}"></div>
     </div>
-    <div class="frow" style="padding-top:2px"><span style="flex:none;width:100%;padding:0;font-size: var(--fs-md)">Repetir</span></div>
-    ${segHTML('repeat', [
-      { v: 'daily', label: 'Todos los días' },
-      { v: 'weekdays', label: 'Lun a Vie' },
-      { v: 'weekly', label: 'Semanal' },
-      { v: 'weekends', label: 'Fines de sem.' }
-    ], it?.repeat || 'daily')}`;
+    <div class="frow" style="padding-top:2px"><span style="flex:none;width:100%;padding:0;font-size: var(--fs-md);font-weight:600">Repetición</span></div>
+    <div class="routine-freq-wrap" id="routineFreqWrap">
+      <div class="routine-mode-seg" role="group" aria-label="Frecuencia de la rutina">
+        <button type="button" class="r-mode-btn ${isDaily ? 'on' : ''}" data-mode="daily" aria-pressed="${isDaily ? 'true' : 'false'}">
+          <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.2" style="margin-right:6px;vertical-align:-2px"><path d="M17 1l4 4-4 4M3 11V9a4 4 0 0 1 4-4h14M7 23l-4-4 4-4M21 13v2a4 4 0 0 1-4 4H3"/></svg>Todos los días
+        </button>
+        <button type="button" class="r-mode-btn ${!isDaily ? 'on' : ''}" data-mode="specific" aria-pressed="${!isDaily ? 'true' : 'false'}">
+          <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.2" style="margin-right:6px;vertical-align:-2px"><rect x="3" y="4" width="18" height="18" rx="3"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>Día específico
+        </button>
+      </div>
+      <div class="routine-days-container" id="routineDaysContainer" style="display:${isDaily ? 'none' : 'block'}">
+        <div class="routine-days-label">Elegí el día en que se repite:</div>
+        <div class="routine-days-grid" id="routineDaysGrid">
+          ${[
+            { d: 'mon', label: 'L', full: 'Lunes' },
+            { d: 'tue', label: 'M', full: 'Martes' },
+            { d: 'wed', label: 'X', full: 'Miércoles' },
+            { d: 'thu', label: 'J', full: 'Jueves' },
+            { d: 'fri', label: 'V', full: 'Viernes' },
+            { d: 'sat', label: 'S', full: 'Sábado' },
+            { d: 'sun', label: 'D', full: 'Domingo' }
+          ].map(day => `
+            <button type="button" class="r-day-chip ${curDay === day.d ? 'on' : ''}" data-day="${day.d}" aria-pressed="${curDay === day.d ? 'true' : 'false'}" title="${day.full}">
+              <span class="r-day-letter">${day.label}</span>
+              <span class="r-day-sub">${day.full.slice(0, 3)}</span>
+            </button>
+          `).join('')}
+        </div>
+      </div>
+    </div>`;
+            }
             else if (kind === 'task') f += `
     <div class="fgroup">
       <div class="frow"><label for="fd-date">Fecha</label><input type="date" id="fd-date" name="date" value="${dateVal}"></div>
@@ -5221,6 +5550,19 @@
                 (editing ? `<button type="button" class="ghost" data-act="delcurrent"><span>Eliminar ${KIND[kind].label.toLowerCase()}</span></button>` : '');
             if (!editing) setTimeout(() => sheetBody.querySelector('[name=title]')?.focus(), 380);
         }
+        sheetBody.addEventListener('change', e => {
+            if (e.target && e.target.id === 'fd-allday') {
+                const checked = e.target.checked;
+                const timeInp = sheetBody.querySelector('#fd-time');
+                const endInp = sheetBody.querySelector('#fd-end');
+                const rowFrom = sheetBody.querySelector('#row-from');
+                const rowEnd = sheetBody.querySelector('#row-end');
+                if (timeInp) timeInp.disabled = checked;
+                if (endInp) endInp.disabled = checked;
+                if (rowFrom) rowFrom.classList.toggle('is-disabled', checked);
+                if (rowEnd) rowEnd.classList.toggle('is-disabled', checked);
+            }
+        });
         sheetBody.addEventListener('click', e => {
             const tp = e.target.closest('[data-tp]');
             if (tp) {
@@ -5228,6 +5570,32 @@
                 composer.kind = tp.dataset.tp; buildSheet();
                 const inp = sheetBody.querySelector('[name=title]'); if (inp) inp.value = keep;
                 sheetBody.querySelectorAll('.tp').forEach(b => b.setAttribute('aria-pressed', b === tp ? 'true' : 'false'));
+                return;
+            }
+            const rMode = e.target.closest('.r-mode-btn');
+            if (rMode) {
+                const seg = rMode.closest('.routine-mode-seg');
+                if (seg) {
+                    seg.querySelectorAll('.r-mode-btn').forEach(b => {
+                        b.classList.remove('on');
+                        b.setAttribute('aria-pressed', 'false');
+                    });
+                }
+                rMode.classList.add('on');
+                rMode.setAttribute('aria-pressed', 'true');
+                const isDaily = rMode.dataset.mode === 'daily';
+                const cont = sheetBody.querySelector('#routineDaysContainer');
+                if (cont) cont.style.display = isDaily ? 'none' : 'block';
+                return;
+            }
+            const rDay = e.target.closest('.r-day-chip');
+            if (rDay) {
+                sheetBody.querySelectorAll('.r-day-chip').forEach(b => {
+                    b.classList.remove('on');
+                    b.setAttribute('aria-pressed', 'false');
+                });
+                rDay.classList.add('on');
+                rDay.setAttribute('aria-pressed', 'true');
                 return;
             }
             const seg = e.target.closest('.seg button');
@@ -5263,11 +5631,35 @@
             if (kind === 'birthday') { it.date = fd.date.slice(5); it.year = Number(fd.date.slice(0, 4)) || null; }
             else {
                 it.date = fd.date || todayY();
-                it.time = fd.time || '';
-                if (kind === 'event') { it.end = fd.end || ''; it.notes = fd.notes || ''; }
-                else if (kind === 'routine') { it.repeat = segVal('repeat') || 'daily'; it.notes = fd.notes || ''; }
-                else if (kind === 'task') { it.prio = Number(segVal('prio') || 0); it.notes = fd.notes || ''; }
-                else if (kind === 'reminder') { it.notes = fd.notes || ''; }
+                if (kind === 'event') {
+                    const isAllDay = sheetBody.querySelector('#fd-allday')?.checked;
+                    if (isAllDay) {
+                        it.time = '';
+                        it.end = '';
+                    } else {
+                        it.time = fd.time || '';
+                        it.end = fd.end || '';
+                    }
+                    it.location = (fd.location || '').trim();
+                    it.notes = fd.notes || '';
+                }
+                else if (kind === 'routine') {
+                    it.time = fd.time || '';
+                    const rMode = sheetBody.querySelector('.r-mode-btn.on')?.dataset.mode || 'daily';
+                    if (rMode === 'daily') {
+                        it.repeat = 'daily';
+                    } else {
+                        it.repeat = sheetBody.querySelector('.r-day-chip.on')?.dataset.day || 'mon';
+                    }
+                    it.notes = fd.notes || '';
+                }
+                else if (kind === 'task') { it.time = fd.time || ''; it.prio = Number(segVal('prio') || 0); it.notes = fd.notes || ''; }
+                else if (kind === 'reminder') {
+                    it.time = fd.time || '';
+                    it.alarm = fd.alarm !== '' && fd.alarm != null ? Number(fd.alarm) : null;
+                    it.location = (fd.location || '').trim();
+                    it.notes = fd.notes || '';
+                }
             }
             if (kind === 'wish') { it.price = fd.price ? parseFloat(fd.price) : null; it.prio = Number(segVal('prio') || 0); }
             if (kind === 'shopping') { it.listId = sheetBody.querySelector('.chip.on')?.dataset.lid || S.lists[0]?.id; it.qty = fd.qty || ''; }
@@ -5368,7 +5760,7 @@
             const q = norm(rawQ);
             sHint.style.display = q ? 'none' : 'flex';
             if (!q) { sRes.innerHTML = ''; return; }
-            let hits = S.items.filter(i => norm(i.title).includes(q) || norm(i.notes).includes(q));
+            let hits = S.items.filter(i => norm(i.title).includes(q) || norm(i.notes).includes(q) || norm(i.location).includes(q));
             if (searchFilter !== 'all') {
                 hits = hits.filter(i => i.kind === searchFilter);
             }
@@ -5813,6 +6205,7 @@
                     existing.date = existing.kind === 'birthday' ? (existing.date || startDate) : startDate;
                     existing.time = startTime;
                     existing.end = endTime;
+                    existing.location = ev.location || '';
                     existing.notes = ev.description || '';
                 } else {
                     S.items.push({
@@ -5823,6 +6216,7 @@
                         date: startDate,
                         time: startTime,
                         end: endTime,
+                        location: ev.location || '',
                         notes: ev.description || '',
                         done: false, prio: 0, star: false, gcal: true
                     });
@@ -5847,8 +6241,9 @@
                 const [mStr, dStr] = (item.date || '01-01').split('-');
                 const bYear = item.year || curYear;
                 const eventDate = `${curYear}-${mStr.padStart(2, '0')}-${dStr.padStart(2, '0')}`;
+                const name = typeof cleanBirthdayName === 'function' ? cleanBirthdayName(item.title) : item.title;
                 body = {
-                    summary: item.title.toLowerCase().includes('cumple') ? item.title : `🎂 Cumpleaños de ${item.title}`,
+                    summary: `🎂 ${name}`,
                     description: item.year ? `Año de nacimiento: ${item.year}` : (item.notes || 'Cumpleaños guardado en Tempo'),
                     start: { date: eventDate },
                     end: { date: eventDate },
@@ -5862,7 +6257,14 @@
                     weekdays: 'RRULE:FREQ=WEEKLY;BYDAY=MO,TU,WE,TH,FR',
                     weekends: 'RRULE:FREQ=WEEKLY;BYDAY=SA,SU',
                     weekly: 'RRULE:FREQ=WEEKLY',
-                    monthly: 'RRULE:FREQ=MONTHLY'
+                    monthly: 'RRULE:FREQ=MONTHLY',
+                    mon: 'RRULE:FREQ=WEEKLY;BYDAY=MO',
+                    tue: 'RRULE:FREQ=WEEKLY;BYDAY=TU',
+                    wed: 'RRULE:FREQ=WEEKLY;BYDAY=WE',
+                    thu: 'RRULE:FREQ=WEEKLY;BYDAY=TH',
+                    fri: 'RRULE:FREQ=WEEKLY;BYDAY=FR',
+                    sat: 'RRULE:FREQ=WEEKLY;BYDAY=SA',
+                    sun: 'RRULE:FREQ=WEEKLY;BYDAY=SU'
                 };
                 const rrule = freqMap[item.repeat || 'daily'] || 'RRULE:FREQ=DAILY';
                 body = {
@@ -5879,12 +6281,16 @@
                 body = {
                     summary: item.title,
                     description: item.notes || '',
+                    location: item.location || '',
                     start: item.time ? { dateTime: `${item.date}T${item.time}:00`, timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone }
                                      : { date: item.date },
                     end: item.end ? { dateTime: `${item.date}T${item.end}:00`, timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone }
                                   : item.time ? { dateTime: `${item.date}T${item.time}:00`, timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone }
                                   : { date: item.date }
                 };
+                if (item.alarm != null) {
+                    body.reminders = { useDefault: false, overrides: [{ method: 'popup', minutes: Number(item.alarm) }] };
+                }
             }
 
             try {

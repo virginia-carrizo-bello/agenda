@@ -52,12 +52,22 @@ def init_db():
                 listId TEXT,
                 qty TEXT,
                 repeat TEXT,
+                location TEXT,
+                alarm INTEGER,
                 FOREIGN KEY (listId) REFERENCES lists(id) ON DELETE CASCADE
             )
         """)
-        # Migración automática si la tabla items ya existía sin columna repeat
+        # Migración automática si la tabla items ya existía sin columna repeat, location o alarm
         try:
             cursor.execute("ALTER TABLE items ADD COLUMN repeat TEXT")
+        except sqlite3.OperationalError:
+            pass # Ya existe
+        try:
+            cursor.execute("ALTER TABLE items ADD COLUMN location TEXT")
+        except sqlite3.OperationalError:
+            pass # Ya existe
+        try:
+            cursor.execute("ALTER TABLE items ADD COLUMN alarm INTEGER")
         except sqlite3.OperationalError:
             pass # Ya existe
         conn.commit()
@@ -88,13 +98,14 @@ def reseed_db() -> AppState:
         for it in items:
             cursor.execute("""
                 INSERT INTO items (
-                    id, kind, title, done, createdAt, doneAt, date, time, end, prio, notes, year, price, listId, qty, repeat
-                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                    id, kind, title, done, createdAt, doneAt, date, time, end, prio, notes, year, price, listId, qty, repeat, location, alarm
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             """, (
                 it.id, it.kind, it.title, 1 if it.done else 0,
                 it.createdAt or now_ts, it.doneAt,
                 it.date, it.time, it.end, it.prio, it.notes,
-                it.year, it.price, it.listId, it.qty, it.repeat
+                it.year, it.price, it.listId, it.qty, it.repeat,
+                it.location, it.alarm
             ))
         conn.commit()
     return get_state()
@@ -166,8 +177,8 @@ def upsert_item(item: AgendaItem) -> AgendaItem:
         cursor = conn.cursor()
         cursor.execute("""
             INSERT INTO items (
-                id, kind, title, done, createdAt, doneAt, date, time, end, prio, notes, year, price, listId, qty, repeat
-            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                id, kind, title, done, createdAt, doneAt, date, time, end, prio, notes, year, price, listId, qty, repeat, location, alarm
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             ON CONFLICT(id) DO UPDATE SET
                 kind=excluded.kind,
                 title=excluded.title,
@@ -183,12 +194,15 @@ def upsert_item(item: AgendaItem) -> AgendaItem:
                 price=excluded.price,
                 listId=excluded.listId,
                 qty=excluded.qty,
-                repeat=excluded.repeat
+                repeat=excluded.repeat,
+                location=excluded.location,
+                alarm=excluded.alarm
         """, (
             item.id, item.kind, item.title, 1 if item.done else 0,
             item.createdAt or (time.time() * 1000), item.doneAt,
             item.date, item.time, item.end, item.prio, item.notes,
-            item.year, item.price, item.listId, item.qty, item.repeat
+            item.year, item.price, item.listId, item.qty, item.repeat,
+            item.location, item.alarm
         ))
         conn.commit()
     return get_item(item.id)

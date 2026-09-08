@@ -25,6 +25,8 @@ class AgendaItem(BaseModel):
     listId: Optional[str] = None     # ID de la lista para artículos de compra
     qty: Optional[str] = None        # Cantidad para compra (ej: "1 L", "×2")
     repeat: Optional[str] = None     # daily, weekdays, weekly, weekends, monthly
+    location: Optional[str] = None   # Ubicación del evento / actividad
+    alarm: Optional[int] = None      # Minutos antes para alarma/aviso (ej: 0, 5, 10, 15, 30, 60, etc.)
 
 class ItemUpdate(BaseModel):
     kind: Optional[KindType] = None
@@ -41,6 +43,8 @@ class ItemUpdate(BaseModel):
     listId: Optional[str] = None
     qty: Optional[str] = None
     repeat: Optional[str] = None
+    location: Optional[str] = None
+    alarm: Optional[int] = None
 
 class AppState(BaseModel):
     lists: list[ListItem]
