@@ -51,9 +51,15 @@ def init_db():
                 price REAL,
                 listId TEXT,
                 qty TEXT,
+                repeat TEXT,
                 FOREIGN KEY (listId) REFERENCES lists(id) ON DELETE CASCADE
             )
         """)
+        # Migración automática si la tabla items ya existía sin columna repeat
+        try:
+            cursor.execute("ALTER TABLE items ADD COLUMN repeat TEXT")
+        except sqlite3.OperationalError:
+            pass # Ya existe
         conn.commit()
 
         # Si está vacío, poblar con datos semilla
@@ -82,13 +88,13 @@ def reseed_db() -> AppState:
         for it in items:
             cursor.execute("""
                 INSERT INTO items (
-                    id, kind, title, done, createdAt, doneAt, date, time, end, prio, notes, year, price, listId, qty
-                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                    id, kind, title, done, createdAt, doneAt, date, time, end, prio, notes, year, price, listId, qty, repeat
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             """, (
                 it.id, it.kind, it.title, 1 if it.done else 0,
                 it.createdAt or now_ts, it.doneAt,
                 it.date, it.time, it.end, it.prio, it.notes,
-                it.year, it.price, it.listId, it.qty
+                it.year, it.price, it.listId, it.qty, it.repeat
             ))
         conn.commit()
     return get_state()
@@ -160,8 +166,8 @@ def upsert_item(item: AgendaItem) -> AgendaItem:
         cursor = conn.cursor()
         cursor.execute("""
             INSERT INTO items (
-                id, kind, title, done, createdAt, doneAt, date, time, end, prio, notes, year, price, listId, qty
-            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                id, kind, title, done, createdAt, doneAt, date, time, end, prio, notes, year, price, listId, qty, repeat
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             ON CONFLICT(id) DO UPDATE SET
                 kind=excluded.kind,
                 title=excluded.title,
@@ -176,12 +182,13 @@ def upsert_item(item: AgendaItem) -> AgendaItem:
                 year=excluded.year,
                 price=excluded.price,
                 listId=excluded.listId,
-                qty=excluded.qty
+                qty=excluded.qty,
+                repeat=excluded.repeat
         """, (
             item.id, item.kind, item.title, 1 if item.done else 0,
             item.createdAt or (time.time() * 1000), item.doneAt,
             item.date, item.time, item.end, item.prio, item.notes,
-            item.year, item.price, item.listId, item.qty
+            item.year, item.price, item.listId, item.qty, item.repeat
         ))
         conn.commit()
     return get_item(item.id)

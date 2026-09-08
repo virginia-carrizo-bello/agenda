@@ -78,6 +78,8 @@
             --k-wish-soft: #EBD3F2;
             --k-shopping: #436A3E;
             --k-shopping-soft: #D6E5BB;
+            --k-routine: #C2410C;
+            --k-routine-soft: #FFEDD5;
             --k-teal: #2A665F;
             --k-teal-soft: #CBE6DC;
             --k-limon: #7A600E;
@@ -120,6 +122,8 @@
             --k-wish-soft: rgba(223, 192, 240, .15);
             --k-shopping: #B5DCA0;
             --k-shopping-soft: rgba(181, 220, 160, .13);
+            --k-routine: #FB923C;
+            --k-routine-soft: rgba(251, 146, 60, .18);
             --k-teal: #98D9CE;
             --k-teal-soft: rgba(152, 217, 206, .14);
             --k-limon: #F2CE7E;
@@ -158,6 +162,8 @@
                 --k-wish-soft: rgba(223, 192, 240, .15);
                 --k-shopping: #B5DCA0;
                 --k-shopping-soft: rgba(181, 220, 160, .13);
+                --k-routine: #FB923C;
+                --k-routine-soft: rgba(251, 146, 60, .18);
                 --k-teal: #98D9CE;
                 --k-teal-soft: rgba(152, 217, 206, .14);
                 --k-limon: #F2CE7E;
@@ -3057,7 +3063,7 @@
 
         .tps {
             display: grid;
-            grid-template-columns: repeat(3, 1fr);
+            grid-template-columns: repeat(auto-fit, minmax(76px, 1fr));
             gap: 8px;
             margin-bottom: 16px
         }
@@ -3772,6 +3778,7 @@
                     <div class="s-filters" id="sFilters" role="tablist" aria-label="Filtros de búsqueda">
                         <button type="button" class="s-chip on" data-filter="all">Todo</button>
                         <button type="button" class="s-chip" data-filter="event">Eventos</button>
+                        <button type="button" class="s-chip" data-filter="routine">Rutinas</button>
                         <button type="button" class="s-chip" data-filter="task">Tareas</button>
                         <button type="button" class="s-chip" data-filter="reminder">Recordatorios</button>
                         <button type="button" class="s-chip" data-filter="shopping">Compras</button>
@@ -3846,6 +3853,7 @@
             sparkle: '<path d="M12 3l1.9 5.6L19.5 10.5l-5.6 1.9L12 18l-1.9-5.6L4.5 10.5l5.6-1.9L12 3zM19 16.5l.8 2.2 2.2.8-2.2.8-.8 2.2-.8-2.2-2.2-.8 2.2-.8.8-2.2z"/>',
             flag: '<path d="M5.5 21V3.8M5.5 4.2c4.5-2.2 8.5 2.2 13 0v9.3c-4.5 2.2-8.5-2.2-13 0"/>',
             reset: '<path d="M3.5 4.5v5.5h5.5"/><path d="M4.6 14.5a8 8 0 1 0 1.5-7.6L3.5 10"/>',
+            repeat: '<path d="M17 1l4 4-4 4M3 11V9a4 4 0 0 1 4-4h14M7 23l-4-4 4-4M21 13v2a4 4 0 0 1-4 4H3"/>',
             moon: '<path d="M20 14.5A8.5 8.5 0 0 1 9.5 4a8.5 8.5 0 1 0 10.5 10.5z"/>',
             sun: '<circle cx="12" cy="12" r="4"/><path d="M12 2v2.2M12 19.8v2.2M4.93 4.93l1.55 1.55M17.52 17.52l1.55 1.55M2 12h2.2M19.8 12h2.2M4.93 19.07l1.55-1.55M17.52 6.48l1.55-1.55"/>',
             autoTheme: '<circle cx="12" cy="12" r="9"/><path d="M12 3v18"/><path d="M12 3a9 9 0 0 1 0 18" fill="currentColor" fill-opacity="0.35"/>',
@@ -3855,6 +3863,7 @@
         /* ================= Dominio ================= */
         const KIND = {
             event: { label: 'Evento', icon: 'cal' },
+            routine: { label: 'Rutina', icon: 'repeat' },
             reminder: { label: 'Recordatorio', icon: 'bell' },
             task: { label: 'Pendiente', icon: 'check' },
             birthday: { label: 'Cumpleaños', icon: 'gift' },
@@ -3866,6 +3875,7 @@
         const PALETTE = {
             rosa: { name: 'Rosa', c: kcol('birthday'), cs: ksoft('birthday') },
             durazno: { name: 'Durazno', c: kcol('reminder'), cs: ksoft('reminder') },
+            coral: { name: 'Coral', c: kcol('routine'), cs: ksoft('routine') },
             limon: { name: 'Limón', c: kcol('limon'), cs: ksoft('limon') },
             salvia: { name: 'Salvia', c: kcol('shopping'), cs: ksoft('shopping') },
             menta: { name: 'Menta', c: kcol('teal'), cs: ksoft('teal') },
@@ -3873,10 +3883,10 @@
             lavanda: { name: 'Lavanda', c: kcol('task'), cs: ksoft('task') },
             lila: { name: 'Lila', c: kcol('wish'), cs: ksoft('wish') },
         };
-        const PAL_ALIAS = { verde: 'salvia', turquesa: 'menta', azul: 'cielo' }; // compat con datos guardados
+        const PAL_ALIAS = { verde: 'salvia', turquesa: 'menta', azul: 'cielo', naranja: 'coral' }; // compat con datos guardados
         const palOf = n => PALETTE[PAL_ALIAS[n] || n] || PALETTE.salvia;
         const PRIO = ['Baja', 'Media', 'Alta'];
-        const hasCheck = k => ['task', 'reminder', 'shopping', 'wish'].includes(k);
+        const hasCheck = k => ['task', 'reminder', 'shopping', 'wish', 'routine'].includes(k);
 
         /* ================= Fechas ================= */
         const pad = n => String(n).padStart(2, '0');
@@ -4232,6 +4242,24 @@
         function seed() {
             return { items: [], lists: [] };
         }
+        function catalogRecurringEvents() {
+            if (!S || !S.items) return;
+            const titleFreq = {};
+            S.items.forEach(it => { if (it.title) titleFreq[it.title] = (titleFreq[it.title] || 0) + 1; });
+            let changed = false;
+            S.items.forEach(it => {
+                if (it.repeat && it.kind !== 'routine') {
+                    it.kind = 'routine';
+                    changed = true;
+                }
+                if (it.kind === 'event' && (it.recurringEventId || (titleFreq[it.title] > 1 && !it.id.startsWith('b')))) {
+                    it.kind = 'routine';
+                    changed = true;
+                }
+            });
+            if (changed) save();
+        }
+
         async function load() {
             try { const r = localStorage.getItem(KEY); if (r) { S = JSON.parse(r); } } catch (e) { }
             // Si el estado guardado tiene datos de mockup, limpiarlo
@@ -4239,10 +4267,12 @@
                 S = seed(); save();
             }
             if (!S) S = seed();
+            catalogRecurringEvents();
             try {
                 const remote = await api.getState();
                 if (remote && remote.items && remote.lists) {
                     S = remote;
+                    catalogRecurringEvents();
                     save();
                     refreshAll();
                 }
@@ -4256,7 +4286,41 @@
         const byId = id => S.items.find(i => i.id === id);
 
         /* ================= Consultas ================= */
-        const itemsOn = ds => { const mmdd = ds.slice(5); return S.items.filter(it => it.kind === 'birthday' ? it.date === mmdd : it.date === ds) };
+        function isItemDoneOn(it, ds = (UI.selDay || todayY())) {
+            if (it.kind === 'routine' || it.repeat) {
+                return Boolean(it.doneDates && it.doneDates.includes(ds));
+            }
+            return Boolean(it.done);
+        }
+
+        const itemsOn = ds => {
+            const mmdd = ds.slice(5);
+            const dObj = fromYmd(ds);
+            const dayOfWeek = dObj.getDay(); // 0 = Dom, 1 = Lun, ..., 6 = Sáb
+
+            return S.items.filter(it => {
+                if (it.kind === 'birthday') return it.date === mmdd;
+                if (it.kind === 'routine' || it.repeat) {
+                    const start = it.date || '1970-01-01';
+                    if (ds < start) return false;
+                    const rep = it.repeat || 'daily';
+                    if (rep === 'daily') return true;
+                    if (rep === 'weekdays') return dayOfWeek >= 1 && dayOfWeek <= 5;
+                    if (rep === 'weekends') return dayOfWeek === 0 || dayOfWeek === 6;
+                    if (rep === 'weekly') {
+                        const sObj = fromYmd(start);
+                        return dayOfWeek === sObj.getDay();
+                    }
+                    if (rep === 'monthly') {
+                        const startDay = parseInt(start.split('-')[2]);
+                        const curDay = parseInt(ds.split('-')[2]);
+                        return startDay === curDay;
+                    }
+                    return true;
+                }
+                return it.date === ds;
+            });
+        };
         const sortAgenda = (a, b) => {
             const ta = a.time || '99:99', tb = b.time || '99:99';
             return ta !== tb ? (ta < tb ? -1 : 1) : (a.kind === 'birthday' ? 1 : 0) - (b.kind === 'birthday' ? 1 : 0);
@@ -4406,19 +4470,21 @@
 
         /* ================= Filas ================= */
         function rowHTML(it, o = {}) {
+            const curDay = o.ds || UI.selDay || todayY();
+            const isDone = isItemDoneOn(it, curDay);
             let lead;
             if (hasCheck(it.kind)) {
-                lead = `<button type="button" class="chk" data-act="toggle" data-id="${it.id}" aria-pressed="${it.done ? 'true' : 'false'}" aria-label="${it.done ? 'Desmarcar' : 'Completar'}: ${esc(it.title)}"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.2 4.2L19 7.5"/></svg></button>`;
+                lead = `<button type="button" class="chk" data-act="toggle" data-id="${it.id}" aria-pressed="${isDone ? 'true' : 'false'}" aria-label="${isDone ? 'Desmarcar' : 'Completar'}: ${esc(it.title)}"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.2 4.2L19 7.5"/></svg></button>`;
             } else if (it.kind === 'birthday') {
                 lead = `<span class="bav" style="--c:${kcol('birthday')};--cs:${ksoft('birthday')}" aria-hidden="true">${(it.title[0] || '?').toUpperCase()}</span>`;
             } else {
                 lead = `<span class="lead-dot" style="background:${kcol(it.kind)}" aria-hidden="true"></span>`;
             }
-            const flag = (it.kind === 'task' && it.prio > 0 && !it.done) ? `<span style="width:16px;color:var(${it.prio === 2 ? '--red' : '--amber'});flex:none" aria-hidden="true">${ic('flag', 16, 2)}</span>` : '';
+            const flag = (it.kind === 'task' && it.prio > 0 && !isDone) ? `<span style="width:16px;color:var(${it.prio === 2 ? '--red' : '--amber'});flex:none" aria-hidden="true">${ic('flag', 16, 2)}</span>` : '';
             const star = o.star ? `<button type="button" class="starb p${it.prio || 0}" data-act="star" data-id="${it.id}" aria-label="Prioridad: ${PRIO[it.prio || 0]}. Toca para cambiar.">${ic('star', 21, it.prio ? 2.2 : 1.8)}</button>` : '';
             const meta = o.meta || '';
             const chev = o.chev === false ? '' : `<svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg>`;
-            return `<div class="row${it.done ? ' done' : ''}" data-id="${it.id}" data-kind="${it.kind}" style="--kc:${kcol(it.kind)};--kcs:${ksoft(it.kind)}">
+            return `<div class="row${isDone ? ' done' : ''}" data-id="${it.id}" data-kind="${it.kind}" style="--kc:${kcol(it.kind)};--kcs:${ksoft(it.kind)}">
     <div class="under u-l" aria-hidden="true">${ic('trash', 21)}</div>
     <div class="under u-r" aria-hidden="true">${ic('check', 21, 2.4)}</div>
     <div class="fg">${lead}<button type="button" class="tx" data-act="edit" data-id="${it.id}" aria-label="Editar: ${esc(it.title)}"><span class="t1">${esc(it.title)}</span>${o.cap ? `<span class="t2">${o.cap}</span>` : ''}</button>${flag}${meta ? `<span class="meta${o.hot ? ' hot' : ''}">${meta}</span>` : ''}${star}${chev}</div>
@@ -4432,17 +4498,22 @@
         function itemRow(it, o = {}) {
             if (it.kind === 'event') {
                 const meta = o.timeline ? '' : (it.time ? fmtTime(it.time) + (it.end ? ' – ' + fmtTime(it.end) : '') : 'Todo el día');
-                return rowHTML(it, { meta, cap: o.when || (it.notes ? esc(it.notes) : '') });
+                return rowHTML(it, { meta, cap: o.when || (it.notes ? esc(it.notes) : ''), ds: o.ds });
+            }
+            if (it.kind === 'routine') {
+                const repLabel = it.repeat === 'weekdays' ? 'Lun a Vie' : it.repeat === 'weekly' ? 'Semanal' : it.repeat === 'weekends' ? 'Fines de sem.' : 'Todos los días';
+                const meta = (it.time ? fmtTime(it.time) + ' · ' : '') + repLabel;
+                return rowHTML(it, { meta, cap: o.when || (it.notes ? esc(it.notes) : ''), ds: o.ds });
             }
             if (it.kind === 'birthday') {
                 const nb = nextBday(it);
                 const meta = nb.days === 0 ? '¡hoy!' : nb.days === 1 ? 'mañana' : 'en ' + nb.days + ' d';
                 const cp = (nb.turns != null ? `Cumple ${nb.turns} · ` : '') + cap(fShort.format(nb.next));
-                return rowHTML(it, { meta, cap: cp, hot: nb.days <= 1 });
+                return rowHTML(it, { meta, cap: cp, hot: nb.days <= 1, ds: o.ds });
             }
             if (it.kind === 'wish') {
                 const meta = it.price ? new Intl.NumberFormat('es-ES', { style: 'currency', currency: 'EUR', maximumFractionDigits: 2 }).format(it.price) : '';
-                return rowHTML(it, { meta, cap: PRIO[it.prio || 0], star: true, chev: false });
+                return rowHTML(it, { meta, cap: PRIO[it.prio || 0], star: true, chev: false, ds: o.ds });
             }
             let meta = o.timeline ? '' : (it.time ? fmtTime(it.time) : '');
             let cp = o.when || '';
@@ -4450,8 +4521,9 @@
                 cp = o.when || esc(S.lists.find(l => l.id === it.listId)?.name || 'Lista');
                 meta = it.qty ? esc(it.qty) : '';
             } else if (!cp && it.notes) { cp = esc(it.notes); }
-            const hot = !it.done && it.date && it.date < todayY();
-            return rowHTML(it, { meta, cap: cp, hot });
+            const isDone = isItemDoneOn(it, o.ds || UI.selDay || todayY());
+            const hot = !isDone && it.date && it.date < todayY();
+            return rowHTML(it, { meta, cap: cp, hot, ds: o.ds });
         }
 
         function renderCalCellHtml(d, ds, monthName, y) {
@@ -4765,6 +4837,7 @@
       <div class="lists-col">
         <div class="sech">Organización</div>
         <div class="card coll">
+          ${collRow('repeat', kc('routine'), 'Rutinas', S.items.filter(i => i.kind === 'routine').length + ' activas', 'open', 'routine')}
           ${collRow('bell', kc('reminder'), 'Recordatorios', pend('reminder') ? `${pend('reminder')} pendientes` : 'Al día', 'open', 'reminder')}
           ${collRow('check', kc('task'), 'Pendientes', pend('task') ? `${pend('task')} abiertos` : 'Al día', 'open', 'task')}
           ${collRow('gift', kc('birthday'), 'Cumpleaños', S.items.filter(i => i.kind === 'birthday').length + ' guardados', 'open', 'birthday')}
@@ -4821,7 +4894,14 @@
             const st = UI.stack; if (!st) return;
             let html = '', title = '';
             const all = S.items;
-            if (st.kind === 'task' || st.kind === 'reminder') {
+            if (st.kind === 'routine') {
+                title = 'Rutinas';
+                const list = all.filter(i => i.kind === 'routine').sort((a, b) => (a.time || '99:99') < (b.time || '99:99') ? -1 : 1);
+                html = `<div class="dhead"><span class="dt"><b>${list.length}</b> ${list.length === 1 ? 'rutina activa' : 'rutinas activas'}</span></div>
+        ${list.length ? `<div class="card">${list.map(i => itemRow(i)).join('')}</div>` : emptyHTML('repeat', 'Sin rutinas creadas', 'Crea tareas o eventos que se repitan periódicamente para mantener tus hábitos al día.')}
+        <p class="capfield" style="margin-top:12px">Las rutinas se repiten automáticamente en los días indicados y aparecen con color coral en el calendario.</p>`;
+            }
+            else if (st.kind === 'task' || st.kind === 'reminder') {
                 const k = st.kind; title = KIND[k].label;
                 const open = all.filter(i => i.kind === k && !i.done), done = all.filter(i => i.kind === k && i.done);
                 const groups = {};
@@ -4937,7 +5017,13 @@
                 }).join('');
                 const bdayCount = S.items.filter(i => i.kind === 'birthday').length;
                 const wishCount = S.items.filter(i => i.kind === 'wish' && !i.done).length;
+                const routineCount = S.items.filter(i => i.kind === 'routine').length;
                 const specialLists = `
+                    <button type="button" class="pc-sub-item" data-act="open" data-kind="routine">
+                        <span class="pc-sub-dot" style="background:${kcol('routine')}"></span>
+                        <span style="flex:1">Rutinas</span>
+                        ${routineCount ? `<span class="pc-sub-count">${routineCount}</span>` : ''}
+                    </button>
                     <button type="button" class="pc-sub-item" data-act="open" data-kind="birthday">
                         <span class="pc-sub-dot" style="background:${kcol('birthday')}"></span>
                         <span style="flex:1">Cumpleaños</span>
@@ -4956,12 +5042,26 @@
         /* ================= Acciones ================= */
         function toggleDone(rowEl) {
             const it = byId(rowEl.dataset.id); if (!it) return;
-            it.done = !it.done; if (it.done) it.doneAt = Date.now(); else delete it.doneAt;
+            const curDay = UI.selDay || todayY();
+            if (it.kind === 'routine' || it.repeat) {
+                it.doneDates = it.doneDates || [];
+                const idx = it.doneDates.indexOf(curDay);
+                if (idx >= 0) {
+                    it.doneDates.splice(idx, 1);
+                } else {
+                    it.doneDates.push(curDay);
+                }
+                it.done = it.doneDates.includes(todayY());
+            } else {
+                it.done = !it.done;
+                if (it.done) it.doneAt = Date.now(); else delete it.doneAt;
+            }
             save();
             api.toggleItem(it.id).catch(e => console.warn('Sync toggle fallo:', e));
-            rowEl.classList.toggle('done', it.done);
+            const isDoneNow = isItemDoneOn(it, curDay);
+            rowEl.classList.toggle('done', isDoneNow);
             const chk = rowEl.querySelector('.chk');
-            if (chk) chk.setAttribute('aria-pressed', it.done ? 'true' : 'false');
+            if (chk) chk.setAttribute('aria-pressed', isDoneNow ? 'true' : 'false');
             rowEl.classList.add('popping'); setTimeout(() => rowEl.classList.remove('popping'), 380);
             clearTimeout(toggleDone._t); toggleDone._t = setTimeout(refreshAll, 430);
         }
@@ -5066,6 +5166,18 @@
       <div class="frow"><label for="fd-date">Fecha</label><input type="date" id="fd-date" name="date" value="${dateVal}"></div>
       <div class="frow"><label for="fd-time">Hora</label><input type="time" id="fd-time" name="time" value="${it?.time || ''}"></div>
     </div>`;
+            else if (kind === 'routine') f += `
+    <div class="fgroup">
+      <div class="frow"><label for="fd-date">Comienza el</label><input type="date" id="fd-date" name="date" value="${dateVal}"></div>
+      <div class="frow"><label for="fd-time">Hora</label><input type="time" id="fd-time" name="time" value="${it?.time || ''}"></div>
+    </div>
+    <div class="frow" style="padding-top:2px"><span style="flex:none;width:100%;padding:0;font-size: var(--fs-md)">Repetir</span></div>
+    ${segHTML('repeat', [
+      { v: 'daily', label: 'Todos los días' },
+      { v: 'weekdays', label: 'Lun a Vie' },
+      { v: 'weekly', label: 'Semanal' },
+      { v: 'weekends', label: 'Fines de sem.' }
+    ], it?.repeat || 'daily')}`;
             else if (kind === 'task') f += `
     <div class="fgroup">
       <div class="frow"><label for="fd-date">Fecha</label><input type="date" id="fd-date" name="date" value="${dateVal}"></div>
@@ -5105,7 +5217,7 @@
             shTitle.textContent = editing ? `Editar ${KIND[kind].label.toLowerCase()}` : (pick ? 'Nuevo' : `Nuevo ${KIND[kind].label.toLowerCase()}`);
             shDone.textContent = editing ? 'Guardar' : 'Añadir';
             sheetBody.innerHTML = (pick ? typePicker(kind) : '') +
-                `<div class="fgroup" style="margin-top:${pick ? '12px' : '0'}"><input class="biginp" id="fd-title" name="title" aria-label="Título" placeholder="${kind === 'birthday' ? 'Nombre de la persona' : kind === 'wish' ? '¿Qué deseas?' : kind === 'shopping' ? '¿Qué hay que comprar?' : 'Título'}" value="${editing ? esc(editing.title) : ''}" autocomplete="off"></div>` +
+                `<div class="fgroup" style="margin-top:${pick ? '12px' : '0'}"><input class="biginp" id="fd-title" name="title" aria-label="Título" placeholder="${kind === 'birthday' ? 'Nombre de la persona' : kind === 'wish' ? '¿Qué deseas?' : kind === 'shopping' ? '¿Qué hay que comprar?' : kind === 'routine' ? 'Nombre de la rutina' : 'Título'}" value="${editing ? esc(editing.title) : ''}" autocomplete="off"></div>` +
                 fieldsHTML(kind, editing, ctx) +
                 (editing ? `<button type="button" class="ghost" data-act="delcurrent"><span>Eliminar ${KIND[kind].label.toLowerCase()}</span></button>` : '');
             if (!editing) setTimeout(() => sheetBody.querySelector('[name=title]')?.focus(), 380);
@@ -5154,6 +5266,7 @@
                 it.date = fd.date || todayY();
                 it.time = fd.time || '';
                 if (kind === 'event') { it.end = fd.end || ''; it.notes = fd.notes || ''; }
+                else if (kind === 'routine') { it.repeat = segVal('repeat') || 'daily'; it.notes = fd.notes || ''; }
                 else if (kind === 'task') { it.prio = Number(segVal('prio') || 0); it.notes = fd.notes || ''; }
                 else if (kind === 'reminder') { it.notes = fd.notes || ''; }
             }
@@ -5173,6 +5286,7 @@
                 const k = UI.stack.kind;
                 if (k === 'shopping') return openComposer('shopping', null, { listId: UI.stack.id, fixedKind: true });
                 if (k === 'birthday') return openComposer('birthday', null, { fixedKind: true });
+                if (k === 'routine') return openComposer('routine', null, { date, fixedKind: true });
                 return openComposer(k, null, { date, fixedKind: true });
             }
             openComposer(UI.tab === 'calendar' ? 'event' : 'task', null, { date });
@@ -5687,6 +5801,7 @@
             let added = 0;
             for (const ev of allEvents) {
                 if (ev.status === 'cancelled') continue;
+                const isRecurring = Boolean(ev.recurringEventId || ev.recurrence);
                 const existing = S.items.find(i => i.gcalId === ev.id);
                 const startDate = ev.start?.date || ev.start?.dateTime?.slice(0, 10);
                 const startTime = ev.start?.dateTime ? ev.start.dateTime.slice(11, 16) : '';
@@ -5697,11 +5812,16 @@
                     existing.time = startTime;
                     existing.end = endTime;
                     existing.notes = ev.description || '';
+                    if (isRecurring) {
+                        existing.kind = 'routine';
+                        existing.recurringEventId = ev.recurringEventId;
+                    }
                 } else {
                     S.items.push({
                         id: 'gc_' + ev.id,
                         gcalId: ev.id,
-                        kind: 'event',
+                        recurringEventId: ev.recurringEventId || null,
+                        kind: isRecurring ? 'routine' : 'event',
                         title: ev.summary || '(sin título)',
                         date: startDate,
                         time: startTime,
@@ -5712,6 +5832,16 @@
                     added++;
                 }
             }
+
+            // Catalogar eventos con mismo título repetido en múltiples fechas como rutinas
+            const titleFreq = {};
+            S.items.forEach(it => { if (it.title) titleFreq[it.title] = (titleFreq[it.title] || 0) + 1; });
+            S.items.forEach(it => {
+                if (it.kind === 'event' && (it.recurringEventId || titleFreq[it.title] > 1)) {
+                    it.kind = 'routine';
+                }
+            });
+
             console.log(`GCal: ${added} eventos nuevos importados`);
             window._save();
             return added;
@@ -5719,7 +5849,7 @@
 
         // --- Sync: App → Google (push single event) ---
         window.gcalPushItem = async function(item) {
-            if (!gcalToken || item.kind !== 'event' || item.gcalId) return;
+            if (!gcalToken || (item.kind !== 'event' && item.kind !== 'routine') || item.gcalId) return;
             const body = {
                 summary: item.title,
                 description: item.notes || '',

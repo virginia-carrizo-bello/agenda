@@ -1,7 +1,7 @@
 from typing import Optional, Literal
 from pydantic import BaseModel, Field
 
-KindType = Literal['event', 'reminder', 'task', 'birthday', 'wish', 'shopping']
+KindType = Literal['event', 'reminder', 'task', 'birthday', 'wish', 'shopping', 'routine']
 
 class ListItem(BaseModel):
     id: str
@@ -24,6 +24,7 @@ class AgendaItem(BaseModel):
     price: Optional[float] = None    # Precio para lista de deseos
     listId: Optional[str] = None     # ID de la lista para artículos de compra
     qty: Optional[str] = None        # Cantidad para compra (ej: "1 L", "×2")
+    repeat: Optional[str] = None     # daily, weekdays, weekly, weekends, monthly
 
 class ItemUpdate(BaseModel):
     kind: Optional[KindType] = None
@@ -39,6 +40,7 @@ class ItemUpdate(BaseModel):
     price: Optional[float] = None
     listId: Optional[str] = None
     qty: Optional[str] = None
+    repeat: Optional[str] = None
 
 class AppState(BaseModel):
     lists: list[ListItem]
