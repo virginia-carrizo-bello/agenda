@@ -4242,18 +4242,16 @@
         function seed() {
             return { items: [], lists: [] };
         }
-        function catalogRecurringEvents() {
+        function sanitizeItems() {
             if (!S || !S.items) return;
-            const titleFreq = {};
-            S.items.forEach(it => { if (it.title) titleFreq[it.title] = (titleFreq[it.title] || 0) + 1; });
             let changed = false;
             S.items.forEach(it => {
-                if (it.repeat && it.kind !== 'routine') {
-                    it.kind = 'routine';
-                    changed = true;
-                }
-                if (it.kind === 'event' && (it.recurringEventId || (titleFreq[it.title] > 1 && !it.id.startsWith('b')))) {
-                    it.kind = 'routine';
+                if (it.gcalId || it.gcal) {
+                    if (it.kind !== 'event') { it.kind = 'event'; changed = true; }
+                    if (it.repeat) { delete it.repeat; changed = true; }
+                    if (it.recurringEventId) { delete it.recurringEventId; changed = true; }
+                } else if (it.kind === 'routine' && !it.repeat) {
+                    it.kind = 'event';
                     changed = true;
                 }
             });
@@ -4267,12 +4265,12 @@
                 S = seed(); save();
             }
             if (!S) S = seed();
-            catalogRecurringEvents();
+            sanitizeItems();
             try {
                 const remote = await api.getState();
                 if (remote && remote.items && remote.lists) {
                     S = remote;
-                    catalogRecurringEvents();
+                    sanitizeItems();
                     save();
                     refreshAll();
                 }
@@ -4287,7 +4285,7 @@
 
         /* ================= Consultas ================= */
         function isItemDoneOn(it, ds = (UI.selDay || todayY())) {
-            if (it.kind === 'routine' || it.repeat) {
+            if (it.kind === 'routine' && it.repeat) {
                 return Boolean(it.doneDates && it.doneDates.includes(ds));
             }
             return Boolean(it.done);
@@ -4300,24 +4298,25 @@
 
             return S.items.filter(it => {
                 if (it.kind === 'birthday') return it.date === mmdd;
-                if (it.kind === 'routine' || it.repeat) {
+                // Únicamente si es una rutina explícita con repetición configurada
+                if (it.kind === 'routine' && it.repeat) {
                     const start = it.date || '1970-01-01';
                     if (ds < start) return false;
-                    const rep = it.repeat || 'daily';
-                    if (rep === 'daily') return true;
-                    if (rep === 'weekdays') return dayOfWeek >= 1 && dayOfWeek <= 5;
-                    if (rep === 'weekends') return dayOfWeek === 0 || dayOfWeek === 6;
-                    if (rep === 'weekly') {
+                    if (it.repeat === 'daily') return true;
+                    if (it.repeat === 'weekdays') return dayOfWeek >= 1 && dayOfWeek <= 5;
+                    if (it.repeat === 'weekends') return dayOfWeek === 0 || dayOfWeek === 6;
+                    if (it.repeat === 'weekly') {
                         const sObj = fromYmd(start);
                         return dayOfWeek === sObj.getDay();
                     }
-                    if (rep === 'monthly') {
+                    if (it.repeat === 'monthly') {
                         const startDay = parseInt(start.split('-')[2]);
                         const curDay = parseInt(ds.split('-')[2]);
                         return startDay === curDay;
                     }
-                    return true;
+                    return it.date === ds;
                 }
+                // Todo evento normal o ítem sin repetición SOLO aparece en su fecha fija
                 return it.date === ds;
             });
         };
@@ -5801,27 +5800,22 @@
             let added = 0;
             for (const ev of allEvents) {
                 if (ev.status === 'cancelled') continue;
-                const isRecurring = Boolean(ev.recurringEventId || ev.recurrence);
                 const existing = S.items.find(i => i.gcalId === ev.id);
                 const startDate = ev.start?.date || ev.start?.dateTime?.slice(0, 10);
                 const startTime = ev.start?.dateTime ? ev.start.dateTime.slice(11, 16) : '';
                 const endTime = ev.end?.dateTime ? ev.end.dateTime.slice(11, 16) : '';
                 if (existing) {
+                    existing.kind = 'event';
                     existing.title = ev.summary || '(sin título)';
                     existing.date = startDate;
                     existing.time = startTime;
                     existing.end = endTime;
                     existing.notes = ev.description || '';
-                    if (isRecurring) {
-                        existing.kind = 'routine';
-                        existing.recurringEventId = ev.recurringEventId;
-                    }
                 } else {
                     S.items.push({
                         id: 'gc_' + ev.id,
                         gcalId: ev.id,
-                        recurringEventId: ev.recurringEventId || null,
-                        kind: isRecurring ? 'routine' : 'event',
+                        kind: 'event',
                         title: ev.summary || '(sin título)',
                         date: startDate,
                         time: startTime,
@@ -5832,15 +5826,6 @@
                     added++;
                 }
             }
-
-            // Catalogar eventos con mismo título repetido en múltiples fechas como rutinas
-            const titleFreq = {};
-            S.items.forEach(it => { if (it.title) titleFreq[it.title] = (titleFreq[it.title] || 0) + 1; });
-            S.items.forEach(it => {
-                if (it.kind === 'event' && (it.recurringEventId || titleFreq[it.title] > 1)) {
-                    it.kind = 'routine';
-                }
-            });
 
             console.log(`GCal: ${added} eventos nuevos importados`);
             window._save();
