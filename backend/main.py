@@ -16,6 +16,9 @@ from .database import (
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 FRONT_PATH = os.path.join(BASE_DIR, "front.html")
+DIST_DIR = os.path.join(BASE_DIR, "frontend", "dist")
+DIST_INDEX = os.path.join(DIST_DIR, "index.html")
+DIST_ASSETS = os.path.join(DIST_DIR, "assets")
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -38,6 +41,10 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+# Montar carpeta de assets generada por Vite si existe
+if os.path.exists(DIST_ASSETS):
+    app.mount("/assets", StaticFiles(directory=DIST_ASSETS), name="assets")
 
 # ================= Rutas de API =================
 
@@ -116,15 +123,23 @@ def clean_list(list_id: str):
     removed = clean_list_done(list_id)
     return removed
 
+MANIFEST_PATH = os.path.join(BASE_DIR, "manifest.json")
+
 # ================= Servir Frontend =================
+@app.get("/manifest.json", include_in_schema=False)
+def serve_manifest():
+    if os.path.exists(MANIFEST_PATH):
+        return FileResponse(MANIFEST_PATH, media_type="application/json")
+    raise HTTPException(status_code=404, detail="manifest.json no encontrado")
+
 @app.get("/", include_in_schema=False)
+@app.get("/front.html", include_in_schema=False)
+@app.get("/legacy", include_in_schema=False)
 def serve_root():
     if os.path.exists(FRONT_PATH):
         return FileResponse(FRONT_PATH, media_type="text/html")
+    if os.path.exists(DIST_INDEX):
+        return FileResponse(DIST_INDEX, media_type="text/html")
     return {"message": "Tempo backend activo. Documentación disponible en /docs"}
 
-@app.get("/front.html", include_in_schema=False)
-def serve_front():
-    if os.path.exists(FRONT_PATH):
-        return FileResponse(FRONT_PATH, media_type="text/html")
-    raise HTTPException(status_code=404, detail="front.html no encontrado")
+

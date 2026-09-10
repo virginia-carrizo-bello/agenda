@@ -1,0 +1,103 @@
+/* ============ TEMA CLARO — Paleta pastel "Madeby Haley" ============ */
+:root {
+  color-scheme: light;
+  --bg: #FAF5EF;
+  --card: #FFFFFF;
+  --card-hover: #F6EFE6;
+  --bg3: rgba(112, 96, 116, 0.08);
+  --bg3d: rgba(112, 96, 116, 0.15);
+  --label: #3A3140;
+  --label2: rgba(74, 60, 86, 0.74);
+  --label3: rgba(74, 60, 86, 0.50);
+  --sep: rgba(112, 96, 116, 0.12);
+  --accent: #8B5FA8;
+  --tint: rgba(139, 95, 168, 0.10);
+  --on-accent: #FFFFFF;
+  --red: #B04A35;
+  --green: #3E7A4E;
+  --amber: #93630A;
+  --u-del: #C96A55;
+  --u-done: #57855F;
+  --chk-border: #A99CAB;
+
+  /* Colores por Categoría / Tipo de Ítem */
+  --k-event: #376389;
+  --k-event-soft: #C7DDF2;
+  --k-reminder: #8F521B;
+  --k-reminder-soft: #FAD8BC;
+  --k-task: #4A55A2;
+  --k-task-soft: #CDD3F7;
+  --k-birthday: #933A5D;
+  --k-birthday-soft: #F8CBDC;
+  --k-wish: #744795;
+  --k-wish-soft: #EBD3F2;
+  --k-shopping: #436A3E;
+  --k-shopping-soft: #D6E5BB;
+  --k-routine: #C2410C;
+  --k-routine-soft: #FFEDD5;
+  --k-teal: #2A665F;
+  --k-teal-soft: #CBE6DC;
+  --k-limon: #7A600E;
+  --k-limon-soft: #F8EFC0;
+
+  --sat: env(safe-area-inset-top, 0px);
+  --sab: env(safe-area-inset-bottom, 0px);
+  --spring: cubic-bezier(0.34, 1.35, 0.45, 1);
+  --ease: cubic-bezier(0.25, 0.8, 0.3, 1);
+
+  --font-body: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+  --font-display: 'Outfit', system-ui, -apple-system, sans-serif;
+  --shadow-sm: 0 2px 8px rgba(74, 60, 86, 0.05);
+  --shadow-md: 0 8px 24px rgba(74, 60, 86, 0.08);
+  --shadow-lg: 0 16px 40px rgba(74, 60, 86, 0.12);
+  --radius-sm: 8px;
+  --radius-md: 14px;
+  --radius-lg: 20px;
+  --radius-full: 9999px;
+}
+
+/* ============ TEMA OSCURO — pastel sobre fondo ciruela ============ */
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --bg: #16121D;
+  --card: #221D2B;
+  --card-hover: #2B2536;
+  --bg3: rgba(233, 224, 244, 0.08);
+  --bg3d: rgba(233, 224, 244, 0.15);
+  --label: #F2EDF8;
+  --label2: rgba(238, 231, 247, 0.72);
+  --label3: rgba(238, 231, 247, 0.42);
+  --sep: rgba(233, 224, 244, 0.12);
+  --accent: #CDB6F2;
+  --tint: rgba(205, 182, 242, 0.14);
+  --on-accent: #241A38;
+  --red: #FF9E8F;
+  --green: #8FD9A8;
+  --amber: #F2C879;
+  --u-del: #A34A41;
+  --u-done: #3E6E52;
+  --chk-border: #867C92;
+
+  --k-event: #A9CFF0;
+  --k-event-soft: rgba(169, 207, 240, 0.16);
+  --k-reminder: #F6C592;
+  --k-reminder-soft: rgba(246, 197, 146, 0.14);
+  --k-task: #BFC9F5;
+  --k-task-soft: rgba(191, 201, 245, 0.15);
+  --k-birthday: #F5BED2;
+  --k-birthday-soft: rgba(245, 190, 210, 0.15);
+  --k-wish: #DFC0F0;
+  --k-wish-soft: rgba(223, 192, 240, 0.15);
+  --k-shopping: #B5DCA0;
+  --k-shopping-soft: rgba(181, 220, 160, 0.13);
+  --k-routine: #FB923C;
+  --k-routine-soft: rgba(251, 146, 60, 0.18);
+  --k-teal: #98D9CE;
+  --k-teal-soft: rgba(152, 217, 206, 0.14);
+  --k-limon: #F2CE7E;
+  --k-limon-soft: rgba(242, 206, 126, 0.14);
+
+  --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.25);
+  --shadow-md: 0 8px 24px rgba(0, 0, 0, 0.35);
+  --shadow-lg: 0 16px 40px rgba(0, 0, 0, 0.50);
+}

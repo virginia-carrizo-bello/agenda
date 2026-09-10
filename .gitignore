@@ -49,4 +49,6 @@ desktop.ini
 .ruff_cache/
 build/
 dist/
+node_modules/
 *.egg-info/
+
