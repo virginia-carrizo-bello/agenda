@@ -75,6 +75,31 @@ export const ItemRow: React.FC<ItemRowProps> = ({ item, onToggleDone, onEdit, on
       )
     }
 
+    if (isBirthday) {
+      const curYear = new Date().getFullYear()
+      const bYear = item.year || (item.date && item.date.length === 10 ? parseInt(item.date.slice(0, 4), 10) : null)
+      const age = bYear ? curYear - bYear : null
+      if (age !== null && age > 0) {
+        parts.push(
+          <span
+            key="age"
+            style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              background: 'var(--k-birthday-soft)',
+              color: 'var(--k-birthday)',
+              padding: '2px 8px',
+              borderRadius: 'var(--radius-sm)',
+              fontSize: '12px',
+              fontWeight: 600,
+            }}
+          >
+            Cumple {age} años
+          </span>
+        )
+      }
+    }
+
     if (item.alarm !== undefined && item.alarm !== null) {
       parts.push(
         <span

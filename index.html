@@ -4770,11 +4770,26 @@
                 const hot = !isDone && it.date && it.date < todayY();
                 return rowHTML(it, { meta, cap: cp, hot, ds: o.ds });
             }
-            if (it.kind === 'birthday') {
+            if (it.kind === 'birthday' || /cumpleaños|cumple/i.test(it.title)) {
+                const curDay = o.ds || UI.selDay || todayY();
+                const curYear = parseInt(curDay.slice(0, 4), 10) || new Date().getFullYear();
+                const bYear = it.year || (it.date && it.date.length === 10 ? parseInt(it.date.slice(0, 4), 10) : null);
+                const age = bYear ? (curYear - bYear) : null;
                 const nb = nextBday(it);
-                const meta = nb.days === 0 ? '¡hoy!' : nb.days === 1 ? 'mañana' : 'en ' + nb.days + ' d';
-                const cp = (nb.turns != null ? `Cumple ${nb.turns} · ` : '') + cap(fShort.format(nb.next));
-                return rowHTML(it, { meta, cap: cp, hot: nb.days <= 1, ds: o.ds });
+                const isExactDay = o.ds ? (it.date && (it.date.endsWith(o.ds.slice(5)) || it.date === o.ds)) : (nb.days === 0);
+                const meta = isExactDay ? '¡hoy!' : (nb.days === 1 ? 'mañana' : (nb.days < 365 ? 'en ' + nb.days + ' d' : ''));
+                
+                const turns = (age != null && age > 0) ? age : nb.turns;
+                let cp = '';
+                if (turns != null && turns > 0) {
+                    cp = `Cumple ${turns} años` + (nb.next ? ` · ${cap(fShort.format(nb.next))}` : '');
+                } else if (nb.next) {
+                    cp = cap(fShort.format(nb.next));
+                }
+                if (it.notes) {
+                    cp = cp ? `${cp} · ${esc(it.notes)}` : esc(it.notes);
+                }
+                return rowHTML(it, { meta, cap: cp, hot: isExactDay || nb.days <= 1, ds: o.ds });
             }
             if (it.kind === 'wish') {
                 const meta = it.price ? new Intl.NumberFormat('es-ES', { style: 'currency', currency: 'EUR', maximumFractionDigits: 2 }).format(it.price) : '';
@@ -4815,7 +4830,10 @@
                 let titleText = i.title;
                 if (isBday) {
                     const name = cleanBirthdayName(titleText);
-                    titleText = `🎂 ${name}`;
+                    const bYear = i.year || (i.date && i.date.length === 10 ? parseInt(i.date.slice(0, 4), 10) : null);
+                    const targetY = parseInt(ds.slice(0, 4), 10) || new Date().getFullYear();
+                    const age = bYear ? targetY - bYear : null;
+                    titleText = age != null && age > 0 ? `🎂 ${name} (${age} años)` : `🎂 ${name}`;
                 }
                 chipsList.push(`<div class="cal-ev-chip" style="background:${cs};color:${c}" title="${esc(titleText)}${i.time ? ' ' + i.time : ''}">
                     <span class="ev-title">${esc(titleText)}</span>
@@ -4912,7 +4930,7 @@
                     </div>
                 </div>`;
             }
-            const agenda = list.length ? `${holBanner}<div class="card">${list.map(i => itemRow(i)).join('')}</div>`
+            const agenda = list.length ? `${holBanner}<div class="card">${list.map(i => itemRow(i, { ds })).join('')}</div>`
                 : `${holBanner}${emptyHTML('sparkle', 'Sin tareas ni eventos creados', 'Nada adicional previsto para esta fecha.', 'Añadir', 'event')}`;
 
             // --- Pendientes destacados ---
@@ -5051,7 +5069,7 @@
                     </div>
                 </div>`;
             }
-            const agenda = list.length ? `${holBanner}<div class="card">${list.map(i => itemRow(i)).join('')}</div>`
+            const agenda = list.length ? `${holBanner}<div class="card">${list.map(i => itemRow(i, { ds })).join('')}</div>`
                 : `${holBanner}${emptyHTML('sparkle', 'Sin tareas ni eventos creados', 'Nada adicional previsto para esta fecha.', 'Añadir a este día', 'event')}`;
 
             C.calendar.innerHTML = `

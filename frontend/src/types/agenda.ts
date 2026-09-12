@@ -10,15 +10,22 @@ export interface AgendaItem {
   time_end?: string | null      // HH:MM (Hasta)
   all_day?: boolean | number    // 0/1 or boolean
   rrule?: string | null         // e.g. FREQ=DAILY or FREQ=WEEKLY;BYDAY=TU
+  repeat?: string | null        // daily or specific day
   alarm?: number | null         // minutes before event: 0, 5, 10, 15, 30, 60, 120, 1440
   location?: string | null      // Place or link
   list_id?: string | null       // Parent list ID
+  listId?: string | null
+  year?: number | null          // Birth year for birthdays
+  prio?: number | null
+  price?: number | null
+  qty?: string | null
   color?: string | null
   icon?: string | null
   done?: boolean | number
   done_dates?: string | null    // Comma-separated YYYY-MM-DD for routines
   order_index?: number
   created_at?: string | null
+  createdAt?: number | null
   updated_at?: string | null
   gcal_id?: string | null
   gcal_etag?: string | null
