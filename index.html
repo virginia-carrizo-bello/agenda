@@ -5423,8 +5423,8 @@
 
         function fieldsHTML(kind, it, ctx) {
             const dateVal = kind === 'birthday'
-                ? (it ? `${it.year || 2000}-${it.date}` : '')
-                : (it ? it.date : (ctx.date || todayY()));
+                ? (it ? (it.date ? (it.date.length === 5 ? `${it.year || new Date().getFullYear()}-${it.date}` : it.date) : (ctx.date || todayY())) : '')
+                : (it ? (it.date ? (it.date.length === 5 ? `${new Date().getFullYear()}-${it.date}` : it.date) : (ctx.date || todayY())) : (ctx.date || todayY()));
             let f = '';
             if (kind === 'event') {
                 const isAllDay = it ? (!it.time && !it.end) : false;
@@ -5537,7 +5537,7 @@
         }
         function openComposer(kind, editing, ctx = {}) {
             lastFocus = document.activeElement;
-            composer = { kind, editing: editing || null, pick: !editing && !ctx.fixedKind, ctx };
+            composer = { kind, editing: editing || null, pick: !ctx.fixedKind, ctx };
             buildSheet(); SW.classList.add('open');
         }
         function buildSheet() {
@@ -5566,9 +5566,32 @@
         sheetBody.addEventListener('click', e => {
             const tp = e.target.closest('[data-tp]');
             if (tp) {
-                const keep = sheetBody.querySelector('[name=title]')?.value || '';
-                composer.kind = tp.dataset.tp; buildSheet();
-                const inp = sheetBody.querySelector('[name=title]'); if (inp) inp.value = keep;
+                const keepTitle = sheetBody.querySelector('[name=title]')?.value ?? (composer.editing?.title || '');
+                const keepDate = sheetBody.querySelector('[name=date]')?.value;
+                const keepTime = sheetBody.querySelector('[name=time]')?.value;
+                const keepEnd = sheetBody.querySelector('[name=end]')?.value;
+                const keepLocation = sheetBody.querySelector('[name=location]')?.value;
+                const keepNotes = sheetBody.querySelector('[name=notes]')?.value;
+                const keepAlarm = sheetBody.querySelector('[name=alarm]')?.value;
+                const keepPrice = sheetBody.querySelector('[name=price]')?.value;
+                const keepQty = sheetBody.querySelector('[name=qty]')?.value;
+
+                if (composer.editing) {
+                    composer.editing.title = keepTitle;
+                    if (keepDate) composer.editing.date = keepDate;
+                    if (keepTime !== undefined && keepTime !== '') composer.editing.time = keepTime;
+                    if (keepEnd !== undefined && keepEnd !== '') composer.editing.end = keepEnd;
+                    if (keepLocation !== undefined) composer.editing.location = keepLocation;
+                    if (keepNotes !== undefined) composer.editing.notes = keepNotes;
+                    if (keepAlarm !== undefined && keepAlarm !== '') composer.editing.alarm = Number(keepAlarm);
+                    if (keepPrice !== undefined && keepPrice !== '') composer.editing.price = parseFloat(keepPrice);
+                    if (keepQty !== undefined) composer.editing.qty = keepQty;
+                    composer.editing.kind = tp.dataset.tp;
+                }
+                composer.kind = tp.dataset.tp;
+                buildSheet();
+                const inp = sheetBody.querySelector('[name=title]');
+                if (inp && keepTitle) inp.value = keepTitle;
                 sheetBody.querySelectorAll('.tp').forEach(b => b.setAttribute('aria-pressed', b === tp ? 'true' : 'false'));
                 return;
             }

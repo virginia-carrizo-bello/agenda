@@ -153,45 +153,43 @@ export const ComposerModal: React.FC<ComposerModalProps> = ({
       saveLabel={itemToEdit ? 'Guardar' : 'Añadir'}
     >
       {/* Selector de Tipo (Pestañas) */}
-      {!itemToEdit && (
-        <div
-          style={{
-            display: 'flex',
-            background: 'var(--bg3)',
-            borderRadius: 'var(--radius-md)',
-            padding: '4px',
-            gap: '4px',
-            overflowX: 'auto',
-          }}
-        >
-          {[
-            { key: 'event', label: 'Evento', icon: '📅' },
-            { key: 'routine', label: 'Rutina', icon: '🔁' },
-            { key: 'reminder', label: 'Recordatorio', icon: '🔔' },
-            { key: 'birthday', label: 'Cumple', icon: '🎂' },
-            { key: 'task', label: 'Tarea', icon: '✅' },
-          ].map(t => (
-            <button
-              key={t.key}
-              type="button"
-              onClick={() => setKind(t.key as ItemKind)}
-              style={{
-                flex: 1,
-                padding: '8px 6px',
-                borderRadius: 'var(--radius-sm)',
-                fontSize: '13px',
-                fontWeight: kind === t.key ? 700 : 500,
-                background: kind === t.key ? 'var(--card)' : 'transparent',
-                color: kind === t.key ? 'var(--accent)' : 'var(--label2)',
-                boxShadow: kind === t.key ? 'var(--shadow-sm)' : 'none',
-                whiteSpace: 'nowrap',
-              }}
-            >
-              {t.icon} {t.label}
-            </button>
-          ))}
-        </div>
-      )}
+      <div
+        style={{
+          display: 'flex',
+          background: 'var(--bg3)',
+          borderRadius: 'var(--radius-md)',
+          padding: '4px',
+          gap: '4px',
+          overflowX: 'auto',
+        }}
+      >
+        {[
+          { key: 'event', label: 'Evento', icon: '📅' },
+          { key: 'routine', label: 'Rutina', icon: '🔁' },
+          { key: 'reminder', label: 'Recordatorio', icon: '🔔' },
+          { key: 'birthday', label: 'Cumple', icon: '🎂' },
+          { key: 'task', label: 'Tarea', icon: '✅' },
+        ].map(t => (
+          <button
+            key={t.key}
+            type="button"
+            onClick={() => setKind(t.key as ItemKind)}
+            style={{
+              flex: 1,
+              padding: '8px 6px',
+              borderRadius: 'var(--radius-sm)',
+              fontSize: '13px',
+              fontWeight: kind === t.key ? 700 : 500,
+              background: kind === t.key ? 'var(--card)' : 'transparent',
+              color: kind === t.key ? 'var(--accent)' : 'var(--label2)',
+              boxShadow: kind === t.key ? 'var(--shadow-sm)' : 'none',
+              whiteSpace: 'nowrap',
+            }}
+          >
+            {t.icon} {t.label}
+          </button>
+        ))}
+      </div>
 
       {/* Campo Título */}
       <div>
