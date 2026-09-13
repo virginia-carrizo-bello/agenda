@@ -45,6 +45,7 @@ export const ComposerModal: React.FC<ComposerModalProps> = ({
   const [alarm, setAlarm] = useState<number | null>(null)
   const [listId, setListId] = useState<string | null>(defaultListId || null)
   const [icon, setIcon] = useState('✨')
+  const [isWork, setIsWork] = useState(false)
 
   // Estado para rutinas
   const [isDailyRoutine, setIsDailyRoutine] = useState(true)
@@ -68,6 +69,7 @@ export const ComposerModal: React.FC<ComposerModalProps> = ({
       setAlarm(itemToEdit.alarm !== undefined ? itemToEdit.alarm : null)
       setListId(itemToEdit.list_id || defaultListId || null)
       setIcon(itemToEdit.icon || '✨')
+      setIsWork(!!(itemToEdit.isWork || itemToEdit.is_work))
 
       // Extraer rrule para rutinas
       if (itemToEdit.rrule && itemToEdit.rrule.includes('BYDAY=')) {
@@ -93,6 +95,7 @@ export const ComposerModal: React.FC<ComposerModalProps> = ({
       setAlarm(null)
       setListId(defaultListId || (lists.length > 0 ? lists[0].id : null))
       setIcon('🔥')
+      setIsWork(false)
       setIsDailyRoutine(true)
       setSelectedRoutineDays(['MO'])
     }
@@ -126,6 +129,8 @@ export const ComposerModal: React.FC<ComposerModalProps> = ({
       list_id: kind === 'task' ? listId : null,
       rrule,
       icon: kind === 'routine' ? icon : null,
+      isWork,
+      is_work: isWork ? 1 : 0,
     }
 
     await onSave(payload)
@@ -439,6 +444,16 @@ export const ComposerModal: React.FC<ComposerModalProps> = ({
           </div>
         </>
       )}
+
+      {/* Clasificar como Trabajo */}
+      <div style={{ background: 'var(--bg3)', padding: '12px 14px', borderRadius: 'var(--radius-md)' }}>
+        <Switch
+          checked={isWork}
+          onChange={setIsWork}
+          label="💼 Clasificar como Trabajo"
+          id="iswork-switch"
+        />
+      </div>
 
       {/* Notas Generales */}
       <div>

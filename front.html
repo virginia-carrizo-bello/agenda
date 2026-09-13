@@ -2687,6 +2687,77 @@
             box-shadow: 0 2px 8px rgba(0, 0, 0, .08);
         }
 
+        .cal-header-right {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .cal-work-toggle {
+            display: inline-flex;
+            align-items: center;
+            cursor: pointer;
+            user-select: none;
+            flex-shrink: 0;
+            position: relative;
+        }
+
+        .cal-work-toggle input {
+            position: absolute;
+            opacity: 0;
+            width: 0;
+            height: 0;
+            pointer-events: none;
+        }
+
+        .cal-work-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            padding: 5px 12px;
+            border-radius: 999px;
+            background: var(--bg3);
+            border: 1px solid var(--sep);
+            font-size: var(--fs-sm);
+            font-weight: 600;
+            color: var(--label2);
+            transition: all .18s var(--ease);
+        }
+
+        .cal-work-toggle input:checked + .cal-work-pill {
+            background: color-mix(in srgb, var(--accent) 14%, var(--card));
+            border-color: color-mix(in srgb, var(--accent) 35%, transparent);
+            color: var(--accent);
+            font-weight: 700;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, .05);
+        }
+
+        .cal-work-toggle:hover .cal-work-pill {
+            color: var(--label);
+            background: var(--bg3d);
+        }
+
+        .cal-work-toggle input:checked:hover + .cal-work-pill {
+            background: color-mix(in srgb, var(--accent) 20%, var(--card));
+        }
+
+        .work-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 3px;
+            font-size: 11px;
+            font-weight: 600;
+            padding: 1px 6px;
+            border-radius: 6px;
+            background: color-mix(in srgb, var(--accent) 12%, var(--card));
+            color: var(--accent);
+            border: 0.5px solid color-mix(in srgb, var(--accent) 25%, transparent);
+            margin-left: 6px;
+            vertical-align: middle;
+            white-space: nowrap;
+        }
+
         /* ============ Colecciones ============ */
         .coll .fg {
             gap: 13px
@@ -4521,12 +4592,14 @@
             return 'Semanal';
         }
 
-        const itemsOn = ds => {
+        const itemsOn = (ds, opts = {}) => {
             const mmdd = ds.slice(5);
             const dObj = fromYmd(ds);
             const dayOfWeek = dObj.getDay(); // 0 = Dom, 1 = Lun, ..., 6 = Sáb
+            const filterWork = opts.filterWork !== undefined ? opts.filterWork : (UI.showWork === false);
 
             return S.items.filter(it => {
+                if (filterWork && (it.isWork || it.is_work)) return false;
                 if (it.kind === 'birthday') return it.date === mmdd;
                 // Únicamente si es una rutina explícita con repetición configurada
                 if (it.kind === 'routine' && it.repeat) {
@@ -4677,7 +4750,14 @@
         });
 
         /* ================= Estado UI ================= */
-        const UI = { tab: 'today', cursor: new Date(), selDay: todayY(), stack: null, calMode: 'month' };
+        const UI = {
+            tab: 'today',
+            cursor: new Date(),
+            selDay: todayY(),
+            stack: null,
+            calMode: 'month',
+            showWork: localStorage.getItem('tempo.showWork') !== 'false'
+        };
         const $ = s => document.querySelector(s);
         const nav = $('#nav'), navTitle = $('#navTitle');
         const V = { today: $('#v-today'), calendar: $('#v-calendar'), lists: $('#v-lists'), detail: $('#v-detail') };
@@ -4705,6 +4785,8 @@
             const isBday = it.kind === 'birthday' || /cumpleaños|cumple/i.test(it.title);
             const cleanName = isBday ? cleanBirthdayName(it.title) : it.title;
             let titleDisplay = cleanName;
+            const isWork = !!(it.isWork || it.is_work);
+            const workBadge = isWork ? `<span class="work-badge" title="Elemento de trabajo">💼 Trabajo</span>` : '';
 
             let lead;
             if (hasCheck(it.kind)) {
@@ -4721,7 +4803,7 @@
             return `<div class="row${isDone ? ' done' : ''}" data-id="${it.id}" data-kind="${it.kind}" style="--kc:${kcol(it.kind)};--kcs:${ksoft(it.kind)}">
     <div class="under u-l" aria-hidden="true">${ic('trash', 21)}</div>
     <div class="under u-r" aria-hidden="true">${ic('check', 21, 2.4)}</div>
-    <div class="fg">${lead}<button type="button" class="tx" data-act="edit" data-id="${it.id}" aria-label="Editar: ${esc(it.title)}"><span class="t1">${esc(titleDisplay)}</span>${o.cap ? `<span class="t2">${o.cap}</span>` : ''}</button>${flag}${meta ? `<span class="meta${o.hot ? ' hot' : ''}">${meta}</span>` : ''}${star}${chev}</div>
+    <div class="fg">${lead}<button type="button" class="tx" data-act="edit" data-id="${it.id}" aria-label="Editar: ${esc(it.title)}"><span class="t1">${esc(titleDisplay)}${workBadge}</span>${o.cap ? `<span class="t2">${o.cap}</span>` : ''}</button>${flag}${meta ? `<span class="meta${o.hot ? ' hot' : ''}">${meta}</span>` : ''}${star}${chev}</div>
   </div>`;
         }
         const emptyHTML = (icon, title, cap, actLabel = null, actKind = null) => {
@@ -4825,6 +4907,7 @@
 
             items.forEach(i => {
                 const isBday = i.kind === 'birthday' || /cumpleaños|cumple/i.test(i.title);
+                const isWork = !!(i.isWork || i.is_work);
                 const c = kcol(isBday ? 'birthday' : i.kind);
                 const cs = ksoft(isBday ? 'birthday' : i.kind);
                 let titleText = i.title;
@@ -4834,6 +4917,8 @@
                     const targetY = parseInt(ds.slice(0, 4), 10) || new Date().getFullYear();
                     const age = bYear ? targetY - bYear : null;
                     titleText = age != null && age > 0 ? `🎂 ${name} (${age} años)` : `🎂 ${name}`;
+                } else if (isWork) {
+                    titleText = `💼 ${titleText}`;
                 }
                 chipsList.push(`<div class="cal-ev-chip" style="background:${cs};color:${c}" title="${esc(titleText)}${i.time ? ' ' + i.time : ''}">
                     <span class="ev-title">${esc(titleText)}</span>
@@ -4863,16 +4948,23 @@
         }
 
         function renderCalHeaderBar(mainTitle, mode) {
+            const showWork = UI.showWork !== false;
             return `<div class="cal-header-bar">
           <div class="cal-header-left">
             <button type="button" class="cal-nav-btn" data-act="calnav" data-d="-1" aria-label="Anterior">${ic('chevL', 18, 2.2)}</button>
             <span class="cal-title-main">${mainTitle}</span>
             <button type="button" class="cal-nav-btn" data-act="calnav" data-d="1" aria-label="Siguiente">${ic('chevR', 18, 2.2)}</button>
           </div>
-          <div class="cal-view-selector" role="group" aria-label="Modo de vista del calendario">
-            <button type="button" class="cal-mode-btn ${mode === 'month' ? 'on' : ''}" data-act="calmode" data-m="month">Mes</button>
-            <button type="button" class="cal-mode-btn ${mode === 'week' ? 'on' : ''}" data-act="calmode" data-m="week">Semana</button>
-            <button type="button" class="cal-mode-btn ${mode === 'day' ? 'on' : ''}" data-act="calmode" data-m="day">Día</button>
+          <div class="cal-header-right">
+            <label class="cal-work-toggle" title="${showWork ? 'Desactivar para ocultar eventos de trabajo' : 'Activar para ver eventos de trabajo'}">
+              <input type="checkbox" id="chkCalWork" data-act="toggle-cal-work" ${showWork ? 'checked' : ''}>
+              <span class="cal-work-pill"><span class="work-icon">💼</span><span class="work-text">Trabajo</span></span>
+            </label>
+            <div class="cal-view-selector" role="group" aria-label="Modo de vista del calendario">
+              <button type="button" class="cal-mode-btn ${mode === 'month' ? 'on' : ''}" data-act="calmode" data-m="month">Mes</button>
+              <button type="button" class="cal-mode-btn ${mode === 'week' ? 'on' : ''}" data-act="calmode" data-m="week">Semana</button>
+              <button type="button" class="cal-mode-btn ${mode === 'day' ? 'on' : ''}" data-act="calmode" data-m="day">Día</button>
+            </div>
           </div>
         </div>`;
         }
@@ -5550,6 +5642,19 @@
         <div class="frow"><label for="fd-qty">Cantidad</label><input type="text" id="fd-qty" name="qty" inputmode="text" placeholder="1 kg, ×2…" value="${it?.qty || ''}"></div>
       </div>`;
             }
+            const isWork = it ? !!(it.isWork || it.is_work) : false;
+            f += `
+    <div class="fgroup" style="margin-top:10px">
+      <div class="frow">
+        <label for="fd-iswork" style="cursor:pointer;display:flex;align-items:center;gap:6px">
+          <span style="font-size:16px">💼</span> <span style="font-weight:600">Clasificar como Trabajo</span>
+        </label>
+        <label class="switch-wrap" for="fd-iswork">
+          <input type="checkbox" id="fd-iswork" name="isWork" ${isWork ? 'checked' : ''} aria-label="Clasificar como trabajo">
+          <span class="switch-slider" aria-hidden="true"></span>
+        </label>
+      </div>
+    </div>`;
             if (kind !== 'wish') f += `<div class="fgroup"><textarea class="notes" name="notes" id="fd-notes" rows="3" aria-label="Notas" placeholder="Notas (opcional)">${it?.notes ? esc(it.notes) : ''}</textarea></div>`;
             return f;
         }
@@ -5581,6 +5686,13 @@
                 if (rowEnd) rowEnd.classList.toggle('is-disabled', checked);
             }
         });
+        document.addEventListener('change', e => {
+            if (e.target && (e.target.id === 'chkCalWork' || e.target.dataset.act === 'toggle-cal-work')) {
+                UI.showWork = e.target.checked;
+                try { localStorage.setItem('tempo.showWork', String(UI.showWork)); } catch (_) { }
+                refreshAll();
+            }
+        });
         sheetBody.addEventListener('click', e => {
             const tp = e.target.closest('[data-tp]');
             if (tp) {
@@ -5593,6 +5705,7 @@
                 const keepAlarm = sheetBody.querySelector('[name=alarm]')?.value;
                 const keepPrice = sheetBody.querySelector('[name=price]')?.value;
                 const keepQty = sheetBody.querySelector('[name=qty]')?.value;
+                const keepIsWork = sheetBody.querySelector('#fd-iswork')?.checked;
 
                 if (composer.editing) {
                     composer.editing.title = keepTitle;
@@ -5604,6 +5717,7 @@
                     if (keepAlarm !== undefined && keepAlarm !== '') composer.editing.alarm = Number(keepAlarm);
                     if (keepPrice !== undefined && keepPrice !== '') composer.editing.price = parseFloat(keepPrice);
                     if (keepQty !== undefined) composer.editing.qty = keepQty;
+                    if (keepIsWork !== undefined) composer.editing.isWork = keepIsWork;
                     composer.editing.kind = tp.dataset.tp;
                 }
                 composer.kind = tp.dataset.tp;
@@ -5669,6 +5783,7 @@
             const segVal = n => sheetBody.querySelector(`.seg[data-name="${n}"] .on`)?.dataset.v;
             let it = editing || { id: (crypto.randomUUID ? crypto.randomUUID() : 'i' + Date.now() + Math.random()), done: false, createdAt: Date.now() };
             it.kind = kind; it.title = title;
+            it.isWork = !!sheetBody.querySelector('#fd-iswork')?.checked;
             if (kind === 'birthday') { it.date = fd.date.slice(5); it.year = Number(fd.date.slice(0, 4)) || null; }
             else {
                 it.date = fd.date || todayY();

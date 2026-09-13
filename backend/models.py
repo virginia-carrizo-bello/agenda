@@ -27,6 +27,7 @@ class AgendaItem(BaseModel):
     repeat: Optional[str] = None     # daily, weekdays, weekly, weekends, monthly
     location: Optional[str] = None   # Ubicación del evento / actividad
     alarm: Optional[int] = None      # Minutos antes para alarma/aviso (ej: 0, 5, 10, 15, 30, 60, etc.)
+    isWork: Optional[bool] = False   # Clasificación como evento/tarea de trabajo
 
 class ItemUpdate(BaseModel):
     kind: Optional[KindType] = None
@@ -45,6 +46,7 @@ class ItemUpdate(BaseModel):
     repeat: Optional[str] = None
     location: Optional[str] = None
     alarm: Optional[int] = None
+    isWork: Optional[bool] = None
 
 class AppState(BaseModel):
     lists: list[ListItem]

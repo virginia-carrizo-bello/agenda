@@ -54,10 +54,11 @@ def init_db():
                 repeat TEXT,
                 location TEXT,
                 alarm INTEGER,
+                isWork INTEGER DEFAULT 0,
                 FOREIGN KEY (listId) REFERENCES lists(id) ON DELETE CASCADE
             )
         """)
-        # Migración automática si la tabla items ya existía sin columna repeat, location o alarm
+        # Migración automática si la tabla items ya existía sin columna repeat, location, alarm o isWork
         try:
             cursor.execute("ALTER TABLE items ADD COLUMN repeat TEXT")
         except sqlite3.OperationalError:
@@ -68,6 +69,10 @@ def init_db():
             pass # Ya existe
         try:
             cursor.execute("ALTER TABLE items ADD COLUMN alarm INTEGER")
+        except sqlite3.OperationalError:
+            pass # Ya existe
+        try:
+            cursor.execute("ALTER TABLE items ADD COLUMN isWork INTEGER DEFAULT 0")
         except sqlite3.OperationalError:
             pass # Ya existe
         conn.commit()
@@ -98,14 +103,14 @@ def reseed_db() -> AppState:
         for it in items:
             cursor.execute("""
                 INSERT INTO items (
-                    id, kind, title, done, createdAt, doneAt, date, time, end, prio, notes, year, price, listId, qty, repeat, location, alarm
-                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                    id, kind, title, done, createdAt, doneAt, date, time, end, prio, notes, year, price, listId, qty, repeat, location, alarm, isWork
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             """, (
                 it.id, it.kind, it.title, 1 if it.done else 0,
                 it.createdAt or now_ts, it.doneAt,
                 it.date, it.time, it.end, it.prio, it.notes,
                 it.year, it.price, it.listId, it.qty, it.repeat,
-                it.location, it.alarm
+                it.location, it.alarm, 1 if getattr(it, 'isWork', False) else 0
             ))
         conn.commit()
     return get_state()
@@ -113,6 +118,8 @@ def reseed_db() -> AppState:
 def row_to_item(row: sqlite3.Row) -> AgendaItem:
     d = dict(row)
     d['done'] = bool(d['done'])
+    if 'isWork' in d:
+        d['isWork'] = bool(d['isWork'])
     return AgendaItem(**d)
 
 def row_to_list(row: sqlite3.Row) -> ListItem:
@@ -177,8 +184,8 @@ def upsert_item(item: AgendaItem) -> AgendaItem:
         cursor = conn.cursor()
         cursor.execute("""
             INSERT INTO items (
-                id, kind, title, done, createdAt, doneAt, date, time, end, prio, notes, year, price, listId, qty, repeat, location, alarm
-            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                id, kind, title, done, createdAt, doneAt, date, time, end, prio, notes, year, price, listId, qty, repeat, location, alarm, isWork
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             ON CONFLICT(id) DO UPDATE SET
                 kind=excluded.kind,
                 title=excluded.title,
@@ -196,13 +203,14 @@ def upsert_item(item: AgendaItem) -> AgendaItem:
                 qty=excluded.qty,
                 repeat=excluded.repeat,
                 location=excluded.location,
-                alarm=excluded.alarm
+                alarm=excluded.alarm,
+                isWork=excluded.isWork
         """, (
             item.id, item.kind, item.title, 1 if item.done else 0,
             item.createdAt or (time.time() * 1000), item.doneAt,
             item.date, item.time, item.end, item.prio, item.notes,
             item.year, item.price, item.listId, item.qty, item.repeat,
-            item.location, item.alarm
+            item.location, item.alarm, 1 if getattr(item, 'isWork', False) else 0
         ))
         conn.commit()
     return get_item(item.id)
@@ -215,8 +223,8 @@ def update_item_fields(item_id: str, updates: ItemUpdate) -> Optional[AgendaItem
     set_clauses = []
     params = []
     for k, v in data.items():
-        if k == 'done':
-            set_clauses.append("done = ?")
+        if k in ('done', 'isWork'):
+            set_clauses.append(f"{k} = ?")
             params.append(1 if v else 0)
         else:
             set_clauses.append(f"{k} = ?")

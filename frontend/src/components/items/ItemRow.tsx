@@ -171,6 +171,23 @@ export const ItemRow: React.FC<ItemRowProps> = ({ item, onToggleDone, onEdit, on
       >
         <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
           {getKindBadge()}
+          {(item.isWork || item.is_work) && (
+            <span
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '3px',
+                background: 'rgba(139, 95, 168, 0.15)',
+                color: 'var(--accent)',
+                padding: '1px 7px',
+                borderRadius: '999px',
+                fontSize: '11px',
+                fontWeight: 700,
+              }}
+            >
+              💼 Trabajo
+            </span>
+          )}
           <span
             style={{
               fontWeight: 600,

@@ -21,6 +21,8 @@ export interface AgendaItem {
   qty?: string | null
   color?: string | null
   icon?: string | null
+  isWork?: boolean | number | null
+  is_work?: boolean | number | null
   done?: boolean | number
   done_dates?: string | null    // Comma-separated YYYY-MM-DD for routines
   order_index?: number
