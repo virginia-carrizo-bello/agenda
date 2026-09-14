@@ -2178,6 +2178,45 @@
             opacity: .4
         }
 
+        .reorder-btns {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 1px;
+            margin-right: 4px;
+            flex: none;
+        }
+
+        .reorder-btn {
+            width: 24px;
+            height: 18px;
+            display: grid;
+            place-items: center;
+            color: var(--label3);
+            border-radius: 5px;
+            background: transparent;
+            transition: all 0.15s ease;
+            cursor: pointer;
+            padding: 0;
+        }
+
+        .reorder-btn:hover:not(:disabled) {
+            color: var(--accent);
+            background: var(--bg3d);
+            transform: scale(1.15);
+        }
+
+        .reorder-btn:active:not(:disabled) {
+            transform: scale(0.92);
+        }
+
+        .reorder-btn.is-disabled, .reorder-btn:disabled {
+            opacity: 0.18;
+            cursor: default;
+            pointer-events: none;
+        }
+
         /* ============ Hero Hoy ============ */
         .hero {
             display: flex;
@@ -4609,10 +4648,74 @@
                 return it.date === ds;
             });
         };
+
+        function getSortedItemsForDay(ds) {
+            const items = itemsOn(ds);
+            const curDay = ds || UI.selDay || todayY();
+            const orderMap = (S && S.dayOrder && S.dayOrder[curDay]) || null;
+            return [...items].sort((a, b) => {
+                if (orderMap) {
+                    const idxA = orderMap.indexOf(a.id);
+                    const idxB = orderMap.indexOf(b.id);
+                    if (idxA !== -1 && idxB !== -1) return idxA - idxB;
+                    if (idxA !== -1) return -1;
+                    if (idxB !== -1) return 1;
+                }
+                const ordA = a.orderIndex ?? a.order_index;
+                const ordB = b.orderIndex ?? b.order_index;
+                if (ordA != null && ordB != null && ordA !== ordB) {
+                    return ordA - ordB;
+                }
+                if (ordA != null) return -1;
+                if (ordB != null) return 1;
+                const ta = a.time || '99:99', tb = b.time || '99:99';
+                return ta !== tb ? (ta < tb ? -1 : 1) : (a.kind === 'birthday' ? 1 : 0) - (b.kind === 'birthday' ? 1 : 0);
+            });
+        }
+
         const sortAgenda = (a, b) => {
+            const curDay = UI.selDay || todayY();
+            const orderMap = (S && S.dayOrder && S.dayOrder[curDay]) || null;
+            if (orderMap) {
+                const idxA = orderMap.indexOf(a.id);
+                const idxB = orderMap.indexOf(b.id);
+                if (idxA !== -1 && idxB !== -1) return idxA - idxB;
+                if (idxA !== -1) return -1;
+                if (idxB !== -1) return 1;
+            }
+            const ordA = a.orderIndex ?? a.order_index;
+            const ordB = b.orderIndex ?? b.order_index;
+            if (ordA != null && ordB != null && ordA !== ordB) {
+                return ordA - ordB;
+            }
+            if (ordA != null) return -1;
+            if (ordB != null) return 1;
             const ta = a.time || '99:99', tb = b.time || '99:99';
             return ta !== tb ? (ta < tb ? -1 : 1) : (a.kind === 'birthday' ? 1 : 0) - (b.kind === 'birthday' ? 1 : 0);
         };
+
+        function moveItemInDay(id, direction, ds) {
+            ds = ds || UI.selDay || todayY();
+            const list = getSortedItemsForDay(ds);
+            const idx = list.findIndex(i => i.id === id);
+            if (idx < 0) return;
+            const targetIdx = idx + direction;
+            if (targetIdx < 0 || targetIdx >= list.length) return;
+
+            const [moved] = list.splice(idx, 1);
+            list.splice(targetIdx, 0, moved);
+
+            S.dayOrder = S.dayOrder || {};
+            S.dayOrder[ds] = list.map(i => i.id);
+
+            list.forEach((item, i) => {
+                item.orderIndex = i;
+                api.patchItem(item.id, { orderIndex: i }).catch(() => {});
+            });
+
+            save();
+            refreshAll();
+        }
         const dayKinds = ds => [...new Set(itemsOn(ds).map(i => i.kind))];
         const pendToday = () => itemsOn(todayY()).filter(i => hasCheck(i.kind));
         const greeting = () => { const h = new Date().getHours(); return h < 12 ? 'Buenos días' : h < 20 ? 'Buenas tardes' : 'Buenas noches' };
@@ -4800,10 +4903,19 @@
             const star = o.star ? `<button type="button" class="starb p${it.prio || 0}" data-act="star" data-id="${it.id}" aria-label="Prioridad: ${PRIO[it.prio || 0]}. Toca para cambiar.">${ic('star', 21, it.prio ? 2.2 : 1.8)}</button>` : '';
             const meta = o.meta || '';
             const chev = o.chev === false ? '' : `<svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg>`;
+            const reorderBtns = o.reorder ? `
+            <div class="reorder-btns" role="group" aria-label="Cambiar posición">
+              <button type="button" class="reorder-btn reorder-up ${o.isFirst ? 'is-disabled' : ''}" data-act="move-item-up" data-id="${it.id}" data-ds="${curDay}" title="Subir posición en este día" ${o.isFirst ? 'disabled' : ''}>
+                <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.6"><path d="M18 15l-6-6-6 6"/></svg>
+              </button>
+              <button type="button" class="reorder-btn reorder-down ${o.isLast ? 'is-disabled' : ''}" data-act="move-item-down" data-id="${it.id}" data-ds="${curDay}" title="Bajar posición en este día" ${o.isLast ? 'disabled' : ''}>
+                <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.6"><path d="M6 9l6 6 6-6"/></svg>
+              </button>
+            </div>` : '';
             return `<div class="row${isDone ? ' done' : ''}" data-id="${it.id}" data-kind="${it.kind}" style="--kc:${kcol(it.kind)};--kcs:${ksoft(it.kind)}">
     <div class="under u-l" aria-hidden="true">${ic('trash', 21)}</div>
     <div class="under u-r" aria-hidden="true">${ic('check', 21, 2.4)}</div>
-    <div class="fg">${lead}<button type="button" class="tx" data-act="edit" data-id="${it.id}" aria-label="Editar: ${esc(it.title)}"><span class="t1">${esc(titleDisplay)}${workBadge}</span>${o.cap ? `<span class="t2">${o.cap}</span>` : ''}</button>${flag}${meta ? `<span class="meta${o.hot ? ' hot' : ''}">${meta}</span>` : ''}${star}${chev}</div>
+    <div class="fg">${lead}<button type="button" class="tx" data-act="edit" data-id="${it.id}" aria-label="Editar: ${esc(it.title)}"><span class="t1">${esc(titleDisplay)}${workBadge}</span>${o.cap ? `<span class="t2">${o.cap}</span>` : ''}</button>${flag}${meta ? `<span class="meta${o.hot ? ' hot' : ''}">${meta}</span>` : ''}${reorderBtns}${star}${chev}</div>
   </div>`;
         }
         const emptyHTML = (icon, title, cap, actLabel = null, actKind = null) => {
@@ -4829,12 +4941,12 @@
                 } else if (!capText && it.notes) {
                     capText = esc(it.notes);
                 }
-                return rowHTML(it, { meta, cap: capText, ds: o.ds });
+                return rowHTML(it, { ...o, meta, cap: capText, ds: o.ds });
             }
             if (it.kind === 'routine') {
                 const repLabel = getRoutineLabel(it.repeat);
                 const meta = (it.time ? fmtTime(it.time) + ' · ' : '') + repLabel;
-                return rowHTML(it, { meta, cap: o.when || (it.notes ? esc(it.notes) : ''), ds: o.ds });
+                return rowHTML(it, { ...o, meta, cap: o.when || (it.notes ? esc(it.notes) : ''), ds: o.ds });
             }
             if (it.kind === 'reminder') {
                 const alarmStr = getAlarmLabel(it.alarm);
@@ -4850,7 +4962,7 @@
                 }
                 const isDone = isItemDoneOn(it, o.ds || UI.selDay || todayY());
                 const hot = !isDone && it.date && it.date < todayY();
-                return rowHTML(it, { meta, cap: cp, hot, ds: o.ds });
+                return rowHTML(it, { ...o, meta, cap: cp, hot, ds: o.ds });
             }
             if (it.kind === 'birthday' || /cumpleaños|cumple/i.test(it.title)) {
                 const curDay = o.ds || UI.selDay || todayY();
@@ -4871,11 +4983,11 @@
                 if (it.notes) {
                     cp = cp ? `${cp} · ${esc(it.notes)}` : esc(it.notes);
                 }
-                return rowHTML(it, { meta, cap: cp, hot: isExactDay || nb.days <= 1, ds: o.ds });
+                return rowHTML(it, { ...o, meta, cap: cp, hot: isExactDay || nb.days <= 1, ds: o.ds });
             }
             if (it.kind === 'wish') {
                 const meta = it.price ? new Intl.NumberFormat('es-ES', { style: 'currency', currency: 'EUR', maximumFractionDigits: 2 }).format(it.price) : '';
-                return rowHTML(it, { meta, cap: PRIO[it.prio || 0], star: true, chev: false, ds: o.ds });
+                return rowHTML(it, { ...o, meta, cap: PRIO[it.prio || 0], star: true, chev: false, ds: o.ds });
             }
             let meta = o.timeline ? '' : (it.time ? fmtTime(it.time) : '');
             let cp = o.when || '';
@@ -4885,13 +4997,13 @@
             } else if (!cp && it.notes) { cp = esc(it.notes); }
             const isDone = isItemDoneOn(it, o.ds || UI.selDay || todayY());
             const hot = !isDone && it.date && it.date < todayY();
-            return rowHTML(it, { meta, cap: cp, hot, ds: o.ds });
+            return rowHTML(it, { ...o, meta, cap: cp, hot, ds: o.ds });
         }
 
         function renderCalCellHtml(d, ds, monthName, y) {
             const isDesk = window.innerWidth >= 769 && !document.body.classList.contains('preview-mobile');
             const maxChips = isDesk ? 3 : 2;
-            const items = itemsOn(ds).sort(sortAgenda);
+            const items = getSortedItemsForDay(ds);
             const dt = fromYmd(ds);
             const dayOfWeek = dt.getDay(); // 0 = Dom, 6 = Sáb
             const isWeekend = dayOfWeek === 0 || dayOfWeek === 6;
@@ -4907,7 +5019,7 @@
 
             items.forEach(i => {
                 const isBday = i.kind === 'birthday' || /cumpleaños|cumple/i.test(i.title);
-                const isWork = !!(i.isWork || i.is_work);
+                const isWork = !!(i.isWork || it_is_work(i));
                 const c = kcol(isBday ? 'birthday' : i.kind);
                 const cs = ksoft(isBday ? 'birthday' : i.kind);
                 let titleText = i.title;
@@ -4945,6 +5057,10 @@
       <div class="cal-top"><span class="cal-n">${d}</span></div>
       ${chipsHtml}
     </button>`;
+        }
+
+        function it_is_work(i) {
+            return Boolean(i && (i.isWork || i.is_work));
         }
 
         function renderCalHeaderBar(mainTitle, mode) {
@@ -5006,7 +5122,7 @@
             }
 
             // --- Día seleccionado ---
-            const ds = UI.selDay, list = [...itemsOn(ds)].sort(sortAgenda);
+            const ds = UI.selDay, list = getSortedItemsForDay(ds);
             const head = ds === todayY() ? 'Hoy' : (ds === ymd(addDays(new Date(), 1)) ? 'Mañana' : cap(fLong.format(fromYmd(ds))));
             const hol = getArgHoliday(ds);
             let holBanner = '';
@@ -5022,7 +5138,7 @@
                     </div>
                 </div>`;
             }
-            const agenda = list.length ? `${holBanner}<div class="card">${list.map(i => itemRow(i, { ds })).join('')}</div>`
+            const agenda = list.length ? `${holBanner}<div class="card">${list.map((i, idx) => itemRow(i, { ds, reorder: list.length > 1, isFirst: idx === 0, isLast: idx === list.length - 1 })).join('')}</div>`
                 : `${holBanner}${emptyHTML('sparkle', 'Sin tareas ni eventos creados', 'Nada adicional previsto para esta fecha.', 'Añadir', 'event')}`;
 
             // --- Pendientes destacados ---
@@ -5145,7 +5261,7 @@
                 }
             }
 
-            const ds = UI.selDay, list = [...itemsOn(ds)].sort(sortAgenda);
+            const ds = UI.selDay, list = getSortedItemsForDay(ds);
             const head = ds === todayY() ? 'Hoy' : (ds === ymd(addDays(new Date(), 1)) ? 'Mañana' : cap(fLong.format(fromYmd(ds))));
             const hol = getArgHoliday(ds);
             let holBanner = '';
@@ -5161,7 +5277,7 @@
                     </div>
                 </div>`;
             }
-            const agenda = list.length ? `${holBanner}<div class="card">${list.map(i => itemRow(i, { ds })).join('')}</div>`
+            const agenda = list.length ? `${holBanner}<div class="card">${list.map((i, idx) => itemRow(i, { ds, reorder: list.length > 1, isFirst: idx === 0, isLast: idx === list.length - 1 })).join('')}</div>`
                 : `${holBanner}${emptyHTML('sparkle', 'Sin tareas ni eventos creados', 'Nada adicional previsto para esta fecha.', 'Añadir a este día', 'event')}`;
 
             C.calendar.innerHTML = `
@@ -6007,6 +6123,8 @@
             const act = e.target.closest('[data-act]');
             if (act) {
                 const a = act.dataset.act, id = act.dataset.id;
+                if (a === 'move-item-up') { moveItemInDay(id, -1, act.dataset.ds); return; }
+                if (a === 'move-item-down') { moveItemInDay(id, 1, act.dataset.ds); return; }
                 if (a === 'toggle') { const r = act.closest('.row'); if (r) toggleDone(r); return; }
                 if (a === 'edit') { const it = byId(id); if (it) openComposer(it.kind, it); return; }
                 if (a === 'goto') { UI.selDay = act.dataset.day; UI.cursor = fromYmd(act.dataset.day); setTab('calendar'); return; }

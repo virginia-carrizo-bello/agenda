@@ -55,6 +55,7 @@ def init_db():
                 location TEXT,
                 alarm INTEGER,
                 isWork INTEGER DEFAULT 0,
+                orderIndex INTEGER DEFAULT 0,
                 FOREIGN KEY (listId) REFERENCES lists(id) ON DELETE CASCADE
             )
         """)
@@ -73,6 +74,10 @@ def init_db():
             pass # Ya existe
         try:
             cursor.execute("ALTER TABLE items ADD COLUMN isWork INTEGER DEFAULT 0")
+        except sqlite3.OperationalError:
+            pass # Ya existe
+        try:
+            cursor.execute("ALTER TABLE items ADD COLUMN orderIndex INTEGER DEFAULT 0")
         except sqlite3.OperationalError:
             pass # Ya existe
         conn.commit()
@@ -184,8 +189,8 @@ def upsert_item(item: AgendaItem) -> AgendaItem:
         cursor = conn.cursor()
         cursor.execute("""
             INSERT INTO items (
-                id, kind, title, done, createdAt, doneAt, date, time, end, prio, notes, year, price, listId, qty, repeat, location, alarm, isWork
-            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                id, kind, title, done, createdAt, doneAt, date, time, end, prio, notes, year, price, listId, qty, repeat, location, alarm, isWork, orderIndex
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             ON CONFLICT(id) DO UPDATE SET
                 kind=excluded.kind,
                 title=excluded.title,
@@ -204,13 +209,15 @@ def upsert_item(item: AgendaItem) -> AgendaItem:
                 repeat=excluded.repeat,
                 location=excluded.location,
                 alarm=excluded.alarm,
-                isWork=excluded.isWork
+                isWork=excluded.isWork,
+                orderIndex=excluded.orderIndex
         """, (
             item.id, item.kind, item.title, 1 if item.done else 0,
             item.createdAt or (time.time() * 1000), item.doneAt,
             item.date, item.time, item.end, item.prio, item.notes,
             item.year, item.price, item.listId, item.qty, item.repeat,
-            item.location, item.alarm, 1 if getattr(item, 'isWork', False) else 0
+            item.location, item.alarm, 1 if getattr(item, 'isWork', False) else 0,
+            getattr(item, 'orderIndex', 0) or 0
         ))
         conn.commit()
     return get_item(item.id)
