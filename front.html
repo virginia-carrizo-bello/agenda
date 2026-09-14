@@ -4956,15 +4956,15 @@
             <button type="button" class="cal-nav-btn" data-act="calnav" data-d="1" aria-label="Siguiente">${ic('chevR', 18, 2.2)}</button>
           </div>
           <div class="cal-header-right">
-            <label class="cal-work-toggle" title="${showWork ? 'Desactivar para ocultar eventos de trabajo' : 'Activar para ver eventos de trabajo'}">
-              <input type="checkbox" id="chkCalWork" data-act="toggle-cal-work" ${showWork ? 'checked' : ''}>
-              <span class="cal-work-pill"><span class="work-icon">💼</span><span class="work-text">Trabajo</span></span>
-            </label>
             <div class="cal-view-selector" role="group" aria-label="Modo de vista del calendario">
               <button type="button" class="cal-mode-btn ${mode === 'month' ? 'on' : ''}" data-act="calmode" data-m="month">Mes</button>
               <button type="button" class="cal-mode-btn ${mode === 'week' ? 'on' : ''}" data-act="calmode" data-m="week">Semana</button>
               <button type="button" class="cal-mode-btn ${mode === 'day' ? 'on' : ''}" data-act="calmode" data-m="day">Día</button>
             </div>
+            <label class="cal-work-toggle" title="${showWork ? 'Desactivar para ocultar eventos de trabajo' : 'Activar para ver eventos de trabajo'}">
+              <input type="checkbox" id="chkCalWork" data-act="toggle-cal-work" ${showWork ? 'checked' : ''}>
+              <span class="cal-work-pill"><span class="work-icon">💼</span><span class="work-text">Trabajo</span></span>
+            </label>
           </div>
         </div>`;
         }
@@ -5579,7 +5579,9 @@
             else if (kind === 'routine') {
                 const rep = it?.repeat || 'daily';
                 const isDaily = rep === 'daily';
-                const curDay = !isDaily ? rep : 'mon';
+                const selectedDays = (!isDaily && rep)
+                    ? (rep.includes(',') ? rep.split(',').map(s => s.trim()) : [rep])
+                    : ['mon'];
                 f += `
     <div class="fgroup">
       <div class="frow"><label for="fd-date">Comienza el</label><input type="date" id="fd-date" name="date" value="${dateVal}"></div>
@@ -5596,7 +5598,7 @@
         </button>
       </div>
       <div class="routine-days-container" id="routineDaysContainer" style="display:${isDaily ? 'none' : 'block'}">
-        <div class="routine-days-label">Elegí el día en que se repite:</div>
+        <div class="routine-days-label">Elegí los días en que se repite:</div>
         <div class="routine-days-grid" id="routineDaysGrid">
           ${[
             { d: 'mon', label: 'L', full: 'Lunes' },
@@ -5607,7 +5609,7 @@
             { d: 'sat', label: 'S', full: 'Sábado' },
             { d: 'sun', label: 'D', full: 'Domingo' }
           ].map(day => `
-            <button type="button" class="r-day-chip ${curDay === day.d ? 'on' : ''}" data-day="${day.d}" aria-pressed="${curDay === day.d ? 'true' : 'false'}" title="${day.full}">
+            <button type="button" class="r-day-chip ${selectedDays.includes(day.d) ? 'on' : ''}" data-day="${day.d}" aria-pressed="${selectedDays.includes(day.d) ? 'true' : 'false'}" title="${day.full}">
               <span class="r-day-letter">${day.label}</span>
               <span class="r-day-sub">${day.full.slice(0, 3)}</span>
             </button>
@@ -5745,12 +5747,14 @@
             }
             const rDay = e.target.closest('.r-day-chip');
             if (rDay) {
-                sheetBody.querySelectorAll('.r-day-chip').forEach(b => {
-                    b.classList.remove('on');
-                    b.setAttribute('aria-pressed', 'false');
-                });
-                rDay.classList.add('on');
-                rDay.setAttribute('aria-pressed', 'true');
+                const isCurrentlyOn = rDay.classList.contains('on');
+                const allOn = sheetBody.querySelectorAll('.r-day-chip.on');
+                if (isCurrentlyOn && allOn.length <= 1) {
+                    return;
+                }
+                const nextState = !isCurrentlyOn;
+                rDay.classList.toggle('on', nextState);
+                rDay.setAttribute('aria-pressed', nextState ? 'true' : 'false');
                 return;
             }
             const seg = e.target.closest('.seg button');
@@ -5805,7 +5809,8 @@
                     if (rMode === 'daily') {
                         it.repeat = 'daily';
                     } else {
-                        it.repeat = sheetBody.querySelector('.r-day-chip.on')?.dataset.day || 'mon';
+                        const dayChips = [...sheetBody.querySelectorAll('.r-day-chip.on')].map(b => b.dataset.day);
+                        it.repeat = dayChips.length ? dayChips.join(',') : 'mon';
                     }
                     it.notes = fd.notes || '';
                 }
