@@ -1,7 +1,7 @@
 from typing import Optional, Literal
 from pydantic import BaseModel, Field
 
-KindType = Literal['event', 'reminder', 'task', 'birthday', 'wish', 'shopping', 'routine']
+KindType = Literal['event', 'reminder', 'task', 'birthday', 'wish', 'shopping', 'routine', 'book']
 
 class ListItem(BaseModel):
     id: str
