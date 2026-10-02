@@ -1341,6 +1341,21 @@
 
         }
 
+        /* iOS PWA: height:100% queda corto y deja la tabbar flotando; usar alto real de viewport */
+        @media (max-width: 768px) {
+
+            html,
+            body,
+            .stage,
+            .device,
+            #phone,
+            .app,
+            .app-main {
+                height: 100vh !important;
+                height: 100dvh !important;
+            }
+        }
+
         /* ============ Barra de control de modo de visualización en PC ============ */
         .view-mode-bar {
             position: fixed;
