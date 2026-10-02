@@ -1341,18 +1341,17 @@
 
         }
 
-        /* iOS PWA: height:100% queda corto y deja la tabbar flotando; usar alto real de viewport */
+        /* iOS PWA: innerHeight reporta ~50px menos que la pantalla; setAppHeight() calcula --app-height real */
         @media (max-width: 768px) {
 
-            html,
-            body,
-            .stage,
-            .device,
-            #phone,
-            .app,
-            .app-main {
-                height: 100vh !important;
-                height: 100dvh !important;
+            html.is-standalone,
+            html.is-standalone body,
+            html.is-standalone .stage,
+            html.is-standalone .device,
+            html.is-standalone #phone,
+            html.is-standalone .app,
+            html.is-standalone .app-main {
+                height: var(--app-height) !important;
             }
         }
 
@@ -6388,7 +6387,14 @@
         }
         /* ================= Calibración de Altura de Pantalla Móvil y Detección PWA ================= */
         function setAppHeight() {
-            const h = window.innerHeight;
+            let h = window.innerHeight;
+            const isIOS = /iPhone|iPad|iPod/.test(navigator.userAgent);
+            if (isIOS && window.navigator.standalone === true) {
+                // En PWA iOS innerHeight queda corto: usar el alto real de pantalla
+                const portrait = window.innerHeight >= window.innerWidth;
+                const sh = portrait ? Math.max(screen.width, screen.height) : Math.min(screen.width, screen.height);
+                h = Math.max(h, sh);
+            }
             document.documentElement.style.setProperty('--app-height', `${h}px`);
             const isStandalone = window.navigator.standalone === true || window.matchMedia('(display-mode: standalone)').matches;
             document.documentElement.classList.toggle('is-standalone', isStandalone);
