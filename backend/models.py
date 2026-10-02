@@ -59,3 +59,11 @@ class ItemUpdate(BaseModel):
 class AppState(BaseModel):
     lists: list[ListItem]
     items: list[AgendaItem]
+
+
+class Doc(BaseModel):
+    """Documento genérico (hábitos, medidas, notas, diario, metas, sesiones de foco)."""
+    id: str
+    type: str
+    data: dict = Field(default_factory=dict)
+    updatedAt: Optional[float] = None

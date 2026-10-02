@@ -6,12 +6,12 @@ from fastapi.staticfiles import StaticFiles
 import os
 from typing import Optional
 
-from .models import ListItem, AgendaItem, ItemUpdate, AppState
+from .models import ListItem, AgendaItem, ItemUpdate, AppState, Doc
 from .database import (
     init_db, get_state, get_all_lists, create_list, delete_list,
     get_all_items, get_item, upsert_item, update_item_fields,
     toggle_item_done, delete_item, clean_list_done, batch_insert_items,
-    reseed_db
+    reseed_db, get_all_docs, upsert_doc, delete_doc
 )
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -123,6 +123,21 @@ def clean_list(list_id: str):
     removed = clean_list_done(list_id)
     return removed
 
+# ================= Documentos genéricos (hábitos, medidas, notas, metas…) =================
+@app.get("/api/docs", response_model=list[Doc], summary="Listar documentos, opcionalmente por tipo")
+def list_docs(type: Optional[str] = None):
+    return get_all_docs(type)
+
+@app.put("/api/docs/{doc_id}", response_model=Doc, summary="Crear o reemplazar un documento")
+def put_doc(doc_id: str, doc: Doc):
+    doc.id = doc_id
+    return upsert_doc(doc)
+
+@app.delete("/api/docs/{doc_id}", summary="Eliminar un documento")
+def remove_doc(doc_id: str):
+    delete_doc(doc_id)
+    return {"status": "deleted", "id": doc_id}
+
 MANIFEST_PATH = os.path.join(BASE_DIR, "manifest.json")
 
 # ================= Servir Frontend =================
@@ -138,10 +153,10 @@ def serve_manifest():
 def serve_root():
     # no-cache: el navegador siempre revalida y toma la última versión del front
     no_cache = {"Cache-Control": "no-cache, must-revalidate"}
-    if os.path.exists(FRONT_PATH):
-        return FileResponse(FRONT_PATH, media_type="text/html", headers=no_cache)
     if os.path.exists(DIST_INDEX):
         return FileResponse(DIST_INDEX, media_type="text/html", headers=no_cache)
+    if os.path.exists(FRONT_PATH):
+        return FileResponse(FRONT_PATH, media_type="text/html", headers=no_cache)
     return {"message": "Tempo backend activo. Documentación disponible en /docs"}
 
 
@@ -151,3 +166,16 @@ def serve_favicon():
     return Response(status_code=204)
 
 
+
+
+@app.get("/{filename:path}", include_in_schema=False)
+def serve_dist_file(filename: str):
+    """Archivos estáticos del build (sw.js, manifest, íconos) y respaldo SPA."""
+    if filename.startswith("api/"):
+        raise HTTPException(status_code=404, detail="Ruta de API no encontrada")
+    safe = os.path.normpath(os.path.join(DIST_DIR, filename))
+    if filename and safe.startswith(DIST_DIR) and os.path.isfile(safe):
+        return FileResponse(safe)
+    if os.path.exists(DIST_INDEX):
+        return FileResponse(DIST_INDEX, media_type="text/html", headers={"Cache-Control": "no-cache, must-revalidate"})
+    raise HTTPException(status_code=404, detail="No encontrado")

@@ -4,7 +4,7 @@ import os
 import tempfile
 import time
 from typing import Optional
-from .models import ListItem, AgendaItem, ItemUpdate, AppState
+from .models import ListItem, AgendaItem, ItemUpdate, AppState, Doc
 from .seed_data import get_seed_data
 
 # En Vercel el sistema de archivos es de solo lectura excepto /tmp
@@ -86,6 +86,14 @@ def init_db():
                 cursor.execute(f"ALTER TABLE items ADD COLUMN {col_def}")
             except sqlite3.OperationalError:
                 pass # Ya existe
+        cursor.execute("""
+            CREATE TABLE IF NOT EXISTS docs (
+                id TEXT PRIMARY KEY,
+                type TEXT NOT NULL,
+                data TEXT NOT NULL DEFAULT '{}',
+                updatedAt REAL
+            )
+        """)
         conn.commit()
 
         # Si está vacío, poblar con datos semilla
@@ -174,7 +182,7 @@ def create_list(l: ListItem) -> ListItem:
     with get_connection() as conn:
         cursor = conn.cursor()
         cursor.execute(
-            "INSERT INTO lists (id, name, color) VALUES (?, ?, ?)",
+            "INSERT OR REPLACE INTO lists (id, name, color) VALUES (?, ?, ?)",
             (l.id, l.name, l.color)
         )
         conn.commit()
@@ -282,3 +290,38 @@ def batch_insert_items(items: list[AgendaItem]) -> list[AgendaItem]:
     for it in items:
         inserted.append(upsert_item(it))
     return inserted
+
+
+# ================= Documentos genéricos =================
+def _row_to_doc(row) -> Doc:
+    try:
+        data = json.loads(row["data"] or "{}")
+    except Exception:
+        data = {}
+    return Doc(id=row["id"], type=row["type"], data=data, updatedAt=row["updatedAt"])
+
+def get_all_docs(doc_type: Optional[str] = None) -> list[Doc]:
+    with get_connection() as conn:
+        cur = conn.cursor()
+        if doc_type:
+            cur.execute("SELECT * FROM docs WHERE type = ?", (doc_type,))
+        else:
+            cur.execute("SELECT * FROM docs")
+        return [_row_to_doc(r) for r in cur.fetchall()]
+
+def upsert_doc(doc: Doc) -> Doc:
+    stamp = doc.updatedAt or time.time() * 1000
+    with get_connection() as conn:
+        conn.execute(
+            "INSERT INTO docs (id, type, data, updatedAt) VALUES (?, ?, ?, ?) "
+            "ON CONFLICT(id) DO UPDATE SET type = excluded.type, data = excluded.data, updatedAt = excluded.updatedAt",
+            (doc.id, doc.type, json.dumps(doc.data, ensure_ascii=False), stamp),
+        )
+        conn.commit()
+    return Doc(id=doc.id, type=doc.type, data=doc.data, updatedAt=stamp)
+
+def delete_doc(doc_id: str) -> bool:
+    with get_connection() as conn:
+        cur = conn.execute("DELETE FROM docs WHERE id = ?", (doc_id,))
+        conn.commit()
+        return cur.rowcount > 0
