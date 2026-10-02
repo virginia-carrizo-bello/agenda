@@ -752,8 +752,9 @@
         }
 
         .views {
-            position: absolute;
-            inset: 0
+            position: relative;
+            flex: 1;
+            min-height: 0
         }
 
         .view {
@@ -799,79 +800,61 @@
         }
 
         .pad {
-            padding: calc(var(--sat) + 60px) 16px calc(var(--sab) + 96px);
+            padding: calc(var(--sat) + 60px) 16px 28px;
         }
 
         /* ==========================================================================
-         TABBAR — ahora es hijo directo de <body>, fuera de #phone / overflow:hidden
-         Esto soluciona el bug de iOS WebKit donde position:fixed dentro de
-         overflow:hidden NO ancla al viewport físico real de la pantalla.
+         TABBAR — último hijo de .app-main (flex column): siempre queda al final de la
+         pantalla, o del marco del teléfono en la vista previa. No es position:fixed.
          ========================================================================== */
 
-        /* Por defecto (PC) la barra está oculta */
+        /* Oculta en PC (ver regla body:not(.preview-mobile) más abajo) */
         .tabbar {
-            display: none;
+            display: flex;
+            position: relative;
+            flex: 0 0 auto;
+            width: 100%;
+            z-index: 50;
+            height: calc(58px + var(--sab));
+            padding: 6px 8px var(--sab);
+            margin: 0;
+            box-sizing: border-box;
+            align-items: flex-start;
+            justify-content: space-around;
+            /* Mezcla con negro para separarla del fondo en ambos temas */
+            background: color-mix(in srgb, var(--card) 92%, black);
+            backdrop-filter: blur(28px) saturate(2);
+            -webkit-backdrop-filter: blur(28px) saturate(2);
+            border-top: 1px solid var(--sep);
+            box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.04);
         }
 
-        /* En móvil: mostrar y fijar al borde físico inferior */
-        @media (max-width: 768px) {
-            .tabbar {
-                display: flex;
-                position: fixed;
-                bottom: 0;
-                left: 0;
-                right: 0;
-                width: 100%;
-                z-index: 9999;
-                height: calc(56px + env(safe-area-inset-bottom, 0px));
-                min-height: calc(56px + env(safe-area-inset-bottom, 0px));
-                padding: 4px 8px env(safe-area-inset-bottom, 0px);
-                margin: 0;
-                box-sizing: border-box;
-                align-items: flex-start;
-                justify-content: space-around;
-                /* --card y --bg quedan a solo 5-14 unidades de RGB entre sí (blanco vs.
-                   crema), una diferencia real pero casi imperceptible — sobre todo en
-                   la franja de safe-area inferior, sin texto/ícono que ancle el ojo.
-                   Se confirmó con posicionamiento y "marcadores" de pintado que la barra
-                   YA llega pixel-perfecto al borde real (no hay bug de layout ni de
-                   pintado): lo que se percibía como "hueco" era solo bajo contraste.
-                   Mezclamos con negro en vez de con --bg para separarla claramente del
-                   fondo de página en ambos temas. */
-                background: color-mix(in srgb, var(--card) 92%, black);
-                backdrop-filter: blur(28px) saturate(2);
-                -webkit-backdrop-filter: blur(28px) saturate(2);
-                border-top: 1px solid var(--sep);
-                box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.04);
-            }
+        .tabbar button {
+            flex: 1;
+            height: 50px;
+            max-height: 50px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 2px;
+            color: var(--label2);
+            font-size: var(--fs-sm);
+            font-weight: 600;
+            letter-spacing: .1px;
+            padding: 0;
+            margin: 0;
+            border-radius: 8px;
+            transition: color .2s;
+        }
 
-            .tabbar button {
-                flex: 1;
-                height: 50px;
-                max-height: 50px;
-                display: flex;
-                flex-direction: column;
-                align-items: center;
-                justify-content: center;
-                gap: 2px;
-                color: var(--label2);
-                font-size: var(--fs-sm);
-                font-weight: 600;
-                letter-spacing: .1px;
-                padding: 0;
-                margin: 0;
-                border-radius: 8px;
-                transition: color .2s;
-            }
+        .tabbar button svg {
+            width: 22px;
+            height: 22px;
+        }
 
-            .tabbar button svg {
-                width: 22px;
-                height: 22px;
-            }
-
-            .tabbar button.on {
-                color: var(--accent);
-            }
+        .tabbar button.on {
+            color: var(--accent);
         }
 
         /* ============ Adaptaciones de Escritorio vs Móvil ============ */
@@ -920,6 +903,14 @@
                 font-size: var(--fs-lg) !important;
                 font-weight: 700 !important;
                 text-align: left !important;
+            }
+            body:not(.preview-mobile) .nav-r {
+                margin-left: auto !important;
+            }
+
+            /* El título centrado choca con la barra flotante de modo de vista y repite la fecha/clima de la página */
+            body:not(.preview-mobile) .nav-c {
+                display: none !important;
             }
 
             body:not(.preview-mobile) .views {
@@ -1185,8 +1176,6 @@
                 display: none !important;
             }
 
-            /* #phone SIN overflow:hidden — esto es crucial para que position:fixed
-               en hijos directos de body funcione correctamente en iOS WebKit */
             .stage,
             .device,
             #phone {
@@ -1207,7 +1196,7 @@
                 transform: none !important;
                 display: flex !important;
                 flex-direction: column !important;
-                /* SIN overflow: hidden — la tabbar ya está fuera de este contenedor */
+                
             }
 
             .island,
@@ -1259,18 +1248,15 @@
             }
 
             .views {
-                position: absolute !important;
-                top: 0 !important;
-                bottom: 0 !important;
-                left: 0 !important;
-                right: 0 !important;
+                position: relative !important;
+                flex: 1 1 auto !important;
+                min-height: 0 !important;
                 width: 100% !important;
-                height: 100% !important;
             }
 
             .pad {
                 padding-top: calc(env(safe-area-inset-top, 0px) + 54px) !important;
-                padding-bottom: calc(76px + env(safe-area-inset-bottom, 0px)) !important;
+                padding-bottom: 28px !important;
                 padding-left: 16px !important;
                 padding-right: 16px !important;
                 box-sizing: border-box !important;
@@ -1297,8 +1283,6 @@
                 height: 100% !important;
             }
 
-            /* La tabbar ya tiene position:fixed como hijo directo de body
-               — no necesita ajuste adicional, funciona correctamente */
         }
 
         /* ============ Barra de control de modo de visualización en PC ============ */
@@ -1510,12 +1494,7 @@
             }
 
             body.preview-mobile .tabbar {
-                /* En modo preview-mobile en PC, la tabbar debe aparecer DENTRO del marco del teléfono.
-                   Como ahora está fuera de #phone, la posicionamos fija igual pero ajustada al centro.
-                   Usamos bottom fijo y left/right calculados para que caiga sobre el marco simulado */
                 display: flex !important;
-                position: fixed !important;
-                bottom: 0 !important;
             }
 
             body.preview-mobile .island {
