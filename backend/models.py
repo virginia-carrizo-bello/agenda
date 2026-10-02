@@ -29,6 +29,9 @@ class AgendaItem(BaseModel):
     alarm: Optional[int] = None      # Minutos antes para alarma/aviso (ej: 0, 5, 10, 15, 30, 60, etc.)
     isWork: Optional[bool] = False   # Clasificación como evento/tarea de trabajo
     orderIndex: Optional[int] = None # Posición de orden manual en el día
+    doneDates: Optional[list[str]] = None  # Rutinas: días (YYYY-MM-DD) completados
+    gcalId: Optional[str] = None     # ID del evento en Google Calendar (si fue importado/sincronizado)
+    gcal: Optional[bool] = False     # Marca de evento proveniente de Google Calendar
 
 class ItemUpdate(BaseModel):
     kind: Optional[KindType] = None
@@ -49,6 +52,9 @@ class ItemUpdate(BaseModel):
     alarm: Optional[int] = None
     isWork: Optional[bool] = None
     orderIndex: Optional[int] = None
+    doneDates: Optional[list[str]] = None
+    gcalId: Optional[str] = None
+    gcal: Optional[bool] = None
 
 class AppState(BaseModel):
     lists: list[ListItem]

@@ -811,6 +811,7 @@
         }
 
         .view.detail {
+            display: block;
             z-index: 30;
             background: var(--bg);
             transform: translateX(102%);
@@ -878,8 +879,38 @@
             height: 22px;
         }
 
+        .tabbar button {
+            position: relative;
+        }
+
+        .tabbar button svg {
+            transition: transform .25s var(--spring);
+        }
+
         .tabbar button.on {
             color: var(--accent);
+        }
+
+        .tabbar button.on svg {
+            transform: translateY(-1px) scale(1.1);
+        }
+
+        /* Indicador superior de la pestaña activa */
+        .tabbar button::before {
+            content: '';
+            position: absolute;
+            top: -7px;
+            left: 50%;
+            width: 26px;
+            height: 3px;
+            border-radius: 0 0 4px 4px;
+            background: var(--accent);
+            transform: translateX(-50%) scaleX(0);
+            transition: transform .25s var(--spring);
+        }
+
+        .tabbar button.on::before {
+            transform: translateX(-50%) scaleX(1);
         }
 
         /* ============ Adaptaciones de Escritorio vs Móvil ============ */
@@ -3383,7 +3414,7 @@
 
         .tp.on .tpi {
             background: var(--c);
-            color: var(--cs)
+            color: var(--on-accent)
         }
 
         .tp.on span {
@@ -4530,7 +4561,7 @@
         async function load() {
             try { const r = localStorage.getItem(KEY); if (r) { S = JSON.parse(r); } } catch (e) { }
             // Si el estado guardado tiene datos de mockup, limpiarlo
-            if (S && S.items && S.items.some(i => i.id && (i.id.startsWith('e') || i.id.startsWith('t') || i.id.startsWith('r') || i.id.startsWith('b') || i.id.startsWith('w') || i.id.startsWith('s')) && !i.gcalId)) {
+            if (S && S.items && S.items.some(i => /^[etrbws]\d{1,2}$/.test(i.id || '') && !i.gcalId)) {
                 S = seed(); save();
             }
             if (!S) S = seed();
@@ -4538,7 +4569,9 @@
             try {
                 const remote = await api.getState();
                 if (remote && remote.items && remote.lists) {
+                    const localOrder = S && S.dayOrder;
                     S = remote;
+                    if (localOrder) S.dayOrder = localOrder; // el orden manual del día solo vive en el cliente
                     sanitizeItems();
                     save();
                     refreshAll();
@@ -4589,6 +4622,21 @@
                 return startDay === curDay;
             }
             return it.date === ds;
+        }
+
+        /* Racha: días programados consecutivos completados (hoy pendiente no corta la racha) */
+        function routineStreak(it) {
+            const done = new Set(it.doneDates || []);
+            if (!done.size) return 0;
+            const today = todayY();
+            let n = 0, d = new Date();
+            for (let i = 0; i < 400; i++, d = addDays(d, -1)) {
+                const ds = ymd(d);
+                if (!isRoutineOnDay(it, ds, d.getDay())) continue;
+                if (done.has(ds)) n++;
+                else if (ds !== today) break;
+            }
+            return n;
         }
 
         function getRoutineLabel(repeat) {
@@ -4925,7 +4973,10 @@
             if (it.kind === 'routine') {
                 const repLabel = getRoutineLabel(it.repeat);
                 const meta = (it.time ? fmtTime(it.time) + ' · ' : '') + repLabel;
-                return rowHTML(it, { ...o, meta, cap: o.when || (it.notes ? esc(it.notes) : ''), ds: o.ds });
+                const streak = routineStreak(it);
+                const streakTxt = streak >= 2 ? `🔥 Racha de ${streak} días` : '';
+                const baseCap = o.when || (it.notes ? esc(it.notes) : '');
+                return rowHTML(it, { ...o, meta, cap: [streakTxt, baseCap].filter(Boolean).join(' · '), ds: o.ds });
             }
             if (it.kind === 'reminder') {
                 const alarmStr = getAlarmLabel(it.alarm);
@@ -5355,6 +5406,18 @@
         <span class="sq link" aria-hidden="true">${ic('reset', 17)}</span>
         <span class="tx"><span class="t1 link">Restaurar datos de ejemplo</span></span></button></div>
     </div>
+    <div class="card" style="margin-top:10px">
+      <div class="row coll"><button type="button" class="fg" data-act="notif">
+        <span class="sq" style="--c:${kcol('reminder')};--cs:${ksoft('reminder')}" aria-hidden="true">${ic('bell', 18)}</span>
+        <span class="tx"><span class="t1">Avisos del navegador</span><span class="t2" id="notifSub">${notifStatusLabel()}</span></span></button></div>
+      <div class="row coll"><button type="button" class="fg" data-act="export">
+        <span class="sq" style="--c:${kcol('shopping')};--cs:${ksoft('shopping')}" aria-hidden="true">${ic('check', 18)}</span>
+        <span class="tx"><span class="t1">Exportar copia de seguridad</span><span class="t2">Descarga todos tus datos en un archivo .json</span></span></button></div>
+      <div class="row coll"><button type="button" class="fg" data-act="import">
+        <span class="sq" style="--c:${kcol('event')};--cs:${ksoft('event')}" aria-hidden="true">${ic('plus', 18)}</span>
+        <span class="tx"><span class="t1">Importar copia de seguridad</span><span class="t2">Suma los datos de un archivo exportado</span></span></button></div>
+      <input type="file" id="importFile" accept="application/json,.json" hidden>
+    </div>
     <p class="capfield" style="text-align:center;margin-top:14px">Toca el círculo para completar · desliza → para eliminar · toca una fila para editarla</p>`;
             if (window._updateGCalUI) window._updateGCalUI();
         }
@@ -5533,7 +5596,7 @@
                 if (it.done) it.doneAt = Date.now(); else delete it.doneAt;
             }
             save();
-            api.toggleItem(it.id).catch(e => console.warn('Sync toggle fallo:', e));
+            api.saveItem(it).catch(e => console.warn('Sync toggle fallo:', e));
             const isDoneNow = isItemDoneOn(it, curDay);
             rowEl.classList.toggle('done', isDoneNow);
             const chk = rowEl.querySelector('.chk');
@@ -5767,6 +5830,7 @@
             sheetBody.innerHTML = (pick ? typePicker(kind) : '') +
                 `<div class="fgroup" style="margin-top:${pick ? '12px' : '0'}"><input class="biginp" id="fd-title" name="title" aria-label="Título" placeholder="${kind === 'birthday' ? 'Nombre de la persona' : kind === 'wish' ? '¿Qué deseas?' : kind === 'shopping' ? '¿Qué hay que comprar?' : kind === 'routine' ? 'Nombre de la rutina' : 'Título'}" value="${editing ? esc(editing.title) : ''}" autocomplete="off"></div>` +
                 fieldsHTML(kind, editing, ctx) +
+                (editing && ['task', 'reminder', 'event', 'shopping'].includes(kind) && editing.date ? `<button type="button" class="ghost" data-act="snooze" style="color:var(--accent)"><span>Mover a mañana</span></button>` : '') +
                 (editing ? `<button type="button" class="ghost" data-act="delcurrent"><span>Eliminar ${KIND[kind].label.toLowerCase()}</span></button>` : '');
             if (!editing) setTimeout(() => sheetBody.querySelector('[name=title]')?.focus(), 380);
         }
@@ -5975,16 +6039,18 @@
         (function () {
             let d = null;
             function down(e) {
-                if (!SW.classList.contains('open')) return;
-                if (window.innerWidth > 768 && !document.body.classList.contains('preview-mobile')) return;
+                if (!SW.classList.contains('open')) return false;
+                if (e.target.closest('button')) return false;
+                if (window.innerWidth > 768 && !document.body.classList.contains('preview-mobile')) return false;
                 d = { y: e.clientY, dy: 0 }; sheet.style.transition = 'none';
+                return true;
             }
             function move(e) { if (!d) return; d.dy = Math.max(0, e.clientY - d.y); sheet.style.transform = `translateY(${d.dy}px)`; }
             function up() {
                 if (!d) return; const dy = d.dy; d = null; sheet.style.transition = '';
                 if (dy > 120) closeSheet(); else sheet.style.transform = '';
             }
-            [$('#sheetHead'), $('#grabber')].forEach(el => el.addEventListener('pointerdown', e => { down(e); try { el.setPointerCapture(e.pointerId) } catch (_) { } }));
+            [$('#sheetHead'), $('#grabber')].forEach(el => el.addEventListener('pointerdown', e => { if (down(e)) { try { el.setPointerCapture(e.pointerId) } catch (_) { } } }));
             document.addEventListener('pointermove', move);
             document.addEventListener('pointerup', up);
             document.addEventListener('pointercancel', () => { d = null; sheet.style.transform = ''; });
@@ -6147,6 +6213,16 @@
                 if (a === 'newlist') { openNewList(); return; }
                 if (a === 'cleanlist') { cleanDone(id); return; }
                 if (a === 'star') { cycleStar(id, act); return; }
+                if (a === 'snooze') {
+                    const it = composer.editing; if (!it) return;
+                    it.date = ymd(addDays(new Date(), 1)); save();
+                    api.saveItem(it).catch(e => console.warn('Sync posponer fallo:', e));
+                    closeSheet(); refreshAll(); toast('Movido a mañana', { icon: 'check' });
+                    return;
+                }
+                if (a === 'notif') { enableNotifications(); return; }
+                if (a === 'export') { exportBackup(); return; }
+                if (a === 'import') { document.getElementById('importFile')?.click(); return; }
                 if (a === 'delcurrent') { if (composer.editing) { const did = composer.editing.id; closeSheet(); setTimeout(() => delItem(did, null), 160); } return; }
                 if (a === 'reseed') {
                     api.reseed().then(state => {
@@ -6307,6 +6383,75 @@
         window.addEventListener('orientationchange', setAppHeight);
         window.addEventListener('DOMContentLoaded', setAppHeight);
         setAppHeight();
+
+        /* ================= Avisos de alarmas ================= */
+        const FIRED_KEY = 'tempo.alarmsFired';
+        function notifStatusLabel() {
+            if (!('Notification' in window)) return 'No disponible en este navegador';
+            if (Notification.permission === 'granted') return 'Activados · te avisaremos con la alarma de eventos y recordatorios';
+            if (Notification.permission === 'denied') return 'Bloqueados desde el navegador';
+            return 'Toca para activar los avisos de alarma';
+        }
+        function enableNotifications() {
+            if (!('Notification' in window)) { toast('Este navegador no soporta notificaciones', { icon: 'bell' }); return; }
+            if (Notification.permission === 'denied') { toast('Habilitá las notificaciones desde el candado del navegador', { icon: 'bell' }); return; }
+            Notification.requestPermission().then(p => {
+                const sub = document.getElementById('notifSub'); if (sub) sub.textContent = notifStatusLabel();
+                toast(p === 'granted' ? 'Avisos activados' : 'Avisos no activados', { icon: 'bell' });
+            });
+        }
+        function checkAlarms() {
+            if (!S || !S.items) return;
+            let fired = []; try { fired = JSON.parse(localStorage.getItem(FIRED_KEY) || '[]'); } catch (_) { }
+            const now = Date.now(); let changed = false;
+            S.items.forEach(it => {
+                if (it.alarm == null || it.done || !it.date || !it.time || !['reminder', 'event'].includes(it.kind)) return;
+                const start = new Date(`${it.date}T${it.time}`).getTime();
+                if (isNaN(start)) return;
+                const trigger = start - it.alarm * 60000;
+                const key = `${it.id}|${it.date}|${it.time}|${it.alarm}`;
+                if (now < trigger || now > start + 15 * 60000 || fired.includes(key)) return;
+                fired.push(key); changed = true;
+                const when = it.alarm === 0 ? 'ahora' : `en ${it.alarm >= 60 ? Math.round(it.alarm / 60) + ' h' : it.alarm + ' min'}`;
+                toast(`${it.title} · ${when}`, { icon: 'bell' });
+                if ('Notification' in window && Notification.permission === 'granted') {
+                    try { new Notification(it.title, { body: `${KIND[it.kind].label} ${when} (${fmtTime(it.time)})`, tag: key }); } catch (_) { }
+                }
+            });
+            if (changed) { try { localStorage.setItem(FIRED_KEY, JSON.stringify(fired.slice(-200))); } catch (_) { } }
+        }
+        setInterval(checkAlarms, 30000);
+        setTimeout(checkAlarms, 2500);
+
+        /* ================= Copia de seguridad ================= */
+        function exportBackup() {
+            const data = { app: 'tempo', version: 1, exportedAt: new Date().toISOString(), lists: S.lists, items: S.items };
+            const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+            const a = document.createElement('a');
+            a.href = URL.createObjectURL(blob); a.download = `tempo-backup-${todayY()}.json`;
+            document.body.appendChild(a); a.click(); a.remove();
+            setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+            toast('Copia de seguridad exportada');
+        }
+        document.addEventListener('change', e => {
+            if (e.target.id !== 'importFile') return;
+            const file = e.target.files && e.target.files[0]; if (!file) return;
+            file.text().then(txt => {
+                const data = JSON.parse(txt);
+                if (!data || !Array.isArray(data.items)) throw new Error('formato');
+                const lists = Array.isArray(data.lists) ? data.lists : [];
+                const newLists = lists.filter(l => l && l.id && l.name && !S.lists.some(x => x.id === l.id));
+                newLists.forEach(l => { S.lists.push(l); api.saveList(l).catch(() => { }); });
+                const valid = data.items.filter(i => i && i.id && i.title && KIND[i.kind]);
+                const byIdMap = new Map(S.items.map(i => [i.id, i]));
+                valid.forEach(i => { byIdMap.set(i.id, i); });
+                S.items = [...byIdMap.values()]; save();
+                api.batchInsert(valid).catch(err => console.warn('Sync importar fallo:', err));
+                refreshAll();
+                toast(`Importados ${valid.length} elementos`);
+            }).catch(() => toast('Archivo de copia no válido', { icon: 'trash' }))
+              .finally(() => { e.target.value = ''; });
+        });
 
         /* ================= Init ================= */
         applyThemePref(getThemePref());

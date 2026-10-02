@@ -1,7 +1,7 @@
 from contextlib import asynccontextmanager
 from fastapi import FastAPI, HTTPException, status
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import FileResponse
+from fastapi.responses import FileResponse, Response
 from fastapi.staticfiles import StaticFiles
 import os
 from typing import Optional
@@ -136,10 +136,18 @@ def serve_manifest():
 @app.get("/front.html", include_in_schema=False)
 @app.get("/legacy", include_in_schema=False)
 def serve_root():
+    # no-cache: el navegador siempre revalida y toma la última versión del front
+    no_cache = {"Cache-Control": "no-cache, must-revalidate"}
     if os.path.exists(FRONT_PATH):
-        return FileResponse(FRONT_PATH, media_type="text/html")
+        return FileResponse(FRONT_PATH, media_type="text/html", headers=no_cache)
     if os.path.exists(DIST_INDEX):
-        return FileResponse(DIST_INDEX, media_type="text/html")
+        return FileResponse(DIST_INDEX, media_type="text/html", headers=no_cache)
     return {"message": "Tempo backend activo. Documentación disponible en /docs"}
+
+
+@app.get("/favicon.ico", include_in_schema=False)
+def serve_favicon():
+    # El ícono real va embebido como data-URI en el HTML; evita el 404 en consola
+    return Response(status_code=204)
 
 
