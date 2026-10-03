@@ -1,9 +1,9 @@
 import { useEffect, useMemo, useRef } from 'react'
 import { addMonths, addWeeks, isSameMonth } from 'date-fns'
 import { ChevronLeft, ChevronRight, Briefcase, Plus } from 'lucide-react'
-import { DndContext, PointerSensor, TouchSensor, closestCenter, useSensor, useSensors } from '@dnd-kit/core'
+import { DndContext, KeyboardSensor, PointerSensor, TouchSensor, closestCenter, useSensor, useSensors } from '@dnd-kit/core'
 import type { DragEndEvent } from '@dnd-kit/core'
-import { SortableContext, arrayMove, useSortable, verticalListSortingStrategy } from '@dnd-kit/sortable'
+import { SortableContext, arrayMove, sortableKeyboardCoordinates, useSortable, verticalListSortingStrategy } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
 import { GripVertical } from 'lucide-react'
 import { useStore } from '../data/store'
@@ -62,7 +62,7 @@ export function Calendar() {
   return (
     <div className="page cal">
       <header className="page-head">
-        <div className="ph-main"><div><div className="ph-sub">Calendario</div><h1 className="cal-title">{title}</h1></div></div>
+        <div className="ph-main"><h1 className="cal-title">{title}</h1></div>
         <div className="ph-actions"><TopActions /></div>
       </header>
 
@@ -112,8 +112,8 @@ function MonthGrid({ cursor, sel, weekStart, items, showWork, onPick }: {
   }, [cells, items, showWork])
 
   return (
-    <div className="card month" role="grid" aria-label="Mes">
-      <div className="month-h" role="row">{labels.map((l, i) => <span key={i} role="columnheader">{l}</span>)}</div>
+    <div className="month" aria-label="Días del mes">
+      <div className="month-h" aria-hidden="true">{labels.map((l, i) => <span key={i}>{l}</span>)}</div>
       <div className="month-b">
         {cells.map(d => {
           const ds = ymd(d)
@@ -122,7 +122,7 @@ function MonthGrid({ cursor, sel, weekStart, items, showWork, onPick }: {
           const kinds = [...new Set(its.map(i => i.kind))].slice(0, 4)
           const dow = d.getDay()
           return (
-            <button key={ds} type="button" role="gridcell" aria-selected={ds === sel}
+            <button key={ds} type="button" aria-pressed={ds === sel} aria-current={ds === today ? 'date' : undefined}
               aria-label={`${fmt(d, "EEEE d 'de' MMMM")}${its.length ? `, ${its.length} elementos` : ''}${hol ? `, ${hol.name}` : ''}`}
               className={`cell ${isSameMonth(d, cursor) ? '' : 'out'} ${ds === today ? 'today' : ''} ${ds === sel ? 'sel' : ''} ${hol || dow === 0 || dow === 6 ? 'off' : ''}`}
               onClick={() => onPick(ds)}>
@@ -158,6 +158,7 @@ function DayPanel({ ds, compact }: { ds: string; compact?: boolean }) {
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 6 } }),
     useSensor(TouchSensor, { activationConstraint: { delay: 220, tolerance: 8 } }),
+    useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates }),
   )
   const onEnd = (e: DragEndEvent) => {
     if (!e.over || e.active.id === e.over.id) return
@@ -170,7 +171,7 @@ function DayPanel({ ds, compact }: { ds: string; compact?: boolean }) {
     <aside className={`day-panel ${compact ? 'compact' : ''}`}>
       <div className="dp-h">
         <div>
-          <h3>{cap(fmt(ds, "EEEE d 'de' MMMM"))}</h3>
+          <h2>{cap(fmt(ds, "EEEE d 'de' MMMM"))}</h2>
           <span className="dp-s">{list.length ? `${list.length} ${list.length === 1 ? 'elemento' : 'elementos'} · ${done} hechos` : 'Día libre'}</span>
         </div>
         <button type="button" className="icon-btn accent" aria-label="Agregar a este día"
@@ -186,7 +187,7 @@ function DayPanel({ ds, compact }: { ds: string; compact?: boolean }) {
           </SortableContext>
         </DndContext>
       )}
-      <p className="hint">Mantené presionado el asa para reordenar · deslizá para completar o borrar.</p>
+      <p className="hint">Para reordenar, mantené presionada el asa o enfocala y usá la barra espaciadora y las flechas. Deslizá una fila para completarla o borrarla.</p>
     </aside>
   )
 }
@@ -280,7 +281,7 @@ function TimeGrid({ days, items, showWork, onCreate, onPickDay }: {
             {Array.from({ length: 24 }, (_, h) => <span key={h} style={{ top: h * HOUR_H }}>{h ? `${String(h).padStart(2, '0')}:00` : ''}</span>)}
           </div>
           {perDay.map(d => (
-            <div key={d.ds} className="tg-col" onClick={e => click(e, d.ds)}>
+            <div key={d.ds} className="tg-col" role="presentation" onClick={e => click(e, d.ds)}>
               {Array.from({ length: 24 }, (_, h) => <i key={h} style={{ top: h * HOUR_H }} />)}
               {d.ds === today && <div className="tg-now" style={{ top: (nowMin / 60) * HOUR_H }} />}
               {d.timed.map(ev => (

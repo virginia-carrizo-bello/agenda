@@ -86,10 +86,10 @@ export function Health() {
 
   return (
     <div className="page">
-      <PageHead title="Medidas y peso" sub="Salud"
+      <PageHead title="Medidas y peso"
         actions={<button type="button" className="icon-btn accent" aria-label="Nueva medida" onClick={() => setEditor({ id: null, m: { name: '', unit: '', color: 'accent', goal: null, decimals: 1 } })}><Plus size={20} /></button>} />
 
-      <div className="chips scroll" role="tablist">
+      <div className="chips scroll" role="group" aria-label="Medidas">
         {sorted.map(m => <Chip key={m.id} on={cur?.id === m.id} color={colorVar(m.data.color)} onClick={() => setSelId(m.id)}>{m.data.name}</Chip>)}
       </div>
 
@@ -167,10 +167,10 @@ export function Health() {
                 <div className="chips">{SUGGEST.filter(s => !metrics.some(m => m.data.name === s.name)).map(s => <Chip key={s.name} onClick={() => setEditor({ ...editor, m: { ...s, goal: null } })}>{s.name}</Chip>)}</div>
               </>
             )}
-            <input className="big-input" placeholder="Nombre (ej: Cintura)" aria-label="Nombre" value={editor.m.name} onChange={e => setEditor({ ...editor, m: { ...editor.m, name: e.target.value } })} />
+            <input autoComplete="off" className="big-input" placeholder="Ej: Cintura…" aria-label="Nombre" value={editor.m.name} onChange={e => setEditor({ ...editor, m: { ...editor.m, name: e.target.value } })} />
             <div className="group">
-              <div className="row"><label htmlFor="m-unit">Unidad</label><input id="m-unit" type="text" placeholder="kg, cm, %…" value={editor.m.unit} onChange={e => setEditor({ ...editor, m: { ...editor.m, unit: e.target.value } })} /></div>
-              <div className="row"><label htmlFor="m-goal">Meta</label><input id="m-goal" type="number" inputMode="decimal" step="0.1" placeholder="Opcional" value={editor.m.goal ?? ''} onChange={e => setEditor({ ...editor, m: { ...editor.m, goal: e.target.value === '' ? null : parseFloat(e.target.value) } })} /></div>
+              <div className="row"><label htmlFor="m-unit">Unidad</label><input autoComplete="off" id="m-unit" type="text" placeholder="Ej: kg, cm, %…" value={editor.m.unit} onChange={e => setEditor({ ...editor, m: { ...editor.m, unit: e.target.value } })} /></div>
+              <div className="row"><label htmlFor="m-goal">Meta</label><input autoComplete="off" id="m-goal" type="number" inputMode="decimal" step="0.1" placeholder="Opcional…" value={editor.m.goal ?? ''} onChange={e => setEditor({ ...editor, m: { ...editor.m, goal: e.target.value === '' ? null : parseFloat(e.target.value) } })} /></div>
             </div>
             <div className="field-l">Color</div>
             <ColorPicker value={editor.m.color} onChange={c => setEditor({ ...editor, m: { ...editor.m, color: c } })} />

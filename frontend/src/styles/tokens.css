@@ -7,8 +7,8 @@
   --bg3: rgba(112, 96, 116, 0.08);
   --bg3d: rgba(112, 96, 116, 0.15);
   --label: #3A3140;
-  --label2: rgba(74, 60, 86, 0.74);
-  --label3: rgba(74, 60, 86, 0.50);
+  --label2: #5C5166; /* sólido: AA incluso sobre fondos tintados */
+  --label3: #6B6074; /* AA: 5,4:1 sobre crema (antes 2,6:1) */
   --sep: rgba(112, 96, 116, 0.12);
   --accent: #8B5FA8;
   --tint: rgba(139, 95, 168, 0.10);
@@ -18,7 +18,7 @@
   --amber: #93630A;
   --u-del: #C96A55;
   --u-done: #57855F;
-  --chk-border: #A99CAB;
+  --chk-border: #877B8D; /* >=3:1 para componentes de UI */
 
   /* Colores por Categoría / Tipo de Ítem */
   --k-event: #376389;
@@ -45,14 +45,16 @@
   --spring: cubic-bezier(0.34, 1.35, 0.45, 1);
   --ease: cubic-bezier(0.25, 0.8, 0.3, 1);
 
-  --font-body: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
-  --font-display: 'Outfit', system-ui, -apple-system, sans-serif;
+  --font-body: 'Figtree', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --font-display: 'Bricolage Grotesque', 'Figtree', system-ui, sans-serif;
   --shadow-sm: 0 2px 8px rgba(74, 60, 86, 0.05);
   --shadow-md: 0 8px 24px rgba(74, 60, 86, 0.08);
   --shadow-lg: 0 16px 40px rgba(74, 60, 86, 0.12);
-  --radius-sm: 8px;
+  --radius-sm: 10px;
   --radius-md: 14px;
-  --radius-lg: 20px;
+  --accent-ink: #6F4690; /* acento para texto chico sobre crema: 6,6:1 */
+  --radius-lg: 16px;
+  --radius-xl: 28px;
   --radius-full: 9999px;
 }
 
@@ -66,9 +68,10 @@
   --bg3d: rgba(233, 224, 244, 0.15);
   --label: #F2EDF8;
   --label2: rgba(238, 231, 247, 0.72);
-  --label3: rgba(238, 231, 247, 0.42);
+  --label3: #A097AC; /* AA sobre ciruela oscuro */
   --sep: rgba(233, 224, 244, 0.12);
   --accent: #CDB6F2;
+  --accent-ink: #CDB6F2;
   --tint: rgba(205, 182, 242, 0.14);
   --on-accent: #241A38;
   --red: #FF9E8F;
@@ -76,7 +79,7 @@
   --amber: #F2C879;
   --u-del: #A34A41;
   --u-done: #3E6E52;
-  --chk-border: #867C92;
+  --chk-border: #9A90A6;
 
   --k-event: #A9CFF0;
   --k-event-soft: rgba(169, 207, 240, 0.16);

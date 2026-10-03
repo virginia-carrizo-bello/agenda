@@ -16,7 +16,7 @@ const ITEMS: { page: Page; icon: React.ReactNode; name: string; desc: string; c:
 export function More() {
   return (
     <div className="page">
-      <PageHead title="Más" sub="Herramientas" />
+      <PageHead title="Más" />
       <div className="more-grid">
         {ITEMS.map(i => (
           <button key={i.page} type="button" className="card more-card" onClick={() => go(i.page)}

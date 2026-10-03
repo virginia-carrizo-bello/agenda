@@ -37,8 +37,8 @@ export function QuickAdd({ autoFocus, onDone }: { autoFocus?: boolean; onDone?: 
       <div className="quick-in">
         <Sparkles size={18} aria-hidden="true" />
         <input
-          value={text} onChange={e => setText(e.target.value)} autoFocus={autoFocus}
-          placeholder="Escribí algo: «Dentista el viernes 10:30»…" aria-label="Captura rápida"
+          autoComplete="off" value={text} onChange={e => setText(e.target.value)} autoFocus={autoFocus}
+          placeholder="Ej: Dentista mañana a las 10:30…" aria-label="Anotar rápido: escribí qué y cuándo"
           onKeyDown={e => { if (e.key === 'Enter') submit() }}
         />
         <button type="button" className="icon-btn" aria-label="Agregar" disabled={!text.trim()} onClick={submit}>

@@ -40,7 +40,7 @@ export function FocusPage() {
 
   return (
     <div className="page">
-      <PageHead title="Enfoque" sub="Técnica Pomodoro" />
+      <PageHead title="Enfoque" />
       <div className="today-grid">
         <div className="col">
           <div className="card focus-card">
@@ -50,7 +50,7 @@ export function FocusPage() {
               <div className="clock" role="timer" aria-live="off">{fmtClock(f.left)}</div>
               <span className="clock-l">{PHASE_LABEL[f.phase]}</span>
             </Ring>
-            <div className="cycle" aria-label={`Pomodoro ${f.cycle % 4} de 4`}>{[0, 1, 2, 3].map(i => <i key={i} className={i < f.cycle ? 'on' : ''} />)}</div>
+            <div className="cycle" role="img" aria-label={`Pomodoro ${f.cycle % 4} de 4`}>{[0, 1, 2, 3].map(i => <i key={i} className={i < f.cycle ? 'on' : ''} />)}</div>
             <div className="focus-ctl">
               <button type="button" className="icon-btn round lg" aria-label="Reiniciar" onClick={f.reset}><RotateCcw size={20} /></button>
               <button type="button" className="play" aria-label={f.running ? 'Pausar' : 'Iniciar'} onClick={f.running ? f.pause : f.start}>

@@ -51,7 +51,7 @@ export function Settings() {
 
   return (
     <div className="page narrow">
-      <PageHead title="Ajustes" sub="Personalizá Tempo" />
+      <PageHead title="Ajustes" />
 
       <Section title="Apariencia">
         <div className="card pad stack-s">
@@ -69,7 +69,7 @@ export function Settings() {
         <div className="card pad stack-s">
           <div className="row between"><span><MapPin size={15} /> {s.city.name}</span></div>
           <div className="inline-add">
-            <input placeholder="Buscar otra ciudad…" aria-label="Buscar ciudad" value={q} onChange={e => setQ(e.target.value)} onKeyDown={e => { if (e.key === 'Enter') search() }} />
+            <input autoComplete="off" placeholder="Buscar otra ciudad…" aria-label="Buscar ciudad" value={q} onChange={e => setQ(e.target.value)} onKeyDown={e => { if (e.key === 'Enter') search() }} />
             <button type="button" className="icon-btn accent" aria-label="Buscar" onClick={search}><Search size={19} /></button>
           </div>
           {res.map(r => (
@@ -97,7 +97,7 @@ export function Settings() {
           <div className="three">
             {(['work', 'short', 'long'] as const).map(k => (
               <label key={k} className="mini-field"><span>{k === 'work' ? 'Enfoque' : k === 'short' ? 'Descanso' : 'Descanso largo'}</span>
-                <input type="number" min={1} max={120} value={s.focus[k]} onChange={e => set({ focus: { ...s.focus, [k]: Math.max(1, Number(e.target.value) || 1) } })} /></label>
+                <input autoComplete="off" type="number" min={1} max={120} value={s.focus[k]} onChange={e => set({ focus: { ...s.focus, [k]: Math.max(1, Number(e.target.value) || 1) } })} /></label>
             ))}
           </div>
         </div>

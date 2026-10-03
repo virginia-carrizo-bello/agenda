@@ -41,10 +41,11 @@ interface Props {
   item: Item
   ds: string
   showDate?: boolean
+  hideTime?: boolean
   onOpen?: (it: Item) => void
 }
 
-export function ItemRow({ item: it, ds, showDate, onOpen }: Props) {
+export function ItemRow({ item: it, ds, showDate, hideTime, onOpen }: Props) {
   const openComposer = useUI(s => s.openComposer)
   const done = isDoneOn(it, ds)
   const checkable = hasCheck(it.kind)
@@ -75,7 +76,8 @@ export function ItemRow({ item: it, ds, showDate, onOpen }: Props) {
             {it.isWork && <span className="badge work"><Briefcase size={11} />Trabajo</span>}
           </span>
           <span className="item-s">
-            {it.time && <span>{it.time}{it.end ? `–${it.end}` : ''}</span>}
+            {it.time && !hideTime && <span>{it.time}{it.end ? `–${it.end}` : ''}</span>}
+            {hideTime && it.end && <span>hasta {it.end}</span>}
             {showDate && it.date && it.kind !== 'birthday' && <span>{fmt(it.date, "EEE d MMM")}</span>}
             {sub && <span>{sub}</span>}
             {it.location && <span className="ic"><MapPin size={12} />{it.location}</span>}
@@ -85,7 +87,7 @@ export function ItemRow({ item: it, ds, showDate, onOpen }: Props) {
           </span>
         </button>
         {it.kind === 'task' && !done && (it.prio ?? 0) > 0 && (
-          <span className={`prio p${it.prio}`} aria-label={it.prio === 2 ? 'Prioridad alta' : 'Prioridad media'}><Flag size={15} /></span>
+          <span className={`prio p${it.prio}`} role="img" aria-label={it.prio === 2 ? 'Prioridad alta' : 'Prioridad media'}><Flag size={15} /></span>
         )}
         {it.kind === 'book' && <Stars value={it.prio ?? 0} size={14} />}
         {it.kind === 'wish' && it.price ? <span className="price">{new Intl.NumberFormat('es-AR', { style: 'currency', currency: 'ARS', maximumFractionDigits: 0 }).format(it.price)}</span> : null}

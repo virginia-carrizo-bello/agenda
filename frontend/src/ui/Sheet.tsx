@@ -15,17 +15,38 @@ interface Props {
 export function Sheet({ open, title, onClose, children, footer, wide }: Props) {
   const ref = useRef<HTMLDivElement>(null)
   const drag = useRef<{ y: number; dy: number } | null>(null)
+  const closeRef = useRef(onClose)
+  closeRef.current = onClose // el efecto no debe reiniciarse (ni robar el foco) en cada render
 
   useEffect(() => {
     if (!open) return
     const prev = document.activeElement as HTMLElement | null
-    const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') { e.stopPropagation(); onClose() } }
+    const focusables = () =>
+      [...(ref.current?.querySelectorAll<HTMLElement>('button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])') ?? [])]
+        .filter(el => !el.hasAttribute('disabled') && el.offsetParent !== null)
+    // foco inicial: primer campo del formulario, o el diálogo mismo
+    const t = setTimeout(() => {
+      const first = ref.current?.querySelector<HTMLElement>('.sheet-body input, .sheet-body textarea, .sheet-body select')
+      // en pantallas táctiles no se abre el teclado solo
+      const fine = window.matchMedia('(pointer: fine)').matches
+      ;(fine ? (first ?? ref.current) : ref.current)?.focus()
+    }, 30)
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') { e.stopPropagation(); closeRef.current(); return }
+      if (e.key !== 'Tab') return
+      const f = focusables()
+      if (!f.length) return
+      const first = f[0], last = f[f.length - 1]
+      if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus() }
+      else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus() }
+    }
     document.addEventListener('keydown', onKey)
     return () => {
+      clearTimeout(t)
       document.removeEventListener('keydown', onKey)
       prev?.focus?.()
     }
-  }, [open, onClose])
+  }, [open])
 
   if (!open) return null
 
@@ -50,7 +71,7 @@ export function Sheet({ open, title, onClose, children, footer, wide }: Props) {
 
   return (
     <div className="sheet-wrap" role="presentation" onMouseDown={e => { if (e.target === e.currentTarget) onClose() }}>
-      <div ref={ref} className={`sheet ${wide ? 'sheet-wide' : ''}`} role="dialog" aria-modal="true" aria-label={title}>
+      <div ref={ref} className={`sheet ${wide ? 'sheet-wide' : ''}`} role="dialog" aria-modal="true" aria-label={title} tabIndex={-1}>
         <div className="sheet-grab" onPointerDown={start} onPointerMove={move} onPointerUp={end} onPointerCancel={end}>
           <i />
         </div>

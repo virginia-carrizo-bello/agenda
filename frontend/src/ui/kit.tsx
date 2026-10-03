@@ -44,11 +44,12 @@ export function Chip({ on, children, onClick, color }: { on?: boolean; children:
   )
 }
 
-export function Switch({ checked, onChange, label }: { checked: boolean; onChange: (v: boolean) => void; label: string }) {
-  const id = useId()
+export function Switch({ checked, onChange, label, id }: { checked: boolean; onChange: (v: boolean) => void; label: string; id?: string }) {
+  const auto = useId()
+  const inputId = id ?? auto
   return (
-    <label className="switch" htmlFor={id}>
-      <input id={id} type="checkbox" checked={checked} onChange={e => onChange(e.target.checked)} aria-label={label} />
+    <label className="switch" htmlFor={inputId}>
+      <input id={inputId} type="checkbox" checked={checked} onChange={e => onChange(e.target.checked)} aria-label={label} />
       <span className="switch-track" aria-hidden="true" />
     </label>
   )
@@ -92,9 +93,9 @@ export function Stars({ value, onChange, size = 22 }: { value: number; onChange?
   )
 }
 
-export function Progress({ value, color = 'var(--accent)' }: { value: number; color?: string }) {
+export function Progress({ value, color = 'var(--accent)', label = 'Progreso' }: { value: number; color?: string; label?: string }) {
   return (
-    <div className="progress" role="progressbar" aria-valuenow={Math.round(value * 100)} aria-valuemin={0} aria-valuemax={100}>
+    <div className="progress" role="progressbar" aria-label={label} aria-valuenow={Math.round(value * 100)} aria-valuemin={0} aria-valuemax={100}>
       <i style={{ width: `${Math.max(0, Math.min(1, value)) * 100}%`, background: color }} />
     </div>
   )
@@ -131,8 +132,8 @@ export function PageHead({ title, sub, actions, back }: { title: string; sub?: R
       <div className="ph-main">
         {back}
         <div>
-          {sub && <div className="ph-sub">{sub}</div>}
           <h1>{title}</h1>
+          {sub && <p className="ph-meta">{sub}</p>}
         </div>
       </div>
       {actions && <div className="ph-actions">{actions}</div>}
@@ -141,6 +142,10 @@ export function PageHead({ title, sub, actions, back }: { title: string; sub?: R
 }
 
 export const COLORS = ['accent', 'event', 'task', 'birthday', 'reminder', 'shopping', 'teal', 'limon', 'routine', 'wish'] as const
+const COLOR_NAME: Record<string, string> = {
+  accent: 'Ciruela', event: 'Azul', task: 'Índigo', birthday: 'Rosa', reminder: 'Durazno',
+  shopping: 'Salvia', teal: 'Menta', limon: 'Limón', routine: 'Coral', wish: 'Lila',
+}
 export const colorVar = (c: string) => (c === 'accent' ? 'var(--accent)' : `var(--k-${c})`)
 export const colorSoft = (c: string) => (c === 'accent' ? 'var(--tint)' : `var(--k-${c}-soft)`)
 
@@ -149,7 +154,7 @@ export function ColorPicker({ value, onChange }: { value: string; onChange: (c: 
     <div className="swatches" role="radiogroup" aria-label="Color">
       {COLORS.map(c => (
         <button
-          key={c} type="button" role="radio" aria-checked={c === value} aria-label={c}
+          key={c} type="button" role="radio" aria-checked={c === value} aria-label={COLOR_NAME[c] ?? c} title={COLOR_NAME[c]}
           className={`sw ${c === value ? 'on' : ''}`} style={{ background: colorVar(c) }} onClick={() => onChange(c)}
         />
       ))}

@@ -103,10 +103,10 @@ export function CommandPalette() {
     <div className="pal-wrap" role="presentation" onMouseDown={e => { if (e.target === e.currentTarget) setOpen(false) }}>
       <div className="pal" role="dialog" aria-modal="true" aria-label="Buscar y comandos">
         <div className="pal-in"><Search size={18} />
-          <input ref={input} autoFocus value={q} onChange={e => setQ(e.target.value)} onKeyDown={onKey}
+          <input autoComplete="off" ref={input} autoFocus value={q} onChange={e => setQ(e.target.value)} onKeyDown={onKey}
             placeholder="Buscá o escribí «Dentista mañana 10:30»…" aria-label="Buscar o crear" aria-controls="pal-list" />
           <kbd>Esc</kbd></div>
-        <div className="pal-list" id="pal-list" role="listbox">
+        <div className="pal-list" id="pal-list" role="listbox" aria-label="Resultados">
           {entries.map((e, i) => {
             const head = e.group !== lastGroup ? <div className="pal-g" key={`g-${e.group}-${i}`}>{e.group}</div> : null
             lastGroup = e.group

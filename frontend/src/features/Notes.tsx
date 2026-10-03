@@ -37,9 +37,9 @@ export function Notes() {
 
   return (
     <div className="page">
-      <PageHead title="Notas" sub="Ideas y apuntes"
+      <PageHead title="Notas"
         actions={<button type="button" className="icon-btn accent" aria-label="Nueva nota" onClick={() => setEd({ id: null, n: blank() })}><Plus size={20} /></button>} />
-      <div className="search-in"><Search size={18} /><input placeholder="Buscar en tus notas…" aria-label="Buscar notas" value={q} onChange={e => setQ(e.target.value)} /></div>
+      <div className="search-in"><Search size={18} /><input autoComplete="off" placeholder="Buscar en tus notas…" aria-label="Buscar notas" value={q} onChange={e => setQ(e.target.value)} /></div>
       {list.length === 0 ? <Empty icon={<Plus size={24} />} title={q ? 'Sin resultados' : 'Todavía no hay notas'} text={q ? 'Probá con otra palabra.' : 'Anotá ideas, listas de cosas para recordar o lo que se te ocurra.'} /> : (
         <div className="note-grid">
           {list.map(n => (
@@ -64,7 +64,7 @@ export function Notes() {
         )}>
         {ed && (
           <>
-            <input className="big-input" autoFocus={!ed.id} placeholder="Título" aria-label="Título" value={ed.n.title} onChange={e => setEd({ ...ed, n: { ...ed.n, title: e.target.value } })} />
+            <input autoComplete="off" className="big-input" placeholder="Título…" aria-label="Título" value={ed.n.title} onChange={e => setEd({ ...ed, n: { ...ed.n, title: e.target.value } })} />
             <textarea className="notes tall" rows={9} placeholder="Escribí lo que quieras…" aria-label="Contenido" value={ed.n.body} onChange={e => setEd({ ...ed, n: { ...ed.n, body: e.target.value } })} />
             <ColorPicker value={ed.n.color} onChange={c => setEd({ ...ed, n: { ...ed.n, color: c } })} />
           </>
@@ -124,7 +124,7 @@ export function JournalPage() {
               ))}
             </div>
             <textarea className="notes tall" rows={7} placeholder="Contá cómo estuvo tu día…" aria-label="Entrada del diario" value={text} onChange={e => dirty(() => setText(e.target.value))} />
-            <input className="inline-input" placeholder="Hoy agradezco…" aria-label="Gratitud" value={grat} onChange={e => dirty(() => setGrat(e.target.value))} />
+            <input autoComplete="off" className="inline-input" placeholder="Hoy agradezco…" aria-label="Gratitud" value={grat} onChange={e => dirty(() => setGrat(e.target.value))} />
             <div className="sheet-actions"><button type="button" className="btn primary" disabled={saved || (!mood && !text.trim() && !grat.trim())} onClick={save}>{saved ? 'Guardado' : 'Guardar'}</button></div>
           </div>
           {streak > 1 && <div className="card note-card"><b>🔥 {streak} días seguidos</b><p>Escribir un rato cada día te ayuda a ordenar la cabeza.</p></div>}
@@ -206,7 +206,7 @@ export function Goals() {
 
   return (
     <div className="page">
-      <PageHead title="Metas" sub="Lo que querés lograr"
+      <PageHead title="Metas"
         actions={<button type="button" className="icon-btn accent" aria-label="Nueva meta" onClick={() => setEd({ id: null, g: blank() })}><Plus size={20} /></button>} />
       {goals.length === 0 && <Empty icon={<Target size={26} />} title="Definí tu primera meta" text="Dividila en pasos chicos y seguí tu progreso." />}
       <div className="goal-grid">{open.map(card)}</div>
@@ -221,8 +221,8 @@ export function Goals() {
         )}>
         {ed && (
           <>
-            <input className="big-input" autoFocus placeholder="¿Qué querés lograr?" aria-label="Meta" value={ed.g.title} onChange={e => setEd({ ...ed, g: { ...ed.g, title: e.target.value } })} />
-            <textarea className="notes" rows={2} placeholder="¿Por qué es importante? (opcional)" aria-label="Motivo" value={ed.g.why} onChange={e => setEd({ ...ed, g: { ...ed.g, why: e.target.value } })} />
+            <input autoComplete="off" className="big-input" placeholder="Ej: correr 5 km…" aria-label="Meta" value={ed.g.title} onChange={e => setEd({ ...ed, g: { ...ed.g, title: e.target.value } })} />
+            <textarea className="notes" rows={2} placeholder="¿Por qué es importante? (opcional)…" aria-label="Motivo" value={ed.g.why} onChange={e => setEd({ ...ed, g: { ...ed.g, why: e.target.value } })} />
             <div className="group">
               <div className="row"><label htmlFor="g-due">Fecha límite</label><input id="g-due" type="date" value={ed.g.due ?? ''} onChange={e => setEd({ ...ed, g: { ...ed.g, due: e.target.value || null } })} />
                 {ed.g.due && <button type="button" className="link" onClick={() => setEd({ ...ed, g: { ...ed.g, due: null } })}>Quitar</button>}</div>
@@ -239,7 +239,7 @@ export function Goals() {
               ))}
             </ul>
             <div className="inline-add">
-              <input placeholder="Añadir paso…" aria-label="Nuevo paso" value={step} onChange={e => setStep(e.target.value)}
+              <input autoComplete="off" placeholder="Añadir paso…" aria-label="Nuevo paso" value={step} onChange={e => setStep(e.target.value)}
                 onKeyDown={e => { if (e.key === 'Enter' && step.trim()) { setEd({ ...ed, g: { ...ed.g, steps: [...ed.g.steps, { id: uid(), text: step.trim(), done: false }] } }); setStep('') } }} />
               <button type="button" className="icon-btn accent" aria-label="Añadir paso" disabled={!step.trim()}
                 onClick={() => { setEd({ ...ed, g: { ...ed.g, steps: [...ed.g.steps, { id: uid(), text: step.trim(), done: false }] } }); setStep('') }}><Plus size={20} /></button>

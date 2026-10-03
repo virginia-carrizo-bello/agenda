@@ -29,7 +29,7 @@ function Hub() {
 
   return (
     <div className="page">
-      <PageHead title="Listas" sub="Colecciones" actions={<TopActions />} />
+      <PageHead title="Listas" actions={<TopActions />} />
       <div className="two-col">
         <Section title="Organización">
           <div className="card list">
@@ -79,7 +79,7 @@ function NewList({ open, onClose }: { open: boolean; onClose: () => void }) {
   return (
     <Sheet open={open} title="Nueva lista" onClose={onClose}
       footer={<div className="sheet-actions"><button type="button" className="btn primary" disabled={!name.trim()} onClick={save}>Crear</button></div>}>
-      <input className="big-input" autoFocus placeholder="Nombre de la lista" aria-label="Nombre" value={name}
+      <input autoComplete="off" className="big-input" placeholder="Nombre de la lista…" aria-label="Nombre" value={name}
         onChange={e => setName(e.target.value)} onKeyDown={e => { if (e.key === 'Enter') save() }} />
       <div className="field-l">Color</div>
       <div className="swatches" role="radiogroup" aria-label="Color">
@@ -248,7 +248,7 @@ function Shopping({ id }: { id: string }) {
       </div>
       {tot > 0 && <Progress value={done.length / tot} color={p.c} />}
       <div className="inline-add">
-        <input placeholder="Añadir artículo…" aria-label="Añadir artículo" value={text} onChange={e => setText(e.target.value)} onKeyDown={e => { if (e.key === 'Enter') add() }} />
+        <input autoComplete="off" placeholder="Añadir artículo…" aria-label="Añadir artículo" value={text} onChange={e => setText(e.target.value)} onKeyDown={e => { if (e.key === 'Enter') add() }} />
         <button type="button" className="icon-btn accent" aria-label="Añadir" onClick={add} disabled={!text.trim()}><Plus size={20} /></button>
       </div>
       {open.length ? <div className="card list">{open.map(i => <ItemRow key={i.id} item={i} ds={todayYmd()} />)}</div>

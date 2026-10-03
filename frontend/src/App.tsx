@@ -152,8 +152,9 @@ export default function App() {
 
   return (
     <div className="shell">
+      <a className="skip" href="#main" onClick={e => { e.preventDefault(); main.current?.focus() }}>Saltar al contenido</a>
       <aside className="side" aria-label="Navegación principal">
-        <div className="brand"><span className="brand-logo" aria-hidden="true" />Tempo</div>
+        <div className="brand" translate="no"><span className="brand-logo" aria-hidden="true" />Tempo</div>
         <button type="button" className="side-search" onClick={() => setPalette(true)}><Search size={16} />Buscar<kbd>Ctrl K</kbd></button>
         <button type="button" className="btn primary side-new" onClick={() => openComposer({ kind: 'task' })}><Plus size={18} />Nuevo</button>
         <nav>
@@ -169,7 +170,7 @@ export default function App() {
         <button type="button" className={`side-set ${route.page === 'settings' ? 'on' : ''}`} onClick={() => go('settings')}><Cog size={18} />Ajustes</button>
       </aside>
 
-      <main ref={main} className="main" id="main">
+      <main ref={main} className="main" id="main" tabIndex={0} aria-label="Contenido">
         <View />
       </main>
 
@@ -180,7 +181,7 @@ export default function App() {
       )}
 
       <button type="button" className="fab" aria-label="Nuevo elemento" onClick={() => openComposer({ kind: route.page === 'calendar' ? 'event' : 'task', defaults: route.page === 'calendar' ? { date: useUI.getState().selDay } : undefined })}>
-        <Plus size={26} />
+        <Plus size={20} strokeWidth={2.6} /><span>Nuevo</span>
       </button>
 
       <nav className="tabbar" aria-label="Secciones">

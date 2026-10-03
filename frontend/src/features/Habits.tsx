@@ -93,7 +93,7 @@ export function Habits() {
 
   return (
     <div className="page">
-      <PageHead title="Hábitos" sub="Constancia día a día" actions={<><TopActions /></>} />
+      <PageHead title="Hábitos" actions={<><TopActions /></>} />
       {habits.length === 0 ? (
         <Empty icon={<Repeat size={26} />} title="Armá tu primer hábito"
           text="Beber agua, leer, entrenar… Marcalo cada día y mirá crecer tu racha."

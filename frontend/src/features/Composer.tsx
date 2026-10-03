@@ -124,9 +124,9 @@ export function Composer() {
   const title = editing ? `Editar ${KIND_LABEL[kind].toLowerCase()}` : `Nuevo ${KIND_LABEL[kind].toLowerCase()}`
   const showWork = !['birthday', 'book', 'wish', 'shopping'].includes(kind)
   const titleHint: Record<ItemKind, string> = useMemo(() => ({
-    event: 'Reunión, cena, turno…', task: '¿Qué hay que hacer?', reminder: '¿Qué querés recordar?',
-    routine: 'Ej: Tomar agua, leer 20 min…', birthday: 'Nombre de la persona', shopping: '¿Qué hay que comprar?',
-    wish: '¿Qué querés conseguir?', book: 'Título del libro',
+    event: 'Ej: Reunión, cena, turno…', task: 'Ej: Enviar el presupuesto…', reminder: 'Ej: Llamar al contador…',
+    routine: 'Ej: Tomar agua, leer 20 min…', birthday: 'Nombre de la persona…', shopping: 'Ej: Leche, pan…',
+    wish: 'Ej: Auriculares nuevos…', book: 'Título del libro…',
   }), [])
 
   return (
@@ -152,7 +152,7 @@ export function Composer() {
         </div>
       )}
 
-      <input className="big-input" autoFocus={!editing} placeholder={titleHint[kind]} value={f.title}
+      <input autoComplete="off" className="big-input" placeholder={titleHint[kind]} value={f.title}
         aria-label="Título" onChange={e => set('title', e.target.value)}
         onKeyDown={e => { if (e.key === 'Enter') save() }} />
 
@@ -166,7 +166,7 @@ export function Composer() {
           {kind === 'event' && (
             <div className="row">
               <label htmlFor="c-all">Todo el día</label>
-              <Switch checked={f.allDay} onChange={v => set('allDay', v)} label="Todo el día" />
+              <Switch id="c-all" checked={f.allDay} onChange={v => set('allDay', v)} label="Todo el día" />
             </div>
           )}
           {!(kind === 'event' && f.allDay) && (
@@ -232,7 +232,7 @@ export function Composer() {
         <div className="group">
           <div className="row">
             <label htmlFor="c-loc">Lugar</label>
-            <input id="c-loc" type="text" placeholder="Dirección o enlace" value={f.location} onChange={e => set('location', e.target.value)} />
+            <input autoComplete="off" id="c-loc" type="text" placeholder="Dirección o enlace…" value={f.location} onChange={e => set('location', e.target.value)} />
           </div>
         </div>
       )}
@@ -251,7 +251,7 @@ export function Composer() {
           <div className="group">
             <div className="row">
               <label htmlFor="c-price">Precio</label>
-              <input id="c-price" type="number" inputMode="decimal" min="0" step="0.01" placeholder="0" value={f.price} onChange={e => set('price', e.target.value)} />
+              <input autoComplete="off" id="c-price" type="number" inputMode="decimal" min="0" step="0.01" placeholder="0" value={f.price} onChange={e => set('price', e.target.value)} />
             </div>
           </div>
           <div className="field-l">Qué tanto lo querés</div>
@@ -270,7 +270,7 @@ export function Composer() {
           <div className="group">
             <div className="row">
               <label htmlFor="c-qty">Cantidad</label>
-              <input id="c-qty" type="text" placeholder="1 kg, ×2…" value={f.qty} onChange={e => set('qty', e.target.value)} />
+              <input autoComplete="off" id="c-qty" type="text" placeholder="Ej: 1 kg, ×2…" value={f.qty} onChange={e => set('qty', e.target.value)} />
             </div>
           </div>
         </>
@@ -293,7 +293,7 @@ export function Composer() {
         <div className="group">
           <div className="row">
             <label htmlFor="c-work">💼 Es de trabajo</label>
-            <Switch checked={f.isWork} onChange={v => set('isWork', v)} label="Clasificar como trabajo" />
+            <Switch id="c-work" checked={f.isWork} onChange={v => set('isWork', v)} label="Es de trabajo" />
           </div>
         </div>
       )}
